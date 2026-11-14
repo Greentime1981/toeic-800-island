@@ -209,6 +209,12 @@ input[type=date]{font:inherit;padding:6px 8px;border:1.5px solid var(--line);bor
 .kmap>span:first-child{flex:0 0 120px}
 .kmap .stack{flex:1;height:10px;background:var(--line);border-radius:6px;overflow:hidden;display:flex}
 .kmap .stack i{display:block;height:100%}.kmap .sm{background:var(--good)}.kmap .sl{background:var(--red)}
+.scene{width:100%;text-align:center;font-size:calc(58px * var(--z,1));letter-spacing:8px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:22px 8px;line-height:1.3}
+.gtab{width:100%;border-collapse:collapse;margin:8px 0;font-size:calc(14px * var(--z,1))}
+.gtab th,.gtab td{border:1px solid var(--line);padding:5px 8px;text-align:center}
+.gtab th{background:var(--red2)}
+input[type=number]{font:inherit;width:110px;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+label.row2{margin:8px 0}
 </style>
 </head>
 <body>
@@ -896,6 +902,363 @@ const TALKS = [
       ['What should site visit participants do at 4:30?','參訪的參加者 4:30 要做什麼？','Gather at the north entrance','Return to the registration desk','Download an app','Pick up a printed program']]},
 ];
 
+// ================= 補充 Part 3・4（讓每個階段有 6 段對話＋6 段獨白，足夠組 3 回迷你模考） =================
+// g：圖表題用的表格（第一列為標題）
+TALKS.push(
+ // ---------- 階段 1 ----------
+ {lv:1, type:'conv', t:'找不到鑰匙', lines:[
+   ['M','Lisa, have you seen my car keys? I left them on my desk.','莉莎，妳有看到我的車鑰匙嗎？我放在桌上。'],
+   ['W','I think I saw some keys in the kitchen this morning.','我今天早上好像在茶水間看到一串鑰匙。'],
+   ['M','Oh, right! I made coffee there. Thanks.','喔對！我在那裡泡咖啡。謝謝。'],
+   ['W','No problem. Are you leaving now?','不客氣。你現在要走了嗎？'],
+   ['M','Yes, I have to pick up my son at five.','對，我五點要去接我兒子。']],
+  qs:[['What is the man looking for?','男子在找什麼？','His keys','His phone','His coffee cup','His bag'],
+      ['Where does the woman think the item is?','女子認為東西在哪裡？','In the kitchen','On his desk','In his car','At the front desk'],
+      ['What will the man do at five?','男子五點要做什麼？','Pick up his son','Start a meeting','Make coffee','Go to the bank']]},
+ {lv:1, type:'conv', t:'買印表機墨水', lines:[
+   ['W','Excuse me, do you sell ink for the P200 printer?','不好意思，你們有賣 P200 印表機的墨水嗎？'],
+   ['M','Yes, it\'s in aisle four. Black ink is twenty dollars.','有，在第四排。黑色墨水二十美元。'],
+   ['W','Do you have color ink, too?','也有彩色墨水嗎？'],
+   ['M','I\'m sorry, we don\'t have any right now. It will come in on Friday.','抱歉，現在沒有。週五會到貨。'],
+   ['W','OK. I\'ll take the black one today and come back on Friday.','好。我今天先買黑色的，週五再來。']],
+  qs:[['Where does this conversation most likely take place?','這段對話最可能發生在哪裡？','At a store','At a bank','At a library','At a post office'],
+      ['How much is the black ink?','黑色墨水多少錢？','Twenty dollars','Four dollars','Fifteen dollars','Two hundred dollars'],
+      ['When will the color ink arrive?','彩色墨水什麼時候到？','On Friday','Today','Tomorrow','Next month']]},
+ {lv:1, type:'conv', t:'改約看診時間', lines:[
+   ['W','Hello, this is Jenny Park. I have an appointment with Dr. Lee at three today.','你好，我是珍妮・朴，今天三點約了李醫師。'],
+   ['M','Yes, Ms. Park. How can I help you?','是的，朴小姐，有什麼需要幫忙的嗎？'],
+   ['W','I have a meeting at work. Can I come tomorrow instead?','我公司有會議。可以改成明天嗎？'],
+   ['M','Let me see. Tomorrow at ten in the morning is open.','我看一下。明天早上十點有空。'],
+   ['W','That\'s perfect. Thank you.','太好了，謝謝。']],
+  qs:[['Why is the woman calling?','女子為什麼打電話？','To change an appointment','To ask about a bill','To order medicine','To find a doctor'],
+      ['Why can\'t the woman come today?','女子為什麼今天不能來？','She has a meeting','She is sick','Her car broke down','She is on vacation'],
+      ['When is the new appointment?','新的預約是什麼時候？','Tomorrow at 10 a.m.','Today at 3 p.m.','Tomorrow at 3 p.m.','Friday at 10 a.m.']]},
+ {lv:1, type:'talk', t:'超市廣播', lines:[
+   ['N','Good morning, shoppers, and welcome to Fresh Market.','各位顧客早安，歡迎光臨鮮市場。'],
+   ['N','Today only, all fruit is twenty percent off.','今天限定，所有水果打八折。'],
+   ['N','Our bakery also has fresh bread, right out of the oven.','我們的烘焙區也有剛出爐的新鮮麵包。'],
+   ['N','Please note that the store will close early today, at six p.m.','請注意，本店今天提早在晚上六點打烊。'],
+   ['N','Thank you for shopping with us.','感謝您的光臨。']],
+  qs:[['Where is the announcement being made?','這段廣播在哪裡播放？','At a supermarket','At a train station','At a restaurant','At an airport'],
+      ['What is on sale today?','今天什麼在特價？','Fruit','Bread','Milk','Vegetables'],
+      ['What time will the store close today?','商店今天幾點關門？','At 6 p.m.','At 8 p.m.','At 10 p.m.','At 5 p.m.']]},
+ {lv:1, type:'talk', t:'語音留言：送貨時間', lines:[
+   ['N','Hi, this is Mark from Quick Delivery.','嗨，我是快送物流的馬克。'],
+   ['N','I\'m calling about your new sofa.','我打來是關於您的新沙發。'],
+   ['N','We can bring it to your home on Saturday between nine and twelve.','我們可以在週六九點到十二點之間送到您家。'],
+   ['N','Please call me back at 555-0148 to say if that time is OK.','請回電 555-0148，告訴我這個時間是否可以。'],
+   ['N','Thank you.','謝謝。']],
+  qs:[['Who most likely is the speaker?','說話者最可能是誰？','A delivery worker','A sofa designer','A store owner','A bank clerk'],
+      ['What will be delivered?','要送的是什麼？','A sofa','A bed','A table','A computer'],
+      ['What is the listener asked to do?','聽者被要求做什麼？','Call back','Pay online','Visit the store','Send an email']]},
+ {lv:1, type:'talk', t:'天氣預報', lines:[
+   ['N','Here is your weather for this week.','以下是本週天氣。'],
+   ['N','Today will be sunny and warm, with a high of twenty-six degrees.','今天晴朗溫暖，最高 26 度。'],
+   ['N','Tomorrow, it will be cloudy, and rain will start in the evening.','明天多雲，傍晚開始下雨。'],
+   ['N','The rain will continue until Thursday, so take your umbrella.','雨會下到週四，請記得帶傘。'],
+   ['N','The weekend will be sunny again.','週末會再放晴。']],
+  qs:[['What will the weather be like today?','今天天氣如何？','Sunny','Rainy','Snowy','Windy'],
+      ['When will the rain start?','什麼時候開始下雨？','Tomorrow evening','This morning','On Thursday','On the weekend'],
+      ['What does the speaker suggest?','說話者建議什麼？','Taking an umbrella','Staying home','Driving slowly','Wearing a coat']]},
+ {lv:1, type:'talk', t:'辦公室搬遷通知', lines:[
+   ['N','Hello, everyone. I have some news about our office.','大家好，我有關於辦公室的消息。'],
+   ['N','Next Monday, our team will move to the eighth floor.','下週一我們團隊會搬到八樓。'],
+   ['N','Please put your things in boxes by Friday afternoon.','請在週五下午前把東西裝箱。'],
+   ['N','You can get boxes from the supply room.','可以到庫房拿箱子。'],
+   ['N','The movers will come on Saturday.','搬家工人週六會來。']],
+  qs:[['What is the talk mainly about?','這段談話主要在講什麼？','An office move','A new manager','A holiday party','A safety test'],
+      ['What should listeners do by Friday?','聽眾週五前要做什麼？','Pack their things','Clean the kitchen','Buy new desks','Call the movers'],
+      ['Where can listeners get boxes?','聽眾可以去哪裡拿箱子？','The supply room','The eighth floor','The lobby','A nearby store']]},
+ {lv:1, type:'talk', t:'博物館導覽開場', lines:[
+   ['N','Welcome to the City Art Museum. My name is Tina, and I\'m your guide today.','歡迎來到市立美術館。我是蒂娜，今天的導覽員。'],
+   ['N','Our tour will take about one hour.','導覽大約一小時。'],
+   ['N','First, we will see paintings on the second floor.','首先我們會看二樓的畫作。'],
+   ['N','Please do not touch the paintings, and please turn off your phones.','請勿觸摸畫作，並請關閉手機。'],
+   ['N','After the tour, you can visit our gift shop.','導覽結束後可以逛我們的禮品店。']],
+  qs:[['Who is the speaker?','說話者是誰？','A tour guide','A painter','A shop owner','A security guard'],
+      ['How long is the tour?','導覽多久？','About one hour','About thirty minutes','About two hours','All day'],
+      ['What are listeners asked to do?','聽眾被要求做什麼？','Turn off their phones','Take photos','Buy tickets','Wait in the lobby']]},
+ // ---------- 階段 2 ----------
+ {lv:2, type:'conv', t:'會議室預訂衝突', lines:[
+   ['M','Hi, Rachel. I booked Conference Room B for two o\'clock, but there\'s already a group in there.','嗨，瑞秋。我訂了兩點的 B 會議室，但裡面已經有一群人了。'],
+   ['W','Oh, that\'s the marketing team. Their workshop is running late.','喔，那是行銷團隊，他們的工作坊延遲了。'],
+   ['M','My clients will be here in ten minutes. Is any other room available?','我的客戶十分鐘後就到。還有其他會議室嗎？'],
+   ['W','Room D on the third floor is free until four. I\'ll change your reservation.','三樓 D 室四點前都空著，我幫你改預約。'],
+   ['M','Thanks. Could you also ask reception to send my clients up there?','謝謝。也可以請接待處帶客戶上去嗎？']],
+  qs:[['What problem does the man mention?','男子提到什麼問題？','A room he reserved is in use','His clients canceled','A projector is broken','He is late for a meeting'],
+      ['Why is the marketing team still in the room?','行銷團隊為什麼還在會議室？','Their workshop is running late','They booked it by mistake','They are cleaning up','They are waiting for clients'],
+      ['What does the man ask the woman to do?','男子請女子做什麼？','Contact the reception desk','Call his clients','Move the marketing team','Bring some coffee']]},
+ {lv:2, type:'conv', t:'出差報帳', lines:[
+   ['W','Ken, did you submit your expense report for the Chicago trip?','肯，你交芝加哥出差的費用報告了嗎？'],
+   ['M','Not yet. I can\'t find the receipt for my taxi from the airport.','還沒。我找不到從機場搭計程車的收據。'],
+   ['W','You can still get reimbursed. Just fill out a missing receipt form.','你還是可以報銷，填一張收據遺失表就好。'],
+   ['M','Great. Where can I get that form?','太好了。哪裡可以拿到那張表？'],
+   ['W','It\'s on the finance page of the intranet. The deadline is this Friday.','在內部網站的財務頁面。截止日是這週五。']],
+  qs:[['What are the speakers discussing?','說話者在討論什麼？','An expense report','A new client','A flight schedule','A job interview'],
+      ['What is the man\'s problem?','男子的問題是什麼？','He lost a receipt','He missed his flight','He lost his wallet','He was charged twice'],
+      ['Where can the man find the form?','男子可以在哪裡找到表格？','On the company intranet','At the airport','In the finance office','In his email']]},
+ {lv:2, type:'conv', t:'徵才面試安排', lines:[
+   ['M','Hello, Ms. Rivera? This is Paul Grant from Bright Media. We received your application for the designer position.','您好，是里維拉小姐嗎？我是明亮媒體的保羅・格蘭特，我們收到您應徵設計師的申請。'],
+   ['W','Oh, thank you for calling!','喔，謝謝您打來！'],
+   ['M','We\'d like to invite you for an interview. Are you available next Tuesday afternoon?','我們想邀請您來面試。下週二下午您有空嗎？'],
+   ['W','Yes, Tuesday works for me. Should I bring anything?','有，週二可以。需要帶什麼嗎？'],
+   ['M','Please bring a portfolio with three or four examples of your recent work.','請帶作品集，放三到四件您最近的作品。']],
+  qs:[['Why is the man calling?','男子為什麼打電話？','To schedule an interview','To offer a job','To cancel a meeting','To ask for a payment'],
+      ['What position did the woman apply for?','女子應徵什麼職位？','Designer','Accountant','Receptionist','Sales manager'],
+      ['What should the woman bring?','女子要帶什麼？','Examples of her work','A reference letter','Her ID card','A list of questions']]},
+ {lv:2, type:'conv', t:'餐廳訂位改人數', lines:[
+   ['W','Good afternoon, Bella Cucina. How can I help you?','午安，貝拉廚房，有什麼需要服務的？'],
+   ['M','Hi, I have a reservation for six people at seven tonight under the name Harris. I need to change it to ten.','嗨，我用哈里斯的名字訂了今晚七點六位，需要改成十位。'],
+   ['W','Let me check... We can seat ten, but only on the patio.','我查一下……十位可以，但只有戶外露台的位子。'],
+   ['M','That\'s fine, as long as it\'s not too cold.','沒關係，只要不會太冷就好。'],
+   ['W','We have heaters out there, so you\'ll be comfortable.','露台有暖爐，您會很舒適。']],
+  qs:[['Why is the man calling?','男子為什麼打電話？','To change the size of a reservation','To cancel a reservation','To order food for delivery','To complain about a meal'],
+      ['Where will the group sit?','這群人會坐在哪裡？','On the patio','In a private room','At the bar','Near the window'],
+      ['What does the woman say about the area?','女子對那個區域說了什麼？','It has heaters','It is very quiet','It is reserved','It closes early']]},
+ {lv:2, type:'talk', t:'電話語音選單', lines:[
+   ['N','Thank you for calling Sunrise Internet.','感謝您致電日出網路。'],
+   ['N','If you are calling about a bill or payment, press one.','帳單或付款問題請按 1。'],
+   ['N','For help with a connection problem, press two.','連線問題請按 2。'],
+   ['N','To add a new service to your account, press three.','要為帳號新增服務請按 3。'],
+   ['N','You can also find answers to common questions on our website, any time of day.','您也可以隨時在我們網站上找到常見問題的解答。']],
+  qs:[['What kind of business is Sunrise?','日出是什麼樣的公司？','An internet provider','A bank','A travel agency','An electronics store'],
+      ['What should callers do if they have a connection problem?','有連線問題的來電者該怎麼做？','Press two','Press one','Press three','Visit a store'],
+      ['What does the speaker say about the website?','說話者提到網站的什麼？','It is available at all times','It is being updated','It offers discounts','It requires a password']]},
+ {lv:2, type:'talk', t:'飯店早餐與設施介紹', lines:[
+   ['N','Welcome to the Harbor View Hotel. I\'d like to tell you about a few of our services.','歡迎入住港景飯店，我想介紹幾項服務。'],
+   ['N','Breakfast is served in the Garden Room from six-thirty to ten every morning.','每天早上六點半到十點在花園廳供應早餐。'],
+   ['N','Our fitness center on the fifth floor is open twenty-four hours.','五樓健身中心 24 小時開放。'],
+   ['N','If you need a taxi, please ask at the front desk at least thirty minutes in advance.','如需計程車，請至少提前三十分鐘告知櫃台。'],
+   ['N','Enjoy your stay.','祝您住宿愉快。']],
+  qs:[['Who most likely are the listeners?','聽眾最可能是誰？','Hotel guests','Restaurant staff','Fitness instructors','Taxi drivers'],
+      ['Where is breakfast served?','早餐在哪裡供應？','In the Garden Room','On the fifth floor','In the lobby','In guest rooms'],
+      ['What should listeners do to get a taxi?','要叫計程車該怎麼做？','Ask in advance at the front desk','Call a taxi company directly','Wait outside the hotel','Use a mobile app']]},
+ {lv:2, type:'talk', t:'新產品發表廣告', lines:[
+   ['N','Are you tired of heavy, noisy vacuum cleaners?','厭倦又重又吵的吸塵器了嗎？'],
+   ['N','Meet the Air Lite Five, our lightest model ever.','來認識我們史上最輕的機型 Air Lite 5。'],
+   ['N','It weighs just two kilograms and runs for sixty minutes on one charge.','它只有兩公斤，充一次電可以用六十分鐘。'],
+   ['N','Order online before May thirty-first and get a free extra battery.','5 月 31 日前上網訂購，加贈一顆備用電池。'],
+   ['N','Visit our website for more details.','詳情請上我們的網站。']],
+  qs:[['What is being advertised?','這是什麼的廣告？','A vacuum cleaner','A laptop','A phone charger','An air conditioner'],
+      ['What is mentioned about the product?','關於產品提到什麼？','It is light','It is cheap','It is waterproof','It is quiet at night'],
+      ['What will customers receive if they order before May 31?','5 月 31 日前訂購可得到什麼？','An extra battery','A discount','Free shipping','A longer warranty']]},
+ {lv:2, type:'talk', t:'部門會議：新系統上線', lines:[
+   ['N','Before we finish today\'s meeting, I want to remind you about the new scheduling system.','今天會議結束前，我想提醒大家新的排班系統。'],
+   ['N','Starting next month, all shift requests must be made through the system, not by email.','從下個月起，所有排班申請都要透過系統，不能用電子郵件。'],
+   ['N','There will be a short training session this Thursday at three.','本週四三點會有一場簡短的訓練。'],
+   ['N','If you can\'t attend, a video of the session will be posted afterward.','無法參加的人，之後會公布訓練影片。'],
+   ['N','Please let me know if you have any questions.','有任何問題請告訴我。']],
+  qs:[['What is the speaker mainly discussing?','說話者主要在討論什麼？','A new scheduling system','A team lunch','A change in salary','A new manager'],
+      ['What will happen on Thursday?','週四會發生什麼？','A training session','A system upgrade','A staff party','A client visit'],
+      ['What will be available for those who cannot attend?','無法參加的人可以得到什麼？','A video','A printed manual','A second session','An email summary']]},
+ // ---------- 階段 3 ----------
+ {lv:3, type:'conv', t:'供應商延遲與替代方案', lines:[
+   ['W','Hiroshi, our fabric supplier just told me that our order of cotton will be delayed by two weeks.','浩志，我們的布料供應商剛通知，棉布訂單會延遲兩週。'],
+   ['M','Two weeks? That will push back production of the summer line.','兩週？那夏季系列的生產會延後。'],
+   ['W','I know. I\'ve contacted another vendor in Portugal. They can ship in five days, but their price is about ten percent higher.','我知道。我聯絡了葡萄牙另一家廠商，他們五天內可以出貨，但價格大約高 10%。'],
+   ['M','I think it\'s worth paying a bit more to launch on time. Can you get their quote in writing?','我覺得多付一點能準時上市是值得的。妳可以請他們提供書面報價嗎？'],
+   ['W','Sure. I\'ll send it to you and the finance director by the end of the day.','好，我今天下班前寄給你和財務主任。']],
+  qs:[['What problem are the speakers discussing?','說話者在討論什麼問題？','A shipment will arrive late','A product has a defect','A price has been reduced','A factory has closed'],
+      ['What is the disadvantage of the other vendor?','另一家廠商的缺點是什麼？','Its prices are higher','Its shipping is slow','Its quality is poor','It is too far away'],
+      ['What will the woman send by the end of the day?','女子今天下班前會寄出什麼？','A written price quote','A product sample','A revised schedule','A signed contract']]},
+ {lv:3, type:'conv', t:'活動場地與餐點（看圖表）', g:[['方案','人數上限','每人價格'],['Silver','40','$35'],['Gold','60','$48'],['Platinum','100','$62']], lines:[
+   ['M','Natalie, I\'m looking at the catering packages for the client appreciation dinner.','娜塔莉，我在看客戶答謝晚宴的外燴方案。'],
+   ['W','How many guests have confirmed so far?','到目前為止有多少位賓客確認了？'],
+   ['M','Fifty-two, and a few more may reply this week.','五十二位，這週可能還會有幾位回覆。'],
+   ['W','Then we need a package for up to sixty. Let\'s not pay for one we don\'t need.','那我們需要上限六十人的方案，不要付用不到的錢。'],
+   ['M','Agreed. I\'ll also ask if they can provide vegetarian options.','同意。我也會問他們能不能提供素食選項。']],
+  qs:[['What event are the speakers planning?','說話者在籌備什麼活動？','A dinner for clients','A staff training','A product launch','A retirement party'],
+      ['Look at the graphic. How much will the company most likely pay per person?','請看圖表。公司最可能每人支付多少？','$48','$35','$62','$52'],
+      ['What will the man ask the caterer about?','男子會問外燴業者什麼？','Vegetarian food','Delivery times','A discount','Extra servers']]},
+ {lv:3, type:'conv', t:'客戶投訴系統錯誤（三人）', lines:[
+   ['W','Thanks for joining the call, Dev. Our client in Toronto says their invoices are showing the wrong tax rate.','謝謝你加入通話，戴夫。我們多倫多的客戶說他們的請款單稅率錯了。'],
+   ['M','That\'s probably related to the billing software update we installed on Monday.','這大概和我們週一安裝的帳務軟體更新有關。'],
+   ['M2','I\'m on the IT team. I can roll back the update tonight while the system is offline.','我是 IT 團隊的。今晚系統離線時我可以把更新還原。'],
+   ['W','Good. And I\'ll let the client know corrected invoices will be sent tomorrow.','很好。我會告訴客戶明天會寄出更正後的請款單。'],
+   ['M','I\'ll also review the other accounts that were billed this week, just in case.','我也會檢查這週其他開過單的帳戶，以防萬一。']],
+  qs:[['What is the problem?','問題是什麼？','Invoices show an incorrect tax rate','A client\'s payment is late','The office is closed','A software license expired'],
+      ['What does the IT team member offer to do?','IT 人員提議做什麼？','Reverse a software update','Call the client','Buy new software','Work on the weekend'],
+      ['What will the woman tell the client?','女子會告訴客戶什麼？','Corrected invoices will be sent','The tax rate has increased','A refund has been issued','The contract will be renewed']]},
+ {lv:3, type:'conv', t:'租辦公空間', lines:[
+   ['W','So this is the space on the twelfth floor. It\'s about two hundred square meters, and it comes furnished.','這就是十二樓的空間，大約兩百平方公尺，附家具。'],
+   ['M','It\'s bright, and I like the view. What\'s the monthly rent?','很明亮，我喜歡這個景觀。月租多少？'],
+   ['W','Four thousand two hundred, including utilities. The minimum lease is two years.','四千兩百，含水電。最短租期兩年。'],
+   ['M','Two years is a little long for us. We\'re a start-up, and we might grow quickly.','兩年對我們來說有點長。我們是新創，可能會成長很快。'],
+   ['W','I understand. Let me ask the owner whether a one-year lease with an option to renew would be possible.','了解。我問問屋主能否簽一年、附續約選擇權。']],
+  qs:[['Who most likely is the woman?','女子最可能是誰？','A real estate agent','An architect','An interior designer','A building inspector'],
+      ['What concern does the man raise?','男子提出什麼顧慮？','The lease period is too long','The rent is too high','The space is too small','The building is too old'],
+      ['What will the woman do next?','女子接下來會做什麼？','Speak with the property owner','Show another office','Lower the rent','Prepare a contract']]},
+ {lv:3, type:'talk', t:'機場延誤廣播', lines:[
+   ['N','Attention passengers on Pacific Air Flight 512 to Vancouver.','搭乘太平洋航空 512 班機前往溫哥華的旅客請注意。'],
+   ['N','Due to a mechanical inspection, our departure has been delayed by approximately ninety minutes.','由於機械檢查，班機起飛延後約九十分鐘。'],
+   ['N','The new boarding time is four forty-five, and the gate has been changed to C14.','新的登機時間是 4 點 45 分，登機門改為 C14。'],
+   ['N','Passengers with connecting flights in Vancouver should speak with an agent at the service counter.','在溫哥華需要轉機的旅客，請到服務櫃台洽詢地勤人員。'],
+   ['N','Meal vouchers are available at the gate. We apologize for the inconvenience.','登機門可領取餐券。造成不便，敬請見諒。']],
+  qs:[['What has caused the delay?','延誤的原因是什麼？','A mechanical inspection','Bad weather','A crew shortage','Heavy air traffic'],
+      ['What are passengers with connecting flights asked to do?','需要轉機的旅客被要求做什麼？','Talk to an agent','Change their seats','Call the airline','Go to gate C14 immediately'],
+      ['What is being offered to passengers?','提供旅客什麼？','Meal vouchers','Hotel rooms','Free upgrades','Travel insurance']]},
+ {lv:3, type:'talk', t:'廣播節目：小企業專訪預告', lines:[
+   ['N','You\'re listening to Business Today. After the break, we\'ll be speaking with Anita Shah, the founder of Greenbox.','您正在收聽「今日商業」。廣告後我們將訪問 Greenbox 創辦人安妮塔・夏。'],
+   ['N','Greenbox delivers meal kits made with ingredients from local farms.','Greenbox 外送使用在地農場食材的料理包。'],
+   ['N','In just three years, the company has expanded from one city to twelve.','短短三年，公司就從一個城市擴展到十二個。'],
+   ['N','Ms. Shah will explain how she managed that growth while keeping prices low.','夏女士將說明她如何在維持低價的同時做到這樣的成長。'],
+   ['N','Listeners can call in with questions at 555-0199.','聽眾可撥打 555-0199 來電提問。']],
+  qs:[['Who is Anita Shah?','安妮塔・夏是誰？','A company founder','A radio host','A farmer','A chef'],
+      ['What does Greenbox provide?','Greenbox 提供什麼？','Meal kits','Gardening tools','Delivery trucks','Cooking classes'],
+      ['What can listeners do?','聽眾可以做什麼？','Call in with questions','Win a free meal kit','Visit a farm','Download a menu']]},
+ {lv:3, type:'talk', t:'工廠安全規定更新（看圖表）', g:[['區域','需要的裝備'],['A 區 組裝','護目鏡'],['B 區 焊接','面罩＋手套'],['C 區 倉儲','安全帽'],['D 區 包裝','無']], lines:[
+   ['N','Good morning. Starting today, there\'s an update to our safety rules.','早安。從今天起，安全規定有更新。'],
+   ['N','Because of the new shelving installed last week, anyone entering the storage area must now wear a hard hat.','由於上週安裝了新的貨架，進入倉儲區的人現在都必須戴安全帽。'],
+   ['N','Hard hats are available at the entrance of that zone.','安全帽放在該區入口。'],
+   ['N','Also, the annual safety inspection will take place on the fifteenth, so please keep all walkways clear.','另外，年度安全檢查將在 15 日進行，請保持走道暢通。'],
+   ['N','Thank you for your cooperation.','謝謝配合。']],
+  qs:[['Why has a rule been changed?','規定為什麼改變？','New shelves were installed','An accident occurred','A new manager was hired','The factory was expanded'],
+      ['Look at the graphic. Which zone is the speaker talking about?','請看圖表。說話者在說哪一區？','Zone C','Zone A','Zone B','Zone D'],
+      ['What are listeners asked to do before the inspection?','檢查前聽眾被要求做什麼？','Keep walkways clear','Clean their machines','Attend a training','Wear new uniforms']]},
+ {lv:3, type:'talk', t:'執行長致詞：表揚員工', lines:[
+   ['N','Thank you all for coming to this year\'s awards luncheon.','感謝大家來參加今年的頒獎午餐會。'],
+   ['N','Our Employee of the Year is Marcus Bell from Customer Support.','年度最佳員工是客服部的馬可斯・貝爾。'],
+   ['N','Marcus created a new training guide that cut our average response time by almost half.','馬可斯製作了新的訓練手冊，讓平均回應時間縮短將近一半。'],
+   ['N','His guide is now being used by our offices in four countries.','他的手冊現在已用在我們四個國家的辦公室。'],
+   ['N','Marcus, please come up and accept your award.','馬可斯，請上台領獎。']],
+  qs:[['What is the purpose of the event?','這場活動的目的是什麼？','To recognize an employee','To introduce a new product','To welcome new staff','To announce a merger'],
+      ['What did Marcus Bell do?','馬可斯・貝爾做了什麼？','He created a training guide','He opened a new office','He hired new staff','He won a contract'],
+      ['What is mentioned about the guide?','關於手冊提到什麼？','It is used in several countries','It was published online','It will be translated','It took two years to write']]},
+ // ---------- 階段 4 ----------
+ {lv:4, type:'conv', t:'預算刪減下的行銷決策', lines:[
+   ['W','Tom, finance has asked every department to reduce spending by eight percent next quarter.','湯姆，財務要求每個部門下一季削減 8% 的支出。'],
+   ['M','That\'s going to be tough. Most of our budget is already committed to the autumn campaign.','這會很困難。我們大部分預算已經投入秋季活動了。'],
+   ['W','What if we cut back on print advertising? Our data shows those ads bring in fewer leads than social media.','如果減少平面廣告呢？我們的數據顯示平面廣告帶來的潛在客戶比社群媒體少。'],
+   ['M','That makes sense, but our contract with the magazine runs through December. We\'d have to check for a cancellation penalty.','有道理，但我們和雜誌的合約到 12 月，得確認有沒有解約罰款。'],
+   ['W','I\'ll have legal look at the terms before we submit our revised budget on Friday.','在週五提交修正預算前，我會請法務看一下條款。']],
+  qs:[['What has the finance department requested?','財務部要求什麼？','A reduction in spending','A new campaign','More detailed reports','An earlier deadline'],
+      ['What does the woman suggest?','女子建議什麼？','Reducing print advertising','Hiring a consultant','Postponing the campaign','Increasing social media staff'],
+      ['Why does the man hesitate?','男子為什麼猶豫？','There may be a penalty for ending a contract','The data is outdated','The magazine is very popular','The deadline is too close']]},
+ {lv:4, type:'conv', t:'海外展會參展準備（看圖表）', g:[['展會','城市','日期'],['TechAsia','Singapore','Mar 4–6'],['EuroDigital','Berlin','Apr 18–20'],['NovaExpo','Toronto','Jun 2–4']], lines:[
+   ['M','Priya, we\'ve narrowed the trade shows down to three, but our new software won\'t be ready until the end of March.','普莉雅，我們已經把展會縮減到三個，但新軟體要到三月底才會好。'],
+   ['W','Then the first one is out. Between the other two, which has more buyers from our target market?','那第一個就不行了。另外兩個哪個有比較多我們目標市場的買家？'],
+   ['M','Our main growth market is Europe, so the April show makes the most sense.','我們主要的成長市場是歐洲，所以四月那場最合理。'],
+   ['W','Agreed. Booth space there sells out quickly, so let\'s reserve one today.','同意。那裡的攤位很快就會賣完，我們今天就預訂。'],
+   ['M','I\'ll fill out the application this afternoon and copy you on the confirmation.','我今天下午填申請表，確認信會副本給妳。']],
+  qs:[['Why do the speakers rule out one trade show?','說話者為什麼排除其中一個展會？','A product will not be ready in time','It is too expensive','It is too far away','It has too few visitors'],
+      ['Look at the graphic. Which city will the speakers most likely travel to?','請看圖表。說話者最可能去哪個城市？','Berlin','Singapore','Toronto','Shanghai'],
+      ['What will the man do this afternoon?','男子今天下午會做什麼？','Submit an application','Book a flight','Prepare a demonstration','Contact buyers']]},
+ {lv:4, type:'conv', t:'人才流失與彈性工時', lines:[
+   ['W','I\'ve just finished reviewing the exit interviews from the past year. Flexibility came up repeatedly.','我剛看完過去一年的離職面談，「彈性」一再被提到。'],
+   ['M','I\'m not surprised. Several competitors now offer hybrid schedules, and we\'re still requiring five days in the office.','我不意外。好幾家競爭對手都提供混合辦公了，我們還要求每週進辦公室五天。'],
+   ['W','I\'d like to propose a six-month pilot program: two remote days a week for teams that volunteer.','我想提議一個六個月的試辦計畫：自願的團隊每週可以遠距兩天。'],
+   ['M','The executives will want evidence that productivity won\'t suffer.','高層會想要證據證明生產力不會下降。'],
+   ['W','That\'s why I plan to track output and client satisfaction throughout the pilot and report back monthly.','所以我打算在試辦期間追蹤產出和客戶滿意度，每月回報。']],
+  qs:[['What did the woman learn from the exit interviews?','女子從離職面談中得知什麼？','Employees wanted more flexibility','Salaries were too low','Training was insufficient','Managers were unavailable'],
+      ['What does the woman propose?','女子提議什麼？','A trial of remote work','Higher salaries','A new office location','Additional vacation days'],
+      ['How will the woman address the executives\' concerns?','女子會如何回應高層的顧慮？','By measuring performance during the program','By hiring more staff','By shortening the program','By surveying competitors']]},
+ {lv:4, type:'conv', t:'合約條款協商（三人）', lines:[
+   ['M','Ms. Okoye, we\'ve reviewed your draft service agreement. Our main concern is the penalty clause for late delivery.','歐柯耶女士，我們看過您的服務合約草稿，主要顧慮是延遲交貨的罰則條款。'],
+   ['W','I understand. Five percent per week is our standard rate.','我了解。每週 5% 是我們的標準。'],
+   ['M2','Given that many delays are caused by customs inspections, which are beyond our control, could that be excluded?','考量很多延誤是海關檢查造成的，不在我們控制範圍內，可以排除嗎？'],
+   ['W','That\'s reasonable, provided you notify us within forty-eight hours of any customs hold.','合理，只要海關一扣貨，你們在四十八小時內通知我們就可以。'],
+   ['M','We can certainly commit to that. Shall we finalize the revised version by Monday?','我們一定做得到。我們週一前完成修訂版定稿好嗎？']],
+  qs:[['What are the speakers discussing?','說話者在討論什麼？','Terms in a contract','A delayed payment','A customs form','A new product'],
+      ['What do the men request?','兩位男子要求什麼？','An exception to a penalty','A lower price','A longer contract','Faster delivery'],
+      ['What condition does the woman set?','女子提出什麼條件？','Timely notification of customs delays','An increased deposit','Weekly progress reports','A signed guarantee']]},
+ {lv:4, type:'talk', t:'財報電話會議開場', lines:[
+   ['N','Good morning, and thank you for joining Veritas Pharmaceuticals\' third-quarter earnings call.','早安，感謝參加 Veritas 製藥第三季財報電話會議。'],
+   ['N','Revenue reached four hundred twenty million dollars, up eleven percent from a year earlier, driven largely by sales of our allergy medication in overseas markets.','營收達四億兩千萬美元，比去年同期成長 11%，主要來自過敏藥在海外市場的銷售。'],
+   ['N','However, research and development costs rose sharply as we expanded clinical trials.','不過，由於擴大臨床試驗，研發成本大幅上升。'],
+   ['N','We therefore expect profit margins to remain under pressure through the first half of next year.','因此我們預期到明年上半年，利潤率仍會承壓。'],
+   ['N','After my remarks, our chief financial officer will take questions from analysts.','我發言後，財務長將回答分析師的提問。']],
+  qs:[['What contributed most to the revenue increase?','營收成長主要來自什麼？','Overseas sales of a medication','A new factory','Lower production costs','A merger'],
+      ['Why does the speaker expect profit margins to be under pressure?','說話者為什麼預期利潤率承壓？','Research costs have increased','Prices have been reduced','Sales have declined','Taxes have risen'],
+      ['What will happen next?','接下來會發生什麼？','Analysts will ask questions','A new product will be shown','The CEO will retire','A video will be played']]},
+ {lv:4, type:'talk', t:'研習會講者：顧客留存', lines:[
+   ['N','A common mistake companies make is spending most of their marketing budget on attracting new customers.','企業常犯的錯誤，是把大部分行銷預算花在吸引新客戶上。'],
+   ['N','Research consistently shows that retaining an existing customer costs far less than acquiring a new one.','研究一再顯示，留住現有顧客的成本遠低於取得新顧客。'],
+   ['N','In today\'s session, I\'ll walk you through three strategies for building loyalty, starting with personalized follow-up after each purchase.','今天的課程我會帶大家看三個建立忠誠度的策略，先從每次購買後的個人化追蹤開始。'],
+   ['N','You\'ll find a worksheet in your folder. We\'ll use it to map out your own customer journey.','資料夾裡有一張工作單，我們會用它畫出你們自己的顧客旅程。'],
+   ['N','Please take a moment to look it over now.','請現在花一點時間看一下。']],
+  qs:[['What is the main topic of the talk?','演講的主題是什麼？','Keeping existing customers','Hiring sales staff','Reducing shipping costs','Designing websites'],
+      ['According to the speaker, what does research show?','根據說話者，研究顯示什麼？','Retaining customers is cheaper than finding new ones','Advertising budgets are increasing','Most customers prefer online shopping','Loyalty programs are ineffective'],
+      ['What are listeners asked to do?','聽眾被要求做什麼？','Review a worksheet','Form small groups','Complete a survey','Watch a video']]},
+ {lv:4, type:'talk', t:'城市交通政策新聞', lines:[
+   ['N','In local news, the city council voted last night to introduce a congestion fee for vehicles entering the downtown area during peak hours.','地方新聞：市議會昨晚表決通過，尖峰時段進入市中心的車輛將收取壅塞費。'],
+   ['N','The fee, set at eight dollars per day, will take effect in March.','費用定為每天八美元，將於三月生效。'],
+   ['N','Supporters argue it will reduce traffic and fund improvements to public transportation.','支持者認為這能減少交通量，並為大眾運輸改善提供資金。'],
+   ['N','However, some business owners worry that it will discourage shoppers from coming downtown.','不過，部分商家擔心這會讓購物者不願到市中心。'],
+   ['N','The council will hold a public forum on the plan next Tuesday at City Hall.','議會將在下週二於市政廳舉辦公聽會。']],
+  qs:[['What did the city council approve?','市議會通過了什麼？','A fee for driving downtown','A new subway line','Lower parking rates','A downtown shopping festival'],
+      ['What concern do some business owners have?','部分商家有什麼顧慮？','Fewer customers may visit','Taxes will increase','Roads will be closed','Rent will rise'],
+      ['What will take place next Tuesday?','下週二會有什麼？','A public meeting','A council vote','A road opening','A business fair']]},
+ {lv:4, type:'talk', t:'語音留言：採購延遲與選項（看圖表）', g:[['型號','交期','單價'],['LX-200','現貨','$1,150'],['LX-300','3 週','$1,290'],['LX-350','6 週','$1,420']], lines:[
+   ['N','Hi, Ms. Duarte, it\'s Leon from Apex Office Equipment, returning your call about the copiers.','嗨，杜爾特女士，我是 Apex 辦公設備的里昂，回覆您關於影印機的來電。'],
+   ['N','Unfortunately, the model you selected, the LX-350, is on backorder for six weeks.','很遺憾，您選的 LX-350 要延後出貨六週。'],
+   ['N','Since you mentioned you need the machines installed before your office opens next month, I\'d recommend the next model down.','您提到下個月辦公室開幕前就需要安裝好，我建議選低一級的型號。'],
+   ['N','It has nearly all the same features, and it can be delivered within three weeks.','它幾乎有全部相同的功能，三週內就能送達。'],
+   ['N','Let me know by Thursday, and I\'ll lock in the current price for you.','週四前告訴我，我就幫您鎖定目前的價格。']],
+  qs:[['Why is the speaker calling?','說話者為什麼打電話？','To report a delay and suggest an alternative','To confirm an installation date','To request a payment','To offer a maintenance plan'],
+      ['Look at the graphic. What is the unit price of the model the speaker recommends?','請看圖表。說話者推薦的型號單價是多少？','$1,290','$1,150','$1,420','$1,350'],
+      ['What does the speaker offer to do?','說話者主動提議做什麼？','Guarantee the current price','Waive the delivery fee','Install the machines for free','Provide a loaner copier']]},
+);
+
+// ================= Part 1 照片描述（以圖示場景代替照片） =================
+// 真正的多益是看照片；本 App 沒有實拍照片，用圖示組成場景，練習「聽四個描述、選最符合畫面的一個」。
+// PART1[階段] = [場景圖示, 場景中文說明（作答後才顯示）, 正確描述, 錯1, 錯2, 錯3, 陷阱說明]
+const PART1 = {
+1: [
+  ['👩‍💻 💻 ☕', '一位女子在電腦前打字，旁邊有一杯咖啡。', 'A woman is typing on a computer.', 'A woman is drinking from a bottle.', 'A woman is cooking in a kitchen.', 'A woman is closing a window.', '先看「人在做什麼」：typing（打字）。drinking 有咖啡杯但她沒在喝。'],
+  ['🧑‍🍳 🍳 🔥', '一位廚師在爐子上用平底鍋煮東西。', 'A cook is using a pan.', 'A cook is washing some dishes.', 'A cook is reading a menu.', 'A cook is sitting at a table.', '動作題：using a pan（用平底鍋）。'],
+  ['🚶‍♂️🚶‍♀️ 🚶 🛣️', '幾個人走在街上。', 'Some people are walking on a street.', 'Some people are riding bicycles.', 'Some people are waiting for a bus.', 'Some people are running in a park.', 'walking 走路；riding bicycles 畫面上沒有腳踏車。'],
+  ['📦 📦 📦 🚚', '幾個箱子堆在卡車旁。', 'Some boxes are next to a truck.', 'Some boxes are on a shelf.', 'A man is driving a truck.', 'The truck is being washed.', '沒有人的照片常考「物品的位置」：next to a truck。'],
+  ['👨‍💼 📞 🗒️', '一位男子在講電話並做筆記。', 'A man is talking on the phone.', 'A man is putting on his jacket.', 'A man is fixing a phone.', 'A man is opening a door.', 'talking on the phone 講電話；fixing 修理是陷阱。'],
+  ['🪑 🪑 🪑 🟫', '會議桌旁的椅子都空著。', 'The chairs are empty.', 'People are sitting on the chairs.', 'The chairs are being moved.', 'A woman is cleaning the table.', '畫面沒有人，就不要選有人動作的句子。'],
+  ['👩‍🔬 🔬 🧪', '一位女子在用顯微鏡。', 'A woman is looking into a microscope.', 'A woman is pouring some water.', 'A woman is writing on a board.', 'A woman is taking off her glasses.', 'looking into 往裡看。'],
+  ['🧑‍🌾 🌱 🪴', '一個人在幫植物澆水。', 'A man is watering some plants.', 'A man is cutting some trees.', 'A man is buying some flowers.', 'A man is sitting on the grass.', 'watering 澆水。'],
+],
+2: [
+  ['🧑‍🔧 🚗 🔧', '技師正在修理車子。', 'A mechanic is repairing a vehicle.', 'A mechanic is parking a car.', 'A mechanic is washing his hands.', 'Some cars are lined up on a street.', 'vehicle＝car 的換句話說，Part 1 正解常用上位字。'],
+  ['🛒 🍎🍞🥛 🧑‍🦰', '一位女子推著放滿食物的購物車。', 'A woman is pushing a shopping cart.', 'A woman is carrying a basket on her head.', 'A woman is paying at a counter.', 'Some fruit is being put into boxes.', 'pushing 推。'],
+  ['📚📚📚 🗄️', '書整齊排在書架上。', 'Some books have been arranged on shelves.', 'Some books are lying on the floor.', 'A man is reading a book.', 'The shelves are being painted.', 'have been arranged＝已經被排好（完成被動，描述狀態）。'],
+  ['👥 🗣️ 📊', '幾個人在看簡報圖表。', 'Some people are looking at a chart.', 'Some people are shaking hands.', 'A man is turning off a projector.', 'The room is completely empty.', 'looking at a chart。'],
+  ['🧹 🧑 🏢', '一位清潔工在掃大廳地板。', 'A worker is sweeping the floor.', 'A worker is mopping a window.', 'A worker is moving some furniture.', 'The floor is being painted.', 'sweeping 掃地；mopping 拖地。'],
+  ['✈️ 🧳🧳 🧍‍♀️', '一位女子在機場拉著行李。', 'A woman is pulling her luggage.', 'A woman is boarding a plane.', 'A woman is weighing a suitcase.', 'Some bags are on a conveyor belt.', 'pulling 拉；boarding 登機是陷阱。'],
+  ['🚲🚲🚲 🌳', '幾台腳踏車停在樹旁。', 'Some bicycles are parked near a tree.', 'Some people are riding bicycles.', 'A tree is being cut down.', 'Some bicycles are being repaired.', '物品照片＋位置：parked near a tree。'],
+  ['🍽️ 🧑‍🍳 🧑‍💼', '服務生在幫客人上菜。', 'A server is bringing food to a customer.', 'A customer is paying the bill.', 'A server is cleaning the kitchen.', 'Some plates are stacked in a sink.', 'bringing food 上菜。'],
+],
+3: [
+  ['🏗️ 👷 🪜', '工人站在梯子上工作。', 'A worker is standing on a ladder.', 'A worker is climbing down some stairs.', 'A ladder is leaning against a fence.', 'Some workers are taking a break.', 'standing on a ladder；leaning against 是物品靠著的陷阱。'],
+  ['🖨️ 📄📄 👨', '男子在影印機旁拿文件。', 'A man is removing some papers from a copier.', 'A man is repairing a printer.', 'A man is filing some folders.', 'Some papers have fallen on the floor.', 'removing…from 從……拿出來。'],
+  ['🚢 📦 🏗️', '起重機正在把貨櫃吊上船。', 'A container is being loaded onto a ship.', 'A ship is sailing on the sea.', 'Some boxes are being unpacked.', 'A crane is being repaired.', 'is being loaded＝正在被裝上（進行被動，表示有人或機器在動作）。'],
+  ['🪟 🧽 🧑', '一個人在擦窗戶。', 'A person is wiping a window.', 'A person is opening a window.', 'A person is hanging a picture.', 'A window is being installed.', 'wiping 擦。'],
+  ['🌳 🪑 🧑‍🤝‍🧑', '兩個人坐在戶外的長椅上。', 'Two people are seated on a bench.', 'Two people are setting up a bench.', 'Two people are walking along a path.', 'A bench is being painted.', 'be seated＝坐著；setting up 是近音陷阱。'],
+  ['🗂️ 🖊️ 👩‍💼', '女子在文件上簽名。', 'A woman is signing a document.', 'A woman is sorting some mail.', 'A woman is designing a sign.', 'Some documents are being shredded.', 'signing 簽名；sign（招牌）是同字陷阱。'],
+  ['🚌 🚏 🧍🧍', '幾個人在公車站排隊。', 'Some people are waiting in line at a bus stop.', 'Some people are getting off a bus.', 'A bus is pulling into a garage.', 'A driver is collecting tickets.', 'waiting in line 排隊。'],
+  ['🍷 🍽️ 🕯️ 🪑', '餐桌已經擺好餐具。', 'A table has been set for a meal.', 'Some diners are eating dinner.', 'A server is clearing a table.', 'Candles are being lit.', 'has been set＝已經擺好（狀態）。'],
+],
+4: [
+  ['🛠️ 🧑‍🔧 💡', '技工正在調整天花板的燈具。', 'A technician is adjusting a light fixture.', 'A technician is replacing a door handle.', 'Some lights have been turned off.', 'A ceiling is being painted.', 'fixture 固定裝置；adjusting 調整。'],
+  ['🏬 🪟 👗👔', '櫥窗裡陳列著服飾。', 'Some clothing is on display in a window.', 'A shopper is trying on a jacket.', 'Some clothes are being folded.', 'A window is being cleaned.', 'on display＝陳列中。'],
+  ['🚧 🛣️ 🚗🚗', '道路施工，車子在旁邊繞行。', 'Traffic is being directed around a work area.', 'A road has been closed to all vehicles.', 'Some workers are crossing a bridge.', 'Some cars are parked in a garage.', 'directed around 引導繞行。'],
+  ['🧑‍🏫 🧑‍🎓🧑‍🎓 📽️', '講者對聽眾做簡報。', 'A presenter is addressing an audience.', 'An audience is leaving a room.', 'A presenter is packing up a laptop.', 'Some chairs are being stacked.', 'address an audience＝對聽眾演講。'],
+  ['🛳️ ⚓ 🌊', '船停靠在碼頭。', 'A boat is docked at a pier.', 'A boat is passing under a bridge.', 'Some passengers are boarding a ferry.', 'Waves are crashing onto a beach.', 'docked 停靠。'],
+  ['📦 🏷️ 🧑‍💼', '員工在箱子上貼標籤。', 'An employee is attaching labels to some boxes.', 'An employee is opening a package.', 'Some boxes are being delivered.', 'Some labels are being printed.', 'attaching…to 貼到……上。'],
+  ['🌿 🧑‍🌾 ✂️', '園丁在修剪灌木。', 'A gardener is trimming some bushes.', 'A gardener is planting some seeds.', 'Some flowers are being arranged in a vase.', 'A lawn is being mowed.', 'trimming 修剪；mowed 割草是同情境陷阱。'],
+  ['🧳 🛎️ 🧑‍💼', '飯店櫃台人員在幫房客登記入住。', 'A clerk is assisting a guest at a front desk.', 'A guest is unpacking a suitcase.', 'A bellhop is carrying luggage upstairs.', 'A lobby is crowded with travelers.', 'assisting 協助。'],
+],
+};
+
+// 補充 Part 2（讓每個階段至少 18 題，足夠組 3 回迷你模考）
+PART2[1].push(
+  ['Do you have a pen I can use?','Sure, here you are.','Yes, I have a pet.','It\'s open now.','你有筆可以借我用嗎？','當然，拿去。','pen／pet、open 近音陷阱。'],
+  ['What floor is the dentist on?','The third floor.','He\'s a good dentist.','About twenty minutes.','牙醫在幾樓？','三樓。','What floor 問樓層。'],
+);
+PART2[3].push(
+  ['Who\'s going to lead the orientation for new hires?','Someone from HR, I believe.','It\'s oriented to the east.','We hired three people.','新人說明會由誰主持？','我想是人資的人。','orientation／oriented、hire 重複陷阱。'],
+  ['Should we order more paper now or wait until Monday?','We still have plenty.','Yes, in alphabetical order.','The paper was due Monday.','我們要現在多訂紙，還是等到週一？','我們還有很多。','用「還夠」間接回答選擇疑問句。'],
+);
+PART2[4].push(
+  ['How did the negotiations with the supplier turn out?','We agreed on a five-year deal.','Turn left at the corner.','The supplier is in Ohio.','和供應商的談判結果如何？','我們談成了五年的合約。','turn out＝結果；turn left 是陷阱。'],
+  ['Isn\'t the quarterly report supposed to be on my desk by now?','Accounting is double-checking the figures.','Yes, it\'s a quarter past nine.','I reported it last week.','季報不是現在就該放在我桌上了嗎？','會計部正在再次核對數字。','間接說明延遲原因。'],
+);
+
 // ================= 閱讀：Part 6 段落填空、Part 7 閱讀理解 =================
 // PART6：text 內 [1] [2] [3] [4] 為空格；blanks：[正解, 錯1, 錯2, 錯3, 解說]
 const PART6 = [
@@ -1148,6 +1511,314 @@ const PART7 = [
       ['What will Mr. Park most likely do?','朴先生最可能做什麼？','Get in touch with Ms. Delgado','Repair the booking system','Process the refund','Reserve a conference room']]},
 ];
 
+// ================= 補充 Part 6・7（每階段 3 篇段落填空＋9 篇閱讀，足夠組 3 回迷你模考） =================
+PART6.push(
+ {lv:1, t:'公告：停車場清潔', kind:'Notice', text:[
+   'NOTICE TO ALL STAFF',
+   'The parking lot will [1] on Saturday, October 12, from 8 a.m. to 4 p.m. Workers will clean the ground and paint new lines.',
+   'Please do not leave your car in the lot [2] this time. You can park on Pine Street instead.',
+   '[3] Cars that are still in the lot on Saturday morning will be moved.',
+   'If you have [4] questions, please call the front desk.'],
+  zh:'全體員工公告：停車場將於 10 月 12 日週六上午 8 點到下午 4 點關閉，工人會清潔地面並畫新的停車格。這段時間請勿把車停在停車場，可改停松樹街。請在週五晚上前把車開走。週六早上仍在停車場的車會被移走。如有任何問題，請打給櫃台。',
+  blanks:[
+   ['be closed','close','closing','closed','停車場「被關閉」用被動：will be closed。'],
+   ['during','while','until','since','during＋名詞（this time）＝在……期間。'],
+   ['Please move your car by Friday evening.','The new lines will be yellow.','Pine Street is very busy on Mondays.','Our office opens at 9 a.m.','接在「請勿停車」後，提醒週五前移車最連貫。'],
+   ['any','much','every','a few of','疑問／條件句中用 any questions。'],
+ ]},
+ {lv:2, t:'Email：會員續約提醒', kind:'Email', text:[
+   'Dear Mr. Novak,',
+   'Your membership at Peak Fitness will [1] on June 30. To continue enjoying our facilities, please renew before that date.',
+   'Members who renew early will receive a free personal training session. [2], you can lock in your current monthly rate for another year.',
+   '[3] Simply log in to your account on our website and click "Renew."',
+   'We look forward to [4] you at the gym.',
+   'Best regards, Peak Fitness Member Services'],
+  zh:'親愛的諾瓦克先生：您在巔峰健身的會籍將於 6 月 30 日到期。若要繼續使用我們的設施，請在該日前續約。提早續約的會員可獲得一次免費私人教練課程。此外，您可以將目前的月費再鎖定一年。續約只需幾分鐘。只要登入網站帳號並點選「續約」即可。期待在健身房見到您。',
+  blanks:[
+   ['expire','expiration','expired','expiring','will＋原形動詞 expire（到期）。'],
+   ['In addition','However','Otherwise','Instead','前後都是好處，用 In addition（此外）。'],
+   ['Renewing takes only a few minutes.','Our gym was renovated last year.','Personal trainers are very busy.','Monthly rates will decrease next year.','接下來說明續約步驟，先說「只要幾分鐘」最連貫。'],
+   ['seeing','see','seen','be seen','look forward to＋V-ing。'],
+ ]},
+ {lv:3, t:'新聞稿：工廠擴建', kind:'Press Release', text:[
+   'HALDEN, March 3 — Norberg Packaging announced today that it will expand its manufacturing plant in Halden. The project, [1] is expected to cost $25 million, will add a new production line for recyclable containers.',
+   'Construction will begin in May and should be completed [2] the end of next year.',
+   'The expansion will create approximately 150 new jobs. [3]',
+   '"Demand for sustainable packaging has grown faster than we [4]," said CEO Lars Norberg.'],
+  zh:'哈爾登 3 月 3 日訊：諾柏格包裝今天宣布將擴建哈爾登工廠。這項預計耗資 2,500 萬美元的工程將新增一條可回收容器的生產線。工程將於五月動工，預計明年底前完工。擴建將創造約 150 個新職缺。公司計畫優先招募當地居民。執行長拉斯・諾柏格表示：「永續包裝的需求成長得比我們預期的還快。」',
+  blanks:[
+   ['which','what','who','it','非限定關係代名詞 which 代替 the project。'],
+   ['by','until','since','for','by the end of＝在……之前完成。'],
+   ['The company plans to hire local residents first.','Recyclable containers are often made of glass.','Halden is located near the coast.','The CEO founded the company in 1990.','前句提到新職缺，接「優先雇用當地人」最連貫。'],
+   ['anticipated','anticipate','anticipating','had anticipation','比較過去的預期，用過去式 anticipated。'],
+ ]},
+ {lv:4, t:'信件：顧問服務提案', kind:'Letter', text:[
+   'Dear Ms. Varga,',
+   'Thank you for meeting with us last week to discuss the reorganization of your logistics department. As requested, I am enclosing a proposal that [1] the scope, timeline, and cost of our consulting services.',
+   'In brief, we recommend a twelve-week engagement, [2] which our team would analyze your current workflows and identify opportunities for automation.',
+   'Based on similar projects, clients have typically reduced processing times by 20 to 30 percent. [3]',
+   'Please note that the fees quoted are valid for sixty days. We would be happy to answer any questions you may have before [4] a decision.',
+   'Sincerely, Daniel Ruiz, Ruiz & Partners'],
+  zh:'親愛的瓦爾加女士：感謝您上週與我們會面，討論貴公司物流部門的重組。依您要求，隨函附上說明顧問服務範圍、時程與費用的提案。簡言之，我們建議進行為期十二週的合作，期間團隊會分析貴公司目前的作業流程並找出可自動化之處。根據類似專案，客戶的處理時間通常可縮短 20% 到 30%。當然，實際成果取決於貴部門的具體狀況。請注意報價有效期為六十天。在您做出決定前，我們很樂意回答任何問題。',
+  blanks:[
+   ['outlines','outlining','outline','is outlined','主格關係代名詞 that 指 a proposal（單數），動詞用 outlines。'],
+   ['during','while','throughout that','when','during which＝在這段期間（介系詞＋which）。'],
+   ['Naturally, actual results will depend on your department\'s specific circumstances.','Our firm was established in Madrid in 1998.','Processing times are measured in hours.','Logistics departments are usually located on the ground floor.','提出數據後，補充「實際結果視情況而定」最合理。'],
+   ['making','make','made','to have made','介系詞 before 後接 V-ing；make a decision 是固定搭配。'],
+ ]},
+);
+
+PART7.push(
+ // ---------- 階段 1 ----------
+ {lv:1, t:'告示：圖書館開放時間', kind:'Notice', text:[
+   'GREENVILLE PUBLIC LIBRARY',
+   'Summer Hours (July 1 – August 31)',
+   'Monday – Friday: 9:00 A.M. – 8:00 P.M.',
+   'Saturday: 10:00 A.M. – 5:00 P.M.',
+   'Sunday: Closed',
+   'Free English conversation classes every Wednesday at 6:00 P.M. No sign-up needed.'],
+  zh:'格林維爾公共圖書館夏季開放時間（7/1–8/31）：週一至週五 9:00–20:00，週六 10:00–17:00，週日休館。每週三晚上 6 點有免費英文會話課，不需報名。',
+  qs:[['When is the library closed?','圖書館什麼時候休館？','On Sunday','On Saturday','On Wednesday','On Monday'],
+      ['What is offered on Wednesdays?','週三提供什麼？','An English class','A book sale','A computer class','A movie night'],
+      ['What is true about the class?','關於課程哪一項正確？','It is free','It is only in July','It starts at 8:00 P.M.','People must sign up']]},
+ {lv:1, t:'Email：午餐會議', kind:'Email', text:[
+   'From: Sam Lee  To: Design Team  Subject: Lunch meeting',
+   'Hi team,',
+   'Our meeting on Thursday will be a lunch meeting in Room 5 at 12:00.',
+   'I will order pizza and salad for everyone.',
+   'Please tell me by Wednesday if you can\'t eat cheese or meat.',
+   'Thanks, Sam'],
+  zh:'嗨各位：週四的會議改為中午 12 點在 5 號會議室的午餐會議。我會幫大家訂披薩和沙拉。不能吃起司或肉的人，請在週三前告訴我。山姆',
+  qs:[['What is the email mainly about?','這封郵件主要在講什麼？','A meeting with lunch','A new team member','A restaurant opening','A cooking class'],
+      ['Where will the meeting be held?','會議在哪裡舉行？','In Room 5','At a pizza shop','In the lobby','In Sam\'s office'],
+      ['What should people do by Wednesday?','大家週三前要做什麼？','Tell Sam about food they can\'t eat','Order their own lunch','Pay for the pizza','Prepare a report']]},
+ {lv:1, t:'簡訊：搭計程車', kind:'Text message', text:[
+   'Anna Wu (2:10 P.M.): My flight just landed. Where should I meet you?',
+   'Ben Ortiz (2:12 P.M.): I\'m sorry, I\'m stuck in traffic. Can you take a taxi to the hotel?',
+   'Anna Wu (2:13 P.M.): Sure. What\'s the name of the hotel again?',
+   'Ben Ortiz (2:14 P.M.): The Riverside Hotel. I\'ll meet you in the lobby at 3:30.'],
+  zh:'安娜：我的班機剛落地，要在哪裡跟你碰面？班：抱歉，我塞在車陣裡。妳可以搭計程車去飯店嗎？安娜：好。飯店名稱是什麼來著？班：河畔飯店。我 3:30 在大廳和妳碰面。',
+  qs:[['Where most likely is Ms. Wu?','吳小姐最可能在哪裡？','At an airport','At a hotel','In a taxi','At an office'],
+      ['Why can\'t Mr. Ortiz pick her up?','歐提茲先生為什麼不能接她？','He is in heavy traffic','His car is broken','He is in a meeting','He forgot the time'],
+      ['Where will they meet?','他們會在哪裡見面？','In a hotel lobby','At the airport gate','At a taxi stand','At a restaurant']]},
+ {lv:1, t:'廣告：二手家具', kind:'Advertisement', text:[
+   'FOR SALE',
+   'Office desk and chair — used for only one year. Like new!',
+   'Desk: $80  Chair: $40  Buy both for $100.',
+   'I am moving to another city, so everything must go by May 20.',
+   'Call Kim at 555-0177 after 6 P.M.'],
+  zh:'出售：辦公桌椅，只用了一年，幾乎全新！桌子 80 美元、椅子 40 美元，兩件一起買 100 美元。我要搬到別的城市，所有東西必須在 5 月 20 日前賣出。晚上 6 點後請打 555-0177 找金。',
+  qs:[['How much are the desk and chair together?','桌椅一起多少錢？','$100','$120','$80','$40'],
+      ['Why is Kim selling the furniture?','金為什麼要賣家具？','She is moving','She bought new furniture','She is closing a store','She doesn\'t like it'],
+      ['When should people call?','應該什麼時候打電話？','In the evening','In the morning','At lunchtime','On May 20 only']]},
+ {lv:1, t:'表格：活動報名', kind:'Form', text:[
+   'COMPANY SPORTS DAY — SIGN-UP FORM',
+   'Name: David Chen   Department: Sales',
+   'Events (choose up to two): ☑ Running  ☐ Basketball  ☑ Table tennis',
+   'T-shirt size: ☐ S  ☑ M  ☐ L',
+   'Please return this form to Human Resources by April 3.'],
+  zh:'公司運動會報名表：姓名陳大衛，部門業務部。項目（最多選兩項）：跑步、桌球。T 恤尺寸 M。請在 4 月 3 日前交回人資部。',
+  qs:[['Which event did Mr. Chen choose?','陳先生選了哪一項？','Table tennis','Basketball','Swimming','Soccer'],
+      ['How many events can each person choose?','每個人最多可以選幾項？','Two','One','Three','Four'],
+      ['Where should the form be returned?','表格要交到哪裡？','Human Resources','The sales department','The gym','The front desk']]},
+ {lv:1, t:'網路評論：咖啡店', kind:'Online review', text:[
+   '★★★☆☆  by Maria G.',
+   'The coffee at Corner Café is very good, and the cakes are fresh.',
+   'But the shop is small, so it is hard to find a seat in the morning.',
+   'Also, they only take cash.',
+   'I will go again, but maybe in the afternoon.'],
+  zh:'三顆星：街角咖啡的咖啡很好喝，蛋糕也很新鮮。但店很小，早上很難找到位子。而且只收現金。我還會再去，但可能改下午去。',
+  qs:[['What did Maria like?','瑪莉亞喜歡什麼？','The coffee','The prices','The large space','The music'],
+      ['What problem does she mention?','她提到什麼問題？','It is hard to find a seat','The staff are rude','The cakes are old','It opens late'],
+      ['What is indicated about the café?','關於咖啡店文中提到什麼？','It does not accept credit cards','It is open 24 hours','It is in a mall','It delivers food']]},
+ // ---------- 階段 2 ----------
+ {lv:2, t:'Email：會議改期', kind:'Email', text:[
+   'From: Grace Kim  To: Oliver Shaw  Subject: Our meeting on Tuesday',
+   'Dear Mr. Shaw,',
+   'I\'m afraid I need to reschedule our meeting on Tuesday, May 7. I have been asked to attend a training session in Seoul that week.',
+   'Would Monday, May 13, or Wednesday, May 15, work for you? I\'m free any time in the afternoon on either day.',
+   'I will bring the updated price list and some samples of our new packaging.',
+   'Best regards, Grace Kim, Sales Manager, Lumina Supplies'],
+  zh:'蕭先生您好：恐怕我必須更改 5 月 7 日週二的會議，那週我被要求去首爾參加訓練。5 月 13 日週一或 15 日週三您方便嗎？這兩天下午我都有空。我會帶更新後的價目表和新包裝的樣品。',
+  qs:[['Why does Ms. Kim want to change the meeting?','金小姐為什麼要更改會議？','She will be at a training session','She is sick','Her office is closed','A client canceled'],
+      ['What does Ms. Kim offer?','金小姐提出什麼？','Two possible dates','A free sample box','A discount','An online meeting'],
+      ['What will Ms. Kim bring to the meeting?','金小姐會帶什麼去會議？','A price list','A contract','A new laptop','A training manual']]},
+ {lv:2, t:'公告：大樓電梯維修', kind:'Notice', text:[
+   'ATTENTION, TENANTS OF THE CLARKE BUILDING',
+   'Elevator B will be out of service from Monday, September 9, to Friday, September 13, for scheduled maintenance.',
+   'Elevator A will remain in operation during this time, but waiting times may be longer than usual, especially between 8:30 and 9:30 A.M.',
+   'Tenants who need to move large items during the maintenance period should contact the building office to reserve the service elevator.',
+   'We apologize for any inconvenience.'],
+  zh:'克拉克大樓租戶請注意：B 號電梯將於 9 月 9 日至 13 日停用進行定期保養。這段期間 A 號電梯照常運作，但等候時間可能較長，尤其是上午 8:30 到 9:30。保養期間需要搬運大型物品的租戶，請聯絡大樓辦公室預約貨梯。',
+  qs:[['What is the purpose of the notice?','這則公告的目的是什麼？','To announce elevator maintenance','To introduce new tenants','To change office hours','To report a safety problem'],
+      ['When will waiting times probably be longest?','什麼時候等候時間可能最長？','In the early morning','At lunchtime','In the evening','On the weekend'],
+      ['Why should some tenants contact the building office?','為什麼有些租戶要聯絡大樓辦公室？','To reserve an elevator for large items','To get a parking pass','To report a broken elevator','To request a key']]},
+ {lv:2, t:'雙篇：訂單與客服回覆', kind:'Order form + Email', text:[
+   '【Order Form – Office Pro Online】 Order #77215  Customer: Linda Tran',
+   '10 boxes of copy paper ($6 each)  |  5 black ink cartridges ($22 each)  |  2 desk lamps ($35 each)',
+   'Delivery: Standard (5–7 days)',
+   '────────────',
+   '【Email】 From: Office Pro Customer Service  To: Linda Tran',
+   'Dear Ms. Tran, thank you for your order. Unfortunately, the desk lamps are currently out of stock and will be shipped separately next month. The rest of your order left our warehouse today. You will not be charged for the lamps until they ship. If you would prefer to cancel them, please reply to this email.'],
+  zh:'訂單：影印紙 10 箱（每箱 6 美元）、黑色墨水匣 5 個（每個 22 美元）、檯燈 2 盞（每盞 35 美元），標準運送 5–7 天。郵件：感謝訂購。很抱歉檯燈目前缺貨，下個月會另外寄出。其餘商品今天已經從倉庫出貨。檯燈出貨前不會向您收費。若想取消檯燈，請回覆此郵件。',
+  qs:[['What item is out of stock?','哪一項商品缺貨？','Desk lamps','Copy paper','Ink cartridges','Paper clips'],
+      ['How much will Ms. Tran be charged now?','陳小姐現在會被收多少錢？','$170','$240','$70','$110'],
+      ['What can Ms. Tran do if she does not want to wait?','如果陳小姐不想等，可以做什麼？','Reply to the email','Call the warehouse','Visit a store','Choose express delivery']]},
+ {lv:2, t:'文章：社區農夫市集', kind:'Article', text:[
+   'RIVERTON — The Riverton Farmers Market will open for the season on Saturday, April 20, in its new location: the parking lot behind City Hall.',
+   'The market moved because its old site on Main Street was too small for the growing number of vendors. This year, more than sixty farms and food businesses will take part, up from forty last year.',
+   'The market will run every Saturday from 8 A.M. to 1 P.M. until the end of October. Free parking is available in the City Hall garage.',
+   'Organizers are also looking for volunteers to help with setup each week.'],
+  zh:'里弗頓報導：里弗頓農夫市集將於 4 月 20 日週六在新地點——市政廳後方停車場——開市。市集搬遷是因為主街的舊址容納不下越來越多的攤商。今年超過六十個農場與食品業者參加，去年是四十個。市集每週六早上 8 點到下午 1 點，持續到十月底。市政廳車庫有免費停車。主辦單位也在招募每週協助布置的志工。',
+  qs:[['Why did the market move?','市集為什麼搬遷？','The old location was too small','The rent increased','Main Street was closed','City Hall requested it'],
+      ['How many vendors took part last year?','去年有多少攤商參加？','Forty','Sixty','Twenty','Eighty'],
+      ['What is indicated about parking?','關於停車文中提到什麼？','It is free','It is limited to vendors','It costs five dollars','It is on Main Street']]},
+ {lv:2, t:'線上聊天：簡報資料', kind:'Online chat', text:[
+   'Carlos Mendes [9:02 A.M.]: Is the sales presentation for the Bayside client ready?',
+   'Hana Ito [9:04 A.M.]: Almost. I still need the latest figures from the Asia team.',
+   'Carlos Mendes [9:05 A.M.]: I can ask them. The meeting starts at eleven, right?',
+   'Hana Ito [9:06 A.M.]: Actually, the client moved it to two o\'clock.',
+   'Carlos Mendes [9:07 A.M.]: Good, that gives us more time. I\'ll send you the numbers by noon.'],
+  zh:'卡洛斯：給灣畔客戶的業務簡報好了嗎？花：快好了，我還需要亞洲團隊的最新數字。卡洛斯：我可以去問。會議是十一點開始對吧？花：其實客戶改到兩點了。卡洛斯：很好，這樣時間比較多。我中午前把數字寄給妳。',
+  qs:[['What does Ms. Ito still need?','伊藤小姐還需要什麼？','Some sales figures','A meeting room','The client\'s address','A projector'],
+      ['At 9:07 A.M., what does Mr. Mendes mean when he writes, "that gives us more time"?','9:07 卡洛斯寫 "that gives us more time" 是什麼意思？','The later meeting time is helpful','The client is late','The presentation is too short','He has finished his work'],
+      ['What will Mr. Mendes do by noon?','卡洛斯中午前會做什麼？','Send some numbers','Call the client','Finish the slides','Book a room']]},
+ {lv:2, t:'雙篇：課程介紹與報名信', kind:'Web page + Email', text:[
+   '【Web page – Westside Community College】 Evening Business Courses (8 weeks)',
+   'Business Writing — Mondays, 7–9 P.M., $180',
+   'Basic Accounting — Tuesdays, 7–9 P.M., $210',
+   'Presentation Skills — Thursdays, 6–8 P.M., $160',
+   'Employees of partner companies receive 15% off.',
+   '────────────',
+   '【Email】 From: Jae Park  To: Westside Registration',
+   'Hello, I would like to sign up for the presentation course. I work at Delta Logistics, which I believe is one of your partner companies. However, I work late on Thursdays every other week. Would it be possible to watch a recording of the classes I miss?'],
+  zh:'網頁：西區社區學院晚間商業課程（8 週）：商業寫作週一 7–9 點 180 美元；基礎會計週二 7–9 點 210 美元；簡報技巧週四 6–8 點 160 美元；合作企業員工享 85 折。郵件：您好，我想報名簡報課。我在達美物流工作，應該是合作企業之一。不過我每隔一週的週四要加班，請問缺課時可以看錄影嗎？',
+  qs:[['What course does Mr. Park want to take?','朴先生想上哪一門課？','Presentation Skills','Business Writing','Basic Accounting','Marketing'],
+      ['How much will Mr. Park probably pay?','朴先生大概要付多少錢？','$136','$160','$180','$153'],
+      ['What does Mr. Park ask about?','朴先生詢問什麼？','Recordings of classes','A refund policy','Parking on campus','Weekend classes']]},
+ // ---------- 階段 3 ----------
+ {lv:3, t:'文章：連鎖書店轉型', kind:'Article', text:[
+   'When online retailers began dominating book sales, many expected Pageturner Books to close its 40 stores. Instead, the chain has posted three consecutive years of growth.',
+   'According to CEO Elena Moretti, the key was turning stores into community spaces. Most locations now host author readings, book clubs, and weekend children\'s programs, and nearly half include a café.',
+   '"People can buy a book anywhere," Moretti said. "What they can\'t get online is the experience of discovering one with other readers."',
+   'The company plans to open five new stores next year, all in mid-sized cities where competition from large bookstores is limited.'],
+  zh:'當網路零售商開始主導書籍銷售時，許多人以為翻頁書店的 40 家店會關門。結果這家連鎖店反而連續三年成長。執行長艾琳娜・莫雷蒂表示，關鍵在於把書店變成社區空間。大多數門市現在舉辦作家朗讀、讀書會和週末兒童活動，將近一半設有咖啡廳。她說：「人們在哪裡都能買書，網路上買不到的是和其他讀者一起發現好書的體驗。」公司計畫明年開五家新店，都在大型書店競爭較少的中型城市。',
+  qs:[['What is the article mainly about?','這篇文章主要在講什麼？','How a bookstore chain has succeeded','Why online retailers are growing','How to start a book club','A new author\'s first book'],
+      ['What is indicated about Pageturner\'s stores?','關於翻頁書店門市文中提到什麼？','Many of them hold events','All of them have cafés','Most of them are closing','They sell only children\'s books'],
+      ['Where will the new stores be located?','新店會開在哪裡？','In mid-sized cities','In large shopping malls','Near universities','In other countries']]},
+ {lv:3, t:'雙篇：會議場地比較與決定', kind:'Brochure + Email', text:[
+   '【Brochure – Lakeside Conference Center】 Rooms: Willow (up to 50 people), Maple (up to 120), Grand Hall (up to 300). All rooms include a projector and Wi-Fi. Catering is available from our on-site kitchen. Free shuttle from Central Station.',
+   '────────────',
+   '【Email】 From: Owen Price  To: Event Committee',
+   'I visited Lakeside yesterday. The Maple room would fit our expected 90 attendees comfortably, and the shuttle solves the parking issue we had last year. My only concern is that their kitchen cannot prepare gluten-free meals, so we would need an outside caterer for about ten guests. The center has confirmed this is allowed. Unless anyone objects, I will book the room for October 8.'],
+  zh:'簡介：湖畔會議中心：柳廳（50 人）、楓廳（120 人）、大廳（300 人）。所有會議室皆附投影機與 Wi-Fi。中心內廚房提供餐飲。中央車站有免費接駁車。郵件：我昨天去了湖畔。楓廳可以舒適容納我們預計的 90 位與會者，接駁車也解決了去年的停車問題。唯一顧慮是他們的廚房無法準備無麩質餐點，所以約十位來賓需要外部外燴，中心已確認允許。若無人反對，我會預訂 10 月 8 日的場地。',
+  qs:[['Which room will Mr. Price most likely book?','普萊斯先生最可能預訂哪一間？','Maple','Willow','Grand Hall','Lakeside'],
+      ['What problem from last year does Mr. Price mention?','普萊斯先生提到去年什麼問題？','Parking','Catering','Room size','Wi-Fi'],
+      ['What is suggested about the Lakeside kitchen?','關於湖畔中心的廚房文中暗示什麼？','It cannot meet some dietary needs','It is closed on weekends','It is very expensive','It only serves breakfast'],
+      ['What has the center confirmed?','中心確認了什麼？','An outside caterer may be used','A discount will be given','Parking is free','The room is available all week']]},
+ {lv:3, t:'內部備忘：新報帳規定', kind:'Memo', text:[
+   'TO: All Sales Staff  FROM: Finance Department  RE: Changes to travel expense policy',
+   'Effective August 1, hotel stays will be reimbursed up to $180 per night in major cities and $130 elsewhere. Previously, the limit was $150 everywhere.',
+   'In addition, all airfare must now be booked through our corporate travel portal at least fourteen days before departure unless a manager approves an exception.',
+   'Receipts for meals over $25 must be uploaded within one week of returning. Claims submitted after thirty days will not be processed.'],
+  zh:'致全體業務人員，財務部：差旅費規定變更。自 8 月 1 日起，住宿在主要城市每晚最高核銷 180 美元、其他地區 130 美元；先前一律為 150 美元。此外，除非經理核准例外，所有機票現在都必須在出發前至少十四天透過公司差旅平台預訂。超過 25 美元的餐費收據必須在返回後一週內上傳。超過三十天提交的申請將不予處理。',
+  qs:[['What is the purpose of the memo?','這份備忘錄的目的是什麼？','To explain new travel rules','To announce a sales contest','To introduce a travel agency','To report quarterly profits'],
+      ['What is true about the new hotel limit?','關於新的住宿上限哪一項正確？','It depends on the location','It is lower everywhere','It applies only to managers','It has not changed'],
+      ['What must staff do to book a flight less than fourteen days in advance?','要在出發前不到十四天訂機票，員工必須怎麼做？','Get approval from a manager','Pay with a personal card','Call the finance department','Use a different website']]},
+ {lv:3, t:'線上聊天：展場物流', kind:'Online chat', text:[
+   'Rita Gomez [10:15 A.M.]: The display panels for our booth haven\'t arrived at the convention center yet.',
+   'Paul Okafor [10:17 A.M.]: The shipping company says the truck was held up at a weigh station. It should get there by two.',
+   'Rita Gomez [10:18 A.M.]: The exhibit hall opens to the public at nine tomorrow, so we\'d still have time this evening.',
+   'Lena Fischer [10:20 A.M.]: I can stay late to help set up. Should I bring the extra lighting?',
+   'Rita Gomez [10:21 A.M.]: Please do. The hall is darker than I expected.'],
+  zh:'麗塔：我們攤位的展示板還沒送到會展中心。保羅：貨運公司說卡車在地磅站被耽擱了，兩點前應該會到。麗塔：展覽廳明天九點才對外開放，所以今晚還有時間。蓮娜：我可以留晚一點幫忙布置。要帶額外的燈嗎？麗塔：麻煩妳，展廳比我預期的暗。',
+  qs:[['What problem is being discussed?','討論的問題是什麼？','A shipment is late','A booth was canceled','A truck was damaged','The hall is closed'],
+      ['At 10:18 A.M., what does Ms. Gomez imply?','10:18 麗塔暗示什麼？','The delay will not be a serious problem','The exhibit will be postponed','She will cancel the order','She needs a different truck'],
+      ['What will Ms. Fischer most likely bring?','費雪小姐最可能帶什麼？','Lights','Display panels','Brochures','Chairs']]},
+ {lv:3, t:'三篇：徵才廣告、履歷摘要、面試通知', kind:'Job ad + Résumé summary + Email', text:[
+   '【Job Ad】 Brightway Hotels seeks an Events Coordinator. Requirements: two years of event planning experience; fluency in English and one other language; availability on weekends. Apply by June 10.',
+   '【Résumé summary – Sofia Lind】 Event assistant, Coastline Resorts (3 years). Languages: Swedish (native), English (fluent), German (basic). Certificate in Hospitality Management.',
+   '────────────',
+   '【Email】 From: Brightway HR  To: Sofia Lind',
+   'Dear Ms. Lind, thank you for applying. We would like to invite you to a video interview on June 18. Please note that the position involves working most Saturdays during the wedding season, from May through September. Kindly confirm whether this schedule would suit you.'],
+  zh:'徵才：明途飯店徵活動協調人。條件：兩年活動規劃經驗；英文流利並會另一種語言；週末可上班。6 月 10 日前申請。履歷：海岸度假村活動助理（三年）。語言：瑞典語（母語）、英文（流利）、德文（基礎）。餐旅管理證書。郵件：林德小姐您好，感謝申請，我們想邀請您 6 月 18 日進行視訊面試。請注意，此職位在五月到九月婚禮旺季期間，大部分週六都要上班。請確認這樣的班表是否適合您。',
+  qs:[['What requirement does Ms. Lind clearly meet?','林德小姐明確符合哪一項條件？','Experience in event planning','A degree in languages','Experience as a manager','A driver\'s license'],
+      ['What language other than English would Ms. Lind most likely use for the job requirement?','除了英文，林德小姐最可能用哪種語言符合條件？','Swedish','German','French','Spanish'],
+      ['What is Ms. Lind asked to confirm?','林德小姐被要求確認什麼？','That she can work on Saturdays','Her current salary','Her interview location','Her references'],
+      ['When does the busy wedding season end?','婚禮旺季什麼時候結束？','In September','In June','In May','In December']]},
+ {lv:3, t:'信件：保險續約通知', kind:'Letter', text:[
+   'Dear Mr. Haddad,',
+   'Your business insurance policy with Shield Mutual is due for renewal on November 1. Because your company has filed no claims during the past three years, you qualify for a 10 percent loyalty discount on your new premium.',
+   'Please note that your policy does not currently cover damage caused by flooding. Given that your warehouse is located near the Delmar River, you may wish to consider adding this coverage.',
+   'Your agent, Fiona Brooks, will contact you next week to review your options.',
+   'Sincerely, Customer Accounts, Shield Mutual'],
+  zh:'哈達德先生您好：您在盾牌互助的企業保單將於 11 月 1 日續約。由於貴公司過去三年沒有任何理賠，您可享新保費九折的忠誠優惠。請注意，您的保單目前不包含淹水損害。考量貴公司倉庫位於德爾瑪河附近，您可考慮加保此項目。您的業務員費歐娜・布魯克斯下週會與您聯絡，討論您的選擇。',
+  qs:[['Why does Mr. Haddad qualify for a discount?','哈達德先生為什麼可享折扣？','He has not made any claims recently','He is a new customer','He paid early','He has several policies'],
+      ['What does the letter suggest Mr. Haddad do?','信中建議哈達德先生做什麼？','Add flood coverage','Move his warehouse','Cancel his policy','Hire a new agent'],
+      ['What will Ms. Brooks do?','布魯克斯小姐會做什麼？','Contact Mr. Haddad','Inspect the warehouse','Send a payment','Visit the river']]},
+ // ---------- 階段 4 ----------
+ {lv:4, t:'文章：零售業自助結帳', kind:'Article', text:[
+   'Self-checkout machines were introduced to cut labor costs and shorten lines. Yet a growing number of retailers are scaling them back.',
+   'Several chains report that theft and scanning errors increased after the machines were installed, offsetting much of the anticipated savings. Others found that older customers, a key demographic, simply avoided stores where staffed registers had been reduced.',
+   'Rather than abandoning the technology entirely, many retailers are adopting a hybrid model: self-checkout limited to small purchases, with staff assigned to assist and monitor.',
+   '"The machines work best as a convenience, not a replacement," said retail analyst Joon Park. "Stores that treated them as a way to eliminate staff are now paying for it."'],
+  zh:'自助結帳機的引進是為了降低人力成本並縮短排隊。然而越來越多零售商正在縮減它。數家連鎖店表示，安裝後竊盜與刷錯增加，抵銷了大部分預期的節省。另一些發現關鍵客群年長顧客會避開減少人工收銀的店。許多零售商並未完全放棄這項技術，而是採取混合模式：自助結帳只限少量購物，並安排員工協助與監看。零售分析師朴俊表示：「這些機器最適合當作便利工具，而不是取代人力。把它當成裁員手段的店，現在正付出代價。」',
+  qs:[['What is the article mainly about?','這篇文章主要在講什麼？','Why stores are rethinking self-checkout','How to install self-checkout machines','The history of retail stores','Training programs for cashiers'],
+      ['The word "offsetting" in paragraph 2 is closest in meaning to','第二段的 offsetting 意思最接近','canceling out','increasing','measuring','delaying'],
+      ['What is indicated about older customers?','關於年長顧客文中提到什麼？','Some avoided stores with fewer staff','They prefer online shopping','They use self-checkout most often','They complained about prices'],
+      ['What does Mr. Park suggest?','朴先生的看法是什麼？','Machines should support staff, not replace them','Machines should be removed','Stores should hire analysts','Prices should be lowered']]},
+ {lv:4, t:'雙篇：供應商評估與決定', kind:'Report excerpt + Email', text:[
+   '【Supplier Evaluation – Q3】 Vendor A: on-time delivery 98%, defect rate 1.2%, unit cost $4.10 | Vendor B: on-time 91%, defect rate 0.6%, unit cost $3.85 | Vendor C: on-time 95%, defect rate 2.4%, unit cost $3.60',
+   '────────────',
+   '【Email】 From: Mariam Saleh (Operations)  To: Purchasing Team',
+   'Following last quarter\'s production stoppage, reliability of delivery is now our top priority, even if it means a higher unit cost. That said, I would not accept a defect rate above 2 percent under any circumstances. Please begin contract negotiations with the vendor that best fits these criteria, and ask whether they can offer a volume discount for orders above 50,000 units.'],
+  zh:'第三季供應商評估：A 廠準時交貨 98%、不良率 1.2%、單價 4.10 美元；B 廠準時 91%、不良率 0.6%、單價 3.85 美元；C 廠準時 95%、不良率 2.4%、單價 3.60 美元。郵件：上一季停工之後，交貨可靠度是我們的首要考量，即使單價較高也一樣。話雖如此，不良率超過 2% 在任何情況下我都不接受。請與最符合這些標準的廠商開始談判合約，並詢問五萬件以上的訂單是否能給數量折扣。',
+  qs:[['Why is delivery reliability now the top priority?','為什麼交貨可靠度現在是首要考量？','Production was stopped last quarter','Costs have fallen','A new factory opened','Customers complained about prices'],
+      ['Which vendor will the purchasing team most likely negotiate with?','採購團隊最可能和哪家廠商談判？','Vendor A','Vendor B','Vendor C','None of them'],
+      ['Why would Vendor C be rejected?','C 廠為什麼會被淘汰？','Its defect rate is too high','Its price is too high','Its deliveries are too slow','It cannot produce enough units'],
+      ['What should the team ask about?','團隊應該詢問什麼？','A discount for large orders','A longer warranty','Faster shipping','Free samples']]},
+ {lv:4, t:'信件：投訴回覆與補償', kind:'Letter', text:[
+   'Dear Ms. Albrecht,',
+   'Thank you for your letter regarding the installation of your kitchen cabinets on May 2. I was concerned to read that our crew arrived four hours late and left the work unfinished without explanation.',
+   'Having spoken with the team, I have learned that a scheduling error caused them to be double-booked that morning. This in no way excuses the lack of communication, and I have taken steps to ensure customers are notified promptly of any change.',
+   'Our installation supervisor will complete the work at a time of your choosing at no additional cost. In addition, we will refund the $250 installation fee in full.',
+   'Yours sincerely, Victor Hale, Customer Experience Director'],
+  zh:'亞布雷希特女士您好：感謝您來信說明 5 月 2 日廚櫃安裝的情況。得知我們的施工團隊晚到四小時、且未說明就留下未完成的工作，我深感關切。與團隊談過後，我得知是排程錯誤造成他們那天早上被重複安排。這絕不能作為缺乏溝通的藉口，我已採取措施確保任何變動都會即時通知客戶。我們的安裝主管會在您選擇的時間免費完成工程。此外，我們將全額退還 250 美元的安裝費。',
+  qs:[['What caused the crew to arrive late?','施工團隊為什麼晚到？','A scheduling mistake','Heavy traffic','Missing materials','A vehicle problem'],
+      ['What has Mr. Hale done to prevent similar problems?','海爾先生做了什麼來避免類似問題？','Improved customer notification','Hired more installers','Changed suppliers','Reduced prices'],
+      ['What is offered to Ms. Albrecht?','提供給亞布雷希特女士什麼？','A full refund of a fee and completion of the work','New cabinets','A store gift card','A discount on future orders'],
+      ['The phrase "in no way" in paragraph 2 is closest in meaning to','第二段 in no way 意思最接近','not at all','in some cases','in the end','by chance']]},
+ {lv:4, t:'網頁：共享辦公空間方案', kind:'Web page', text:[
+   'HUBSPACE COWORKING — Membership Options',
+   'Flex Desk ($220/month): Access to any open desk, Monday–Friday, 8 A.M.–8 P.M. Meeting rooms billed hourly.',
+   'Dedicated Desk ($390/month): Your own desk with lockable storage, 24/7 access, and 4 free meeting-room hours per month.',
+   'Private Office ($1,150/month, up to 4 people): Fully furnished, 24/7 access, 15 free meeting-room hours per month, and mail-handling service.',
+   'All plans include high-speed internet and unlimited coffee. A one-month deposit is required; members who commit to twelve months receive the first month free.'],
+  zh:'Hubspace 共享辦公會員方案：彈性座位每月 220 美元，週一至週五 8–20 點使用任何空位，會議室按時計費。固定座位每月 390 美元，專屬座位與可上鎖收納，24 小時進出，每月 4 小時免費會議室。私人辦公室每月 1,150 美元（最多 4 人），全套家具，24 小時進出，每月 15 小時免費會議室，並代收郵件。所有方案含高速網路與無限咖啡。需付一個月押金；簽約十二個月者首月免費。',
+  qs:[['Which plan would suit someone who needs to work late at night and store equipment?','需要深夜工作並存放設備的人適合哪個方案？','Dedicated Desk','Flex Desk','Private Office only','None of the plans'],
+      ['What is included only with the Private Office?','只有私人辦公室包含什麼？','Mail handling','Internet access','Coffee','24-hour access'],
+      ['How can members receive a month free?','會員如何獲得一個月免費？','By signing up for a full year','By paying a deposit','By referring a friend','By choosing the Flex Desk']]},
+ {lv:4, t:'三篇：活動議程、講者郵件、更新通知', kind:'Agenda + Email + Notice', text:[
+   '【Agenda – Regional Retail Forum, Hall B】 9:00 Opening remarks | 9:30 Keynote: "Data-Driven Merchandising" (Dr. Ana Costa) | 11:00 Panel: Supply Chain Resilience | 1:30 Workshop: Customer Loyalty Programs (Ravi Menon) | 3:30 Networking reception',
+   '【Email】 From: Ravi Menon  To: Forum Organizers  Hi, my flight has been rescheduled and I will not land until 2:15 P.M. Could my session be moved later in the day? I could also shorten it to one hour if that helps.',
+   '────────────',
+   '【Notice posted at registration】 Program update: The afternoon workshop will now begin at 3:30 P.M. and run for one hour. The networking reception will follow immediately afterward.'],
+  zh:'議程（區域零售論壇 B 廳）：9:00 開幕致詞｜9:30 主題演講「數據驅動的商品規劃」（安娜・科斯塔博士）｜11:00 座談：供應鏈韌性｜1:30 工作坊：顧客忠誠計畫（拉維・梅農）｜3:30 交流酒會。郵件（梅農）：我的班機改期，下午 2:15 才會落地，可以把我的場次移到更晚嗎？如果有幫助，我也可以縮短為一小時。公告：議程更新，下午工作坊改在 3:30 開始，進行一小時，交流酒會緊接在後。',
+  qs:[['Why did Mr. Menon write to the organizers?','梅農先生為什麼寫信給主辦單位？','His travel plans changed','He wants to give the keynote','He needs a larger room','He cannot attend at all'],
+      ['What time will the networking reception most likely begin?','交流酒會最可能幾點開始？','4:30 P.M.','3:30 P.M.','2:15 P.M.','5:30 P.M.'],
+      ['What is suggested about Mr. Menon\'s workshop?','關於梅農先生的工作坊文中暗示什麼？','It was shortened','It was canceled','It was moved to the morning','It will be led by Dr. Costa'],
+      ['What will happen at 9:30 A.M.?','上午 9:30 會有什麼？','A keynote speech','A panel discussion','A workshop','A reception']]},
+ {lv:4, t:'文章：再生能源企業採購', kind:'Article', text:[
+   'A growing number of large corporations are signing long-term agreements to buy electricity directly from wind and solar farms. These contracts, known as power purchase agreements, typically lock in a fixed price for ten to twenty years.',
+   'For buyers, the appeal lies partly in predictability: fixed prices shield them from volatile energy markets. For developers, a guaranteed customer makes it far easier to secure financing for new projects.',
+   'Critics note, however, that smaller firms are largely excluded, since few can commit to purchasing such large volumes over such long periods. Some utilities have responded by forming purchasing groups that allow several mid-sized companies to share a single agreement.'],
+  zh:'越來越多大型企業簽訂長期協議，直接向風電與太陽能電廠購電。這類合約稱為購電協議，通常鎖定十到二十年的固定價格。對買方而言，吸引力部分在於可預測性：固定價格可避開波動的能源市場。對開發商而言，有保證的客戶讓新專案更容易取得融資。不過批評者指出，小型企業大多被排除在外，因為很少有公司能承諾長期購買這麼大量的電力。部分電力公司的因應方式是成立採購聯盟，讓幾家中型企業共同分享一份協議。',
+  qs:[['What is one benefit of these agreements for buyers?','這類協議對買方的好處之一是什麼？','Stable prices','Lower taxes','Free installation','Shorter contracts'],
+      ['According to the article, why do developers benefit?','根據文章，開發商為什麼受益？','It helps them obtain funding','They can raise prices','They avoid regulations','They need fewer workers'],
+      ['What problem do critics point out?','批評者指出什麼問題？','Small companies are often unable to participate','The contracts are too short','Wind farms are unreliable','Utilities charge extra fees'],
+      ['The word "shield" in paragraph 2 is closest in meaning to','第二段的 shield 意思最接近','protect','separate','inform','charge']]},
+);
+
 // ================= 半年（26 週）衝刺計畫 =================
 // 每週：階段 lv、標題、重點；單字主題與文法由 app.js 依階段自動分配
 const PLAN = [
@@ -1396,6 +2067,82 @@ function challengeEnd(){
    <p>${sc > best ? '🎉 新紀錄！' : `最佳紀錄：${best} 題`}</p><button class="next" onclick="challengeGo()">再挑戰一次 ›</button><button class="ghost" onclick="home()">回首頁</button></section>`);
 }
 
+// ================= 迷你模考（依多益題型比例縮成約 1/4）＋分數校準 =================
+// 真正多益：聽力 100 題（Part 1：6、Part 2：25、Part 3：39、Part 4：30）、閱讀 100 題（Part 5：30、Part 6：16、Part 7：54），閱讀 75 分鐘。
+// 迷你模考每回：Part 1×2、Part 2×6、Part 3 兩段、Part 4 兩段、Part 5×10、Part 6 一篇、Part 7 三篇（約 45 題）。
+const PART_NAME = {1:'Part 1 照片描述', 2:'Part 2 應答問題', 3:'Part 3 簡短對話', 4:'Part 4 簡短獨白', 5:'Part 5 句子填空', 6:'Part 6 段落填空', 7:'Part 7 閱讀理解'};
+const REAL_N = {1:6, 2:25, 3:39, 4:30, 5:30, 6:16, 7:54};
+const MINI_PER_LV = 3;
+
+function buildP1(item, rng){
+  const p = item.split('|'), lv = +p[1], x = PART1[lv][+p[2]], opts = shuffle(rng, x.slice(2, 6));
+  return {key:item, kind:'mc', tag:'Part 1 照片描述', lv, sec:'L', listenOpts:true, seqSay:opts.map((o, i) => [`${ABC[i]}. ${o}`, 'M']),
+    prompt:`<div class="scene" aria-label="場景圖">${x[0]}</div><button class="say big-say" data-seq="1">🔊 播放描述</button>`,
+    sub:'聽 (A)～(D) 四個描述，選出最符合畫面的一個', ans:x[2], opts, abc:true, tip:`畫面：${x[1]}\n正解：${x[2]}\n💡 ${x[6]}`};
+}
+const p1Items = lv => PART1[lv].map((x, i) => `p1|${lv}|${i}`);
+function partOf(item){
+  const p = item.split('|');
+  if (p[0] === 'p1') return 1; if (p[0] === 'p2') return 2;
+  if (p[0] === 't') return TALKS[+p[1]].type === 'conv' ? 3 : 4;
+  if (p[0] === 'g' || p[0] === 'b') return 5; if (p[0] === 'p6') return 6; if (p[0] === 'p7') return 7;
+  return 0;
+}
+function miniItems(lv, m){
+  const rng = mulberry32(lv * 9973 + m * 131), T = talkIdx(lv), conv = T.filter(i => TALKS[i].type === 'conv'), talk = T.filter(i => TALKS[i].type === 'talk');
+  const g5 = shuffle(mulberry32(lv * 17), gramPool(lv));
+  const pick2 = (a, k) => [a[(2 * m) % a.length], a[(2 * m + 1) % a.length]].slice(0, k);
+  const L = [...pick2(p1Items(lv), 2), ...Array.from({length:6}, (_, k) => p2Items(lv)[(6 * m + k) % PART2[lv].length]),
+    ...pick2(conv, 2).flatMap(talkItems), ...pick2(talk, 2).flatMap(talkItems)];
+  const R = [...Array.from({length:10}, (_, k) => g5[(10 * m + k) % g5.length]), ...p6Items(p6Idx(lv)[m % p6Idx(lv).length]),
+    ...[0, 1, 2].map(k => p7Idx(lv)[(3 * m + k) % p7Idx(lv).length]).flatMap(p7Items)];
+  return [...L, ...R];
+}
+function miniMenu(){
+  const lv = S.lv, rec = (S.mini || {})[lv] || {};
+  const rows = Array.from({length:MINI_PER_LV}, (_, m) => { const it = miniItems(lv, m), L = it.filter(x => partOf(x) <= 4).length, r = rec[m];
+    return `<button class="li" onclick="miniGo(${m})"><b>第 ${m + 1} 回　聽力 ${L} 題＋閱讀 ${it.length - L} 題</b><small>${r ? `最佳 ${r.pct}%・${new Date(r.date).toLocaleDateString('zh-TW')}` : '尚未作答'}</small></button>`; }).join('');
+  view(header('迷你模考') + `<section class="panel"><p>題型與順序和正式多益相同（Part 1 → 7），份量約為正式考試的 1/4。正式考試聽力約 45 分鐘、閱讀 75 分鐘；本模考閱讀建議在 <b>20 分鐘</b>內完成。</p>
+   <table class="gtab"><tr><th>題型</th><th>正式考試</th><th>迷你模考</th></tr>${[1,2,3,4,5,6,7].map(k => `<tr><td>${PART_NAME[k]}</td><td>${REAL_N[k]}</td><td>${miniItems(lv, 0).filter(x => partOf(x) === k).length}</td></tr>`).join('')}</table>
+   <p class="sub left">題目為本 App 原創，難度依目前階段（${LV_NAME[lv]}）。Part 1 以圖示代替照片。要知道真實分數，請搭配官方全真試題。</p></section>
+   <section class="panel">${rows}</section>`);
+}
+function miniGo(m){
+  const lv = S.lv;
+  runQuiz({title:`${LV_SHORT[lv]} 迷你模考 第 ${m + 1} 回`, items:miniItems(lv, m), seed:lv * 7001 + m * 37, noSupp:true, mini:{lv, m, parts:{}}, noAuto:true});
+}
+function miniEnd(){
+  const X = Q.mini, mins = Math.round((Date.now() - Q.t0) / 60000), pct = Q.n ? Math.round(Q.ok / Q.n * 100) : 0;
+  S.mini = S.mini || {}; S.mini[X.lv] = S.mini[X.lv] || {};
+  const old = S.mini[X.lv][X.m]; if (!old || pct >= old.pct) S.mini[X.lv][X.m] = {pct, date:Date.now(), parts:X.parts}; save();
+  const row = k => { const a = X.parts[k] || [0, 0]; return a[1] ? `<tr><td>${PART_NAME[k]}</td><td>${a[0]}／${a[1]}</td><td class="${a[0] / a[1] < 0.6 ? 'warn' : 'ok'}">${Math.round(a[0] / a[1] * 100)}%</td></tr>` : ''; };
+  const weak = [1,2,3,4,5,6,7].filter(k => X.parts[k] && X.parts[k][0] / X.parts[k][1] < 0.6).map(k => PART_NAME[k]);
+  view(header('模考結果') + `<section class="panel result"><div class="score">${pct}<small>%</small></div><p>答對 ${Q.ok}／${Q.n} 題・用時 ${mins} 分鐘</p>
+   <table class="gtab"><tr><th>題型</th><th>答對</th><th>正確率</th></tr>${[1,2,3,4,5,6,7].map(row).join('')}</table>
+   <p>${weak.length ? `需要加強：${weak.join('、')}。答錯的題目已收進錯題本。` : '各題型都達 6 成以上，可以挑戰下一回或更高階段。'}</p>
+   <p class="sub">正確率反映的是「這個階段難度」的熟練度，不是多益分數。分數請看實力診斷。</p>
+   <button class="next" onclick="miniMenu()">回模考列表 ›</button><button class="ghost" onclick="home()">回首頁</button></section>`);
+}
+
+// ---------- 分數校準：用官方全真試題的成績修正 App 的粗估 ----------
+const clampScore = v => Math.max(5, Math.min(495, Math.round(v / 5) * 5));
+function calibrated(d){ if (!d) return null; const c = S.calib || {L:0, R:0}; return {L:clampScore(d.L + c.L), R:clampScore(d.R + c.R), cal:!!S.calib}; }
+function calibMenu(){
+  const dg = S.diag[S.diag.length - 1];
+  view(header('分數校準') + `<section class="panel"><p>App 的預估分數是粗估。做過<b>官方全真試題</b>（例如 ETS 出版的全真試題指南，照正式時間作答）後，輸入你的聽力和閱讀分數，App 會用它和最近一次實力診斷的差距來修正之後的預估。</p>
+   ${dg ? `<p>最近一次實力診斷：聽力 ${dg.L}・閱讀 ${dg.R}（${new Date(dg.date).toLocaleDateString('zh-TW')}）</p>
+   <label class="row2">官方試題聽力分數 <input type="number" id="cl" min="5" max="495" step="5" inputmode="numeric"></label>
+   <label class="row2">官方試題閱讀分數 <input type="number" id="cr" min="5" max="495" step="5" inputmode="numeric"></label>
+   <button class="next" id="cs">儲存校準</button>` : '<p class="warn">請先做一次實力診斷，再和官方試題成績比較。</p><button class="next" onclick="diagStart()">去做實力診斷 ›</button>'}
+   ${S.calib ? `<p class="sub left">目前校準：聽力 ${S.calib.L >= 0 ? '+' : ''}${S.calib.L}、閱讀 ${S.calib.R >= 0 ? '+' : ''}${S.calib.R}　<button class="ghost inl" onclick="S.calib=null;save();calibMenu()">清除校準</button></p>` : ''}
+   <p class="sub left">建議做完官方試題後一週內做實力診斷，兩者時間越接近，校準越準。</p></section>`);
+  if ($('#cs')) $('#cs').onclick = () => {
+    const l = +$('#cl').value, r = +$('#cr').value;
+    if (!(l >= 5 && l <= 495 && r >= 5 && r <= 495)) return toast('請輸入 5～495 之間的分數');
+    S.calib = {L:Math.round(l - dg.L), R:Math.round(r - dg.R), date:Date.now()}; save(); toast('已儲存校準'); home();
+  };
+}
+
 // ================= 多益 800 衝刺島 主程式 =================
 // ---------- 工具 ----------
 function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -1524,9 +2271,10 @@ const talkItems = ti => TALKS[ti].qs.map((q, qi) => `t|${ti}|${qi}`);
 const talkSeq = T => T.lines.map(l => [l[1], l[0]]);
 function buildTalk(item, rng){
   const p = item.split('|'), ti = +p[1], T = TALKS[ti], q = T.qs[+p[2]];
+  const graphic = T.g ? `<table class="gtab">${T.g.map((r, i) => `<tr>${r.map(c => i ? `<td>${esc(c)}</td>` : `<th>${esc(c)}</th>`).join('')}</tr>`).join('')}</table>` : '';
   const script = T.lines.map(l => `<div class="ln"><span class="who">${l[0] === 'N' ? '🎙️' : l[0] === 'W' ? '👩' : '👨'}</span><div><div class="en">${esc(l[1])}</div><div class="zhl">${esc(l[2])}</div></div></div>`).join('');
   return {key:item, kind:'mc', tag:T.type === 'conv' ? 'Part 3 對話' : 'Part 4 獨白', lv:T.lv, sec:'L', seqSay:talkSeq(T), noAutoSeq:true,
-    prompt:`<div class="talkbox"><button class="say big-say" data-seq="1">🔊 播放${T.type === 'conv' ? '對話' : '獨白'}</button><details class="script"><summary>看原文（建議先聽再看）</summary>${script}</details></div><div class="sent qline">${esc(q[0])}</div>`,
+    prompt:`<div class="talkbox"><button class="say big-say" data-seq="1">🔊 播放${T.type === 'conv' ? '對話' : '獨白'}</button><details class="script"><summary>看原文（建議先聽再看）</summary>${script}</details>${graphic}</div><div class="sent qline">${esc(q[0])}</div>`,
     sub:T.lv <= 2 ? esc(q[1]) : '', ans:q[2], opts:shuffle(rng, q.slice(2)), abc:true, tip:`題目：${q[1]}\n（${T.t}）`};
 }
 
@@ -1554,6 +2302,7 @@ function buildItem(item, rng){
   if (p[0] === 'b') return buildBank(+p[1], +p[2], +p[3], rng);
   if (p[0] === 'o') return buildOrder(item, rng);
   if (p[0] === 'p2') return buildP2(item, rng);
+  if (p[0] === 'p1') return buildP1(item, rng);
   if (p[0] === 't') return buildTalk(item, rng);
   if (p[0] === 'p6') return buildP6(item, rng);
   if (p[0] === 'p7') return buildP7(item, rng);
@@ -1575,6 +2324,7 @@ function suppItems(item, rng){
   if (p[0] === 'b') { const n = BANK[p[1]][+p[2]].s.length; return [1,2,3].map(i => `b|${p[1]}|${p[2]}|${(+p[3] + i) % n}`); }
   if (p[0] === 'o') { const n = ORDER[p[1]].length; return [1,2,3].map(i => `o|${p[1]}|${(+p[2] + i) % n}`); }
   if (p[0] === 'p2') { const n = PART2[p[1]].length; return [1,2,3].map(i => `p2|${p[1]}|${(+p[2] + i) % n}`); }
+  if (p[0] === 'p1') { const n = PART1[p[1]].length; return [1,2,3].map(i => `p1|${p[1]}|${(+p[2] + i) % n}`); }
   if (p[0] === 't') { const ti = +p[1], others = talkIdx(TALKS[ti].lv).filter(x => x !== ti); return [...talkItems(ti).filter(x => x !== item), ...shuffle(rng, others.flatMap(talkItems))].slice(0, 3); }
   if (p[0] === 'p6') { const i = +p[1]; return [...p6Items(i).filter(x => x !== item), ...shuffle(rng, p6Idx(PART6[i].lv).filter(x => x !== i).flatMap(p6Items))].slice(0, 3); }
   if (p[0] === 'p7') { const i = +p[1]; return [...p7Items(i).filter(x => x !== item), ...shuffle(rng, p7Idx(PART7[i].lv).filter(x => x !== i).flatMap(p7Items))].slice(0, 3); }
@@ -1600,7 +2350,8 @@ function mixedItem(lv, rng){
   const r = rng();
   if (r < 0.35) return vocabItem(rng, pick(rng, VBY(lv)));
   if (r < 0.6) return pick(rng, gramPool(lv));
-  if (r < 0.75) return pick(rng, p2Items(lv));
+  if (r < 0.68) return pick(rng, p2Items(lv));
+  if (r < 0.75) return pick(rng, p1Items(lv));
   if (r < 0.85) return pick(rng, talkIdx(lv).flatMap(talkItems));
   if (r < 0.92) return pick(rng, p6Idx(lv).flatMap(p6Items));
   return pick(rng, p7Idx(lv).flatMap(p7Items));
@@ -1611,7 +2362,7 @@ function mockItems(lv){
   GRAMMAR[lv].forEach(r => { for (let i = 0; i < 3; i++) items.push('g|' + r.id); });
   BANK[lv].forEach((p, pi) => p.s.forEach((s, si) => items.push(`b|${lv}|${pi}|${si}`)));
   orderItems(lv).forEach(o => items.push(o));
-  items.push(...p2Items(lv), ...talkIdx(lv).flatMap(talkItems), ...p6Idx(lv).flatMap(p6Items), ...p7Idx(lv).flatMap(p7Items));
+  items.push(...p1Items(lv), ...p2Items(lv), ...talkIdx(lv).flatMap(talkItems), ...p6Idx(lv).flatMap(p6Items), ...p7Idx(lv).flatMap(p7Items));
   return shuffle(rng, items);
 }
 const MOCK_CACHE = {};
@@ -1684,9 +2435,10 @@ function home(){
     ['📕','錯題本','reviewMenu()', due ? `今天有 ${due} 題要複習` : `文法・聽力・閱讀 ${Object.keys(S.wrong).length} 題`],
     ['⭐','我的單字本','bookMenu()', `收藏 ${Object.keys(S.book).length} 字`],
     ['⏱️','60 秒快問快答','challengeGo()', S.best60 ? `最佳 ${S.best60} 題` : '和自己的紀錄比賽'],
-    ['🏁','模擬考','mockMenu()', '每回 20 題・題目固定'],
+    ['🏁','迷你模考','miniMenu()', '多益題型 Part 1→7・每回約 45 題'],
+    ['📚','單字文法複習卷','mockMenu()', '每回 20 題・題目固定'],
   ];
-  const scoreBox = (lab, d) => `<div class="sc"><small>${lab}</small><b>${d ? d.L + d.R : '—'}</b>${d ? `<span class="num">聽 ${d.L}・讀 ${d.R}</span>` : ''}</div>`;
+  const scoreBox = (lab, d0) => { const d = calibrated(d0); return `<div class="sc"><small>${lab}${d && d.cal ? '（已校準）' : ''}</small><b>${d ? d.L + d.R : '—'}</b>${d ? `<span class="num">聽 ${d.L}・讀 ${d.R}</span>` : ''}</div>`; };
   view(`<header class="bar home"><h1>💼 多益 800 衝刺島</h1><button class="fzbtn" onclick="settings()" aria-label="設定">⚙️ 設定</button></header>
   <section class="panel plan"><div class="row2"><div><div class="num">半年計畫・第 ${wk}／26 週　剩 ${Math.max(0, 182 - dayOfPlan())} 天</div><b>${esc(P.t)}</b></div><button class="ghost sm" onclick="planView()">看全部</button></div>
    <p class="pf">${esc(P.f)}</p><p class="pf">🧠 今天到期複習 <b>${vdue}</b> 字・新字 <b>${Math.max(0, S.daily.quota0 - (S.daily.newDone || 0))}</b> 個</p><button class="next" onclick="lessonPage()">▶ 開始今日課表</button>
@@ -1695,7 +2447,7 @@ function home(){
   <section class="panel streak"><div class="fire">🔥 <b>${S.streak.count}</b> 天</div><div class="frz">🧊 冰凍卡 ${S.streak.freeze} 張</div></section>
   <section class="panel"><h2>今日任務</h2>${tk.map(t => `<div class="task ${t.ok ? 'ok' : ''}"><span>${t.ok ? '✅' : '⬜'} ${t.n}</span><span class="prog"><i style="width:${t.v / t.max * 100}%"></i></span><span class="num">${Math.round(t.v)}/${t.max}</span></div>`).join('')}</section>
   <section class="panel"><h2>📊 預估分數 <span class="num">（粗估，僅供參考）</span></h2><div class="scores">${scoreBox('最近一次實力診斷', dg)}${scoreBox('平常練習推估', est)}</div>
-   ${est ? '' : '<p class="sub left">四個階段都練到一定題數後，才會顯示平常練習推估。</p>'}<button class="ghost" onclick="diagStart()">🎯 實力診斷（40 題・約 25 分鐘）</button></section>
+   ${est ? '' : '<p class="sub left">四個階段都練到一定題數後，才會顯示平常練習推估。</p>'}<div class="row"><button class="ghost" onclick="diagStart()">🎯 實力診斷（40 題）</button><button class="ghost" onclick="calibMenu()">📝 用官方試題校準</button></div></section>
   <div class="grid">${cards.map(c => `<button class="card" onclick="${c[2]}"><span class="ic">${c[0]}</span><b>${c[1]}</b><small>${c[3]}</small></button>`).join('')}</div>
   <div id="install"></div>
   <p class="foot">原創學習內容，依多益題型（Part 1～7 中的 Part 2～7）與職場主題設計。進度只存在這台裝置，不需帳號、無廣告。本 App 為個人學習工具，與 ETS 及多益官方無關。</p>`);
@@ -1762,6 +2514,7 @@ function finish(ok){
     if (c.sec === 'L') S.daily.listen++;
     if (ok) { Q.ok++; S.daily.correct++; S.stats.ok++; } else { Q.wrong.push(e.it); if (!Q.review) markWrong(e.it); }
     if (Q.diag) Q.diag[c.sec].push([c.lv, ok]);
+    if (Q.mini) { const k = partOf(e.it), a = Q.mini.parts[k] = Q.mini.parts[k] || [0, 0]; a[0] += ok ? 1 : 0; a[1]++; }
     if (e.it.startsWith('v|')) vocabAnswered(e, ok);
     checkStreak();
   }
@@ -1784,6 +2537,7 @@ function quizEnd(){
   if (Q.diag) return diagEnd();
   if (Q.place) return placeEnd();
   if (Q.timed) return challengeEnd();
+  if (Q.mini) return miniEnd();
   const pct = Q.n ? Math.round(Q.ok / Q.n * 100) : 0, w = [...new Set(Q.wrong)];
   if (Q.review && Q.isDueReview) { S.daily.review = true; save(); checkStreak(); }
   if (Q.onDone) Q.onDone(Q.ok, Q.n);
@@ -1949,19 +2703,19 @@ function mockMenu(){
   const btn = r => `<button class="rd ${rec[r] != null ? 'done' : ''}" onclick="mockGo(${r})">第 ${r + 1} 回${rec[r] != null ? `<small>${rec[r]} 分</small>` : ''}</button>`;
   const groups = Array.from({length:Math.ceil(n / G)}, (_, g) => { const a = g * G, b = Math.min(n, a + G), dn = Array.from({length:b - a}, (_, k) => a + k).filter(r => rec[r] != null).length;
     return `<details class="panel mg" ${firstOpen >= a && firstOpen < b ? 'open' : ''}><summary><b>第 ${a + 1}～${b} 回</b>　<span class="num">已完成 ${dn}／${b - a}</span></summary><div class="rounds">${Array.from({length:b - a}, (_, k) => btn(a + k)).join('')}</div></details>`; }).join('');
-  view(header(LV_NAME[lv] + ' 模擬考') + `<section class="panel"><p>題量＝（單字 ${VBY(lv).length} × 3）＋文法規則 × 3＋句型、重組、Part 2・3・4・6・7 各一次 ＝ <b>${items.length}</b> 題，共 ${n} 回（每回 20 題，題目固定）。</p>
+  view(header(LV_NAME[lv] + ' 複習卷') + `<section class="panel"><p>這是單字＋文法為主的複習卷，不是多益題型模考（模考請用「迷你模考」）。題量＝（單字 ${VBY(lv).length} × 3）＋文法規則 × 3＋句型、重組、Part 2・3・4・6・7 各一次 ＝ <b>${items.length}</b> 題，共 ${n} 回（每回 20 題，題目固定）。</p>
    <p>已完成 <b>${done}</b>／${n} 回　<button class="ghost inl" onclick="mockGo(${firstOpen})">繼續第 ${firstOpen + 1} 回 ›</button></p></section>${groups}`);
 }
 function mockGo(r){
   const lv = S.lv, items = (MOCK_CACHE[lv] = MOCK_CACHE[lv] || mockItems(lv)).slice(r * 20, r * 20 + 20);
-  runQuiz({title:`${LV_SHORT[lv]} 模擬考 第 ${r + 1} 回`, items, seed:lv * 100003 + r * 101, onDone:(ok, n) => { S.mock[lv] = S.mock[lv] || {}; S.mock[lv][r] = Math.max(S.mock[lv][r] || 0, Math.round(ok / n * 100)); save(); }});
+  runQuiz({title:`${LV_SHORT[lv]} 複習卷 第 ${r + 1} 回`, items, seed:lv * 100003 + r * 101, onDone:(ok, n) => { S.mock[lv] = S.mock[lv] || {}; S.mock[lv][r] = Math.max(S.mock[lv][r] || 0, Math.round(ok / n * 100)); save(); }});
 }
 
 // ---------- 實力診斷 ----------
 function diagItems(rng){
   const L = [], R = [];
   for (const lv of LEVELS) {
-    L.push(...shuffle(rng, p2Items(lv)).slice(0, 2), ...shuffle(rng, talkIdx(lv).flatMap(talkItems)).slice(0, 2), 'v|' + pick(rng, VBY(lv)).w + '|listen');
+    L.push(pick(rng, p1Items(lv)), pick(rng, p2Items(lv)), ...shuffle(rng, talkIdx(lv).flatMap(talkItems)).slice(0, 2), 'v|' + pick(rng, VBY(lv)).w + '|listen');
     R.push(...shuffle(rng, gramPool(lv)).slice(0, 2).map(g => g), 'v|' + pick(rng, VBY(lv)).w + '|e2c', pick(rng, p6Idx(lv).flatMap(p6Items)), pick(rng, p7Idx(lv).flatMap(p7Items)));
   }
   return [...shuffle(rng, L), ...shuffle(rng, R)];
@@ -1976,10 +2730,10 @@ function diagEnd(){
   const L = sec('L'), R = sec('R'), mins = Math.round((Date.now() - Q.t0) / 60000);
   S.diag.push({date:today(), L, R}); if (S.diag.length > 30) S.diag.shift(); save();
   const hist = S.diag.slice(-8).map(x => `<div class="task"><span>${new Date(x.date).toLocaleDateString('zh-TW')}</span><span class="num">聽 ${x.L}・讀 ${x.R}</span><b>${x.L + x.R}</b></div>`).join('');
-  const total = L + R, gap = Math.max(0, 800 - total);
-  view(header('診斷結果') + `<section class="panel result"><div class="score">${total}<small> 分（粗估）</small></div><p>聽力 ${L}・閱讀 ${R}　｜　用時 ${mins} 分鐘</p>
+  const C = calibrated({L, R}), total = C.L + C.R, gap = Math.max(0, 800 - total);
+  view(header('診斷結果') + `<section class="panel result"><div class="score">${total}<small> 分（${C.cal ? '已依官方試題校準' : '粗估'}）</small></div><p>聽力 ${C.L}・閱讀 ${C.R}　｜　用時 ${mins} 分鐘</p>
    <p>${gap ? `距離 800 分還差約 <b>${gap}</b> 分。${L < R ? '聽力比較弱：每天多做 Part 2 與 Part 3・4，並跟讀原文。' : '閱讀比較弱：加強 Part 5 文法與高頻字，Part 7 練習限時。'}` : '🎉 已達 800 分水準，持續用全真試題維持手感！'}</p>
-   <button class="next" onclick="home()">回首頁</button></section><section class="panel"><h2>診斷紀錄</h2>${hist}</section>`);
+   <button class="next" onclick="home()">回首頁</button>${C.cal ? '' : '<button class="ghost" onclick="calibMenu()">📝 做過官方全真試題？輸入成績來校準</button>'}</section><section class="panel"><h2>診斷紀錄（未校準原始值）</h2>${hist}</section>`);
 }
 
 // ---------- 半年計畫 ----------
