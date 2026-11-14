@@ -158,9 +158,12 @@ button:disabled{cursor:default}
 .qline{width:100%;font-weight:700;margin-top:6px}
 .passage p{margin:6px 0}
 .passage{max-height:300px;width:100%}
-.scores{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.scores{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+.sc small{font-size:calc(11.5px * var(--z,1));text-align:center}
+.linkbtn{text-align:center;text-decoration:none}
+input.tin{font:inherit;width:60%;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 .sc{background:var(--bg);border-radius:12px;padding:10px;display:flex;flex-direction:column;align-items:center}
-.sc small{color:var(--mute)}.sc b{font-size:calc(30px * var(--z,1));color:var(--red);line-height:1.2}
+.sc small{color:var(--mute)}.sc b{font-size:calc(24px * var(--z,1));color:var(--red);line-height:1.2}
 .plan{border-left:5px solid var(--ind)}
 .row2{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .pf{margin:8px 0 0;font-size:calc(14.5px * var(--z,1))}
@@ -1087,7 +1090,8 @@ TALKS.push(
    ['W','I understand. Let me ask the owner whether a one-year lease with an option to renew would be possible.','了解。我問問屋主能否簽一年、附續約選擇權。']],
   qs:[['Who most likely is the woman?','女子最可能是誰？','A real estate agent','An architect','An interior designer','A building inspector'],
       ['What concern does the man raise?','男子提出什麼顧慮？','The lease period is too long','The rent is too high','The space is too small','The building is too old'],
-      ['What will the woman do next?','女子接下來會做什麼？','Speak with the property owner','Show another office','Lower the rent','Prepare a contract']]},
+      ['What will the woman do next?','女子接下來會做什麼？','Speak with the property owner','Show another office','Lower the rent','Prepare a contract'],
+      ['What does the man mean when he says, "we might grow quickly"?','男子說「我們可能會成長很快」是什麼意思？','They may soon need a bigger space','They are hiring right now','They expect higher profits this year','They want to buy the building']]},
  {lv:3, type:'talk', t:'機場延誤廣播', lines:[
    ['N','Attention passengers on Pacific Air Flight 512 to Vancouver.','搭乘太平洋航空 512 班機前往溫哥華的旅客請注意。'],
    ['N','Due to a mechanical inspection, our departure has been delayed by approximately ninety minutes.','由於機械檢查，班機起飛延後約九十分鐘。'],
@@ -1133,7 +1137,8 @@ TALKS.push(
    ['W','I\'ll have legal look at the terms before we submit our revised budget on Friday.','在週五提交修正預算前，我會請法務看一下條款。']],
   qs:[['What has the finance department requested?','財務部要求什麼？','A reduction in spending','A new campaign','More detailed reports','An earlier deadline'],
       ['What does the woman suggest?','女子建議什麼？','Reducing print advertising','Hiring a consultant','Postponing the campaign','Increasing social media staff'],
-      ['Why does the man hesitate?','男子為什麼猶豫？','There may be a penalty for ending a contract','The data is outdated','The magazine is very popular','The deadline is too close']]},
+      ['Why does the man hesitate?','男子為什麼猶豫？','There may be a penalty for ending a contract','The data is outdated','The magazine is very popular','The deadline is too close'],
+      ['What does the man imply when he says, "That\'s going to be tough"?','男子說「這會很困難」是在暗示什麼？','Cutting costs will not be easy','He disagrees with the finance department','The campaign has already failed','He needs more staff']]},
  {lv:4, type:'conv', t:'海外展會參展準備（看圖表）', g:[['展會','城市','日期'],['TechAsia','Singapore','Mar 4–6'],['EuroDigital','Berlin','Apr 18–20'],['NovaExpo','Toronto','Jun 2–4']], lines:[
    ['M','Priya, we\'ve narrowed the trade shows down to three, but our new software won\'t be ready until the end of March.','普莉雅，我們已經把展會縮減到三個，但新軟體要到三月底才會好。'],
    ['W','Then the first one is out. Between the other two, which has more buyers from our target market?','那第一個就不行了。另外兩個哪個有比較多我們目標市場的買家？'],
@@ -1827,27 +1832,27 @@ const PLAN = [
  {lv:1, t:'進行式與代名詞', f:'代名詞主格／受格／所有格是 Part 5 送分題；練習句子重組建立英文語順。'},
  {lv:1, t:'介系詞 in / on / at', f:'時間介系詞＋many / much；Part 3 短對話先求聽懂「誰、在哪、要做什麼」。'},
  {lv:1, t:'助動詞與 There is / are', f:'助動詞後接原形；開始讀簡訊、告示等短篇 Part 7。'},
- {lv:1, t:'階段 1 總複習', f:'打倒階段 1 魔王、清空錯題本，做一次實力診斷看看起點。'},
+ {lv:1, t:'階段 1 總複習', f:'打倒階段 1 魔王、清空錯題本。🌐 做第一回 Parroto 完整模考（200 題計時）＋實力診斷，記錄起點並校準。'},
  {lv:2, t:'詞性判斷入門', f:'Part 5 最大宗：名詞／形容詞／副詞位置。每天 20 個人事、行銷字。'},
  {lv:2, t:'比較級與最高級', f:'than 與 the most；Part 2 練「Why don\'t we…?」提議句不要選 Because。'},
  {lv:2, t:'不定詞與動名詞', f:'decide to / enjoy -ing / look forward to -ing；聽 Part 4 廣播與語音留言。'},
  {lv:2, t:'被動語態', f:'be＋p.p.；開始做 Part 6 段落填空，注意上下文時態。'},
  {lv:2, t:'現在完成式與連接詞', f:'since / for；although / unless / however；Part 7 Email 抓「目的」題。'},
- {lv:2, t:'階段 2 總複習（目標 550）', f:'打倒階段 2 魔王，做實力診斷；聽力每天至少 30 分鐘。'},
+ {lv:2, t:'階段 2 總複習（目標 550）', f:'打倒階段 2 魔王。🌐 Parroto 完整模考第 2 回＋實力診斷；依各 Part 弱項調整每日練習。'},
  {lv:3, t:'關係代名詞', f:'who / which / whose / where；高頻副詞（recently、shortly、approximately）。'},
  {lv:3, t:'連接詞 vs. 介系詞', f:'although vs. despite、because vs. because of；Part 3 練「推論」題。'},
  {lv:3, t:'分詞與情緒形容詞', f:'attached / standing / interested vs. interesting；Part 6 句子插入題。'},
  {lv:3, t:'名詞子句與時間子句', f:'whether / that / what；once / until 用現在式代替未來；雙篇閱讀。'},
  {lv:3, t:'假設語氣與代名詞', f:'If I were…／If we had…；those who、each other；限時閱讀開始計時。'},
- {lv:3, t:'階段 3 總複習（目標 650）', f:'打倒階段 3 魔王，實力診斷；錯題本保持每天清空。'},
+ {lv:3, t:'階段 3 總複習（目標 650）', f:'打倒階段 3 魔王。🌐 Parroto 完整模考第 3 回；Part 7 練到每篇有固定時間分配。'},
  {lv:4, t:'高分字彙搭配', f:'meet a deadline、address a problem、be eligible for；高分副詞。'},
- {lv:4, t:'倒裝與特殊句型', f:'Should you…／Had we…／Not only… but also；Part 4 長獨白與圖表題。'},
+ {lv:4, t:'倒裝與特殊句型', f:'Should you…／Had we…／Not only… but also；「800 關鍵題型」練圖表題與說話者意圖題。'},
  {lv:4, t:'要求語氣 that＋原形', f:'recommend / require that S＋原形；三篇閱讀找「交叉資訊」。'},
- {lv:4, t:'正式介系詞片語', f:'prior to、in accordance with、on behalf of；Part 7 同義字題。'},
- {lv:4, t:'高分時態', f:'will have p.p.、have been V-ing、should have p.p.；全真模擬第一回。'},
- {lv:4, t:'階段 4 總複習（目標 800）', f:'打倒大魔王；閱讀練習 75 分鐘內做完 100 題的節奏。'},
- {lv:0, t:'全真模擬週（一）', f:'每兩天一回官方全真試題（200 題／2 小時），其餘時間只做錯題本與弱項。'},
- {lv:0, t:'全真模擬週（二）＋考前調整', f:'考前三天停止新內容，只複習錯題與高頻字；睡眠充足、熟悉考場路線。'},
+ {lv:4, t:'正式介系詞片語', f:'prior to、in accordance with、on behalf of；「800 關鍵題型」練同義字與句子插入題。'},
+ {lv:4, t:'高分時態', f:'will have p.p.、have been V-ing、should have p.p.；「800 關鍵題型」練推論題，Part 7 限時。'},
+ {lv:4, t:'階段 4 總複習（目標 800）', f:'打倒大魔王。🌐 Parroto 完整模考第 4 回：閱讀 75 分鐘內做完 100 題。'},
+ {lv:0, t:'全真模擬週（一）', f:'🌐 每兩天一回完整模考（Parroto 或官方全真試題，200 題／2 小時），其餘時間只做錯題本與「800 關鍵題型」。'},
+ {lv:0, t:'全真模擬週（二）＋考前調整', f:'🌐 前半週再做 1～2 回完整模考；考前三天停止新內容，只複習錯題與高頻字；睡眠充足、熟悉考場路線。'},
 ];
 
 // ================= 記憶系統：間隔複習（遺忘曲線）＋進度配速（學習曲線）＋單字量檢測 =================
@@ -1925,7 +1930,8 @@ function lessonPage(){
   view(header('今日課表') + `<section class="panel">
     ${step('①', due === 0, '複習到期單字', due ? `${due} 個字今天到期（快忘記了，先救回來）` : '今天沒有到期的字', due ? `複習 ${Math.min(due, 80)} 個 ›` : '', 'lessonReview()')}
     ${step('②', left <= 0, '學新字', left > 0 ? `還有 ${left} 個（${esc(nq.why)}）` : `今天的新字完成了（已學 ${S.daily.newDone || 0} 個）`, left > 0 ? `學 ${Math.min(left, 20)} 個 ›` : '再學 10 個', left > 0 ? `lessonNew(${Math.min(left, 20)})` : 'lessonNew(10)')}
-    ${step('③', S.daily.mix, '文法・聽力・閱讀', `本週文法＋Part 2～7${wdue ? `＋錯題 ${wdue} 題` : ''}`, '開始 ›', 'lessonMix()')}
+    ${step('③', S.daily.mix, '文法・聽力・閱讀', `本週文法＋Part 2～7${weakParts().length ? `＋弱項加強（${weakParts().map(w => 'Part ' + w.k).join('、')}）` : ''}${wdue ? `＋錯題 ${wdue} 題` : ''}`, '開始 ›', 'lessonMix()')}
+    ${extDue() ? step('④', extDue().done >= extDue().need, 'Parroto 完整模考', `第 ${extDue().wk} 週要做 ${extDue().need} 回（已完成 ${extDue().done}）：200 題計時，做完回來登錄成績`, '前往 ›', 'extMenu()') : ''}
   </section>
   <section class="panel"><h2>🧠 記憶狀態</h2><div class="mgrid"><div><b>${ms.L}</b><small>已學</small></div><div><b>${ms.M}</b><small>熟練</small></div><div><b>${ms.R}</b><small>預估目前記得</small></div><div><b>${ms.leech.length}</b><small>難記字</small></div></div>
    <button class="ghost" onclick="curveView()">📈 看學習曲線與遺忘曲線</button></section>`);
@@ -1952,7 +1958,9 @@ function lessonNew(n){
 function lessonMix(){
   const wk = curWeek(), P = PLAN[wk - 1], lv = P.lv || pick(mulberry32(dnum()), [2, 3, 4]), rng = mulberry32(dnum() * 31 + wk), items = [];
   const g = weekGram(wk) || gramPool(lv).map(x => x.split('|').slice(0, 3).join('|'));
-  for (let i = 0; i < 10; i++) items.push(expandGram(pick(rng, g), rng));
+  for (let i = 0; i < 6; i++) items.push(expandGram(pick(rng, g), rng));   // 本週文法重點
+  items.push(...p5Set(lv, 4, rng));                                        // 依多益 Part 5 出題比重
+  weakParts().forEach(w => items.push(...partItems(w.k, lv, rng, 3)));       // 依弱項加強
   for (let i = 0; i < 5; i++) items.push(pick(rng, p2Items(lv)));
   items.push(...shuffle(rng, talkIdx(lv).flatMap(talkItems)).slice(0, 3));
   items.push(...shuffle(rng, [...p6Idx(lv).flatMap(p6Items), ...p7Idx(lv).flatMap(p7Items)]).slice(0, 3));
@@ -2094,7 +2102,7 @@ function miniItems(lv, m){
   const pick2 = (a, k) => [a[(2 * m) % a.length], a[(2 * m + 1) % a.length]].slice(0, k);
   const L = [...pick2(p1Items(lv), 2), ...Array.from({length:6}, (_, k) => p2Items(lv)[(6 * m + k) % PART2[lv].length]),
     ...pick2(conv, 2).flatMap(talkItems), ...pick2(talk, 2).flatMap(talkItems)];
-  const R = [...Array.from({length:10}, (_, k) => g5[(10 * m + k) % g5.length]), ...p6Items(p6Idx(lv)[m % p6Idx(lv).length]),
+  const R = [...p5Set(lv, 10, mulberry32(lv * 9973 + m * 131 + 5)), ...p6Items(p6Idx(lv)[m % p6Idx(lv).length]),
     ...[0, 1, 2].map(k => p7Idx(lv)[(3 * m + k) % p7Idx(lv).length]).flatMap(p7Items)];
   return [...L, ...R];
 }
@@ -2140,6 +2148,197 @@ function calibMenu(){
     const l = +$('#cl').value, r = +$('#cr').value;
     if (!(l >= 5 && l <= 495 && r >= 5 && r <= 495)) return toast('請輸入 5～495 之間的分數');
     S.calib = {L:Math.round(l - dg.L), R:Math.round(r - dg.R), date:Date.now()}; save(); toast('已儲存校準'); home();
+  };
+}
+
+// ================= 以 800 分為目標的調整 =================
+// 1. Part 5 加入「字彙題」，並依多益 Part 5 常見出題比重抽題
+// 2. 800 分關鍵題型專練（推論、說話者意圖、圖表、句子插入、同義字、目的主旨）
+// 3. Parroto 完整模考：外部連結、成績登錄、自動校準、依弱項加強
+// 出題比重為依公開備考資料整理的估計值，不是官方數據。
+
+// ---------- 1. Part 5 字彙題（語意與搭配）----------
+const P5_VOCAB = {
+1: [
+  ['The meeting has been {canceled} because the manager is sick.','finished|opened|invited','經理生病，會議取消了。'],
+  ['Please {sign} your name at the bottom of the form.','draw|call|speak','請在表格最下方簽名。'],
+  ['We need to {order} more paper for the printer.','pay|spend|lend','我們需要為印表機多訂一些紙。'],
+  ['The store offers a 20 percent {discount} on all shoes this week.','price|receipt|change','本週所有鞋子打八折。'],
+  ['Our flight was {delayed} because of the snow.','arrived|booked|checked','我們的班機因下雪延誤。'],
+  ['Ms. Lee will {give} a presentation at the meeting.','take|say|tell','李小姐會在會議上做簡報。'],
+  ['Please {make} a reservation for four people at seven.','do|say|keep','請訂七點四位。'],
+  ['I would like to {exchange} this shirt for a larger size.','borrow|repair|wear','我想把這件襯衫換大一號。'],
+  ['Customers can {pay} by credit card or cash.','buy|spend|cost','顧客可以用信用卡或現金付款。'],
+  ['The new printer is very easy to {use}.','go|come|happen','新的印表機很容易使用。'],
+  ['Please {check} the schedule before you leave.','look|listen|talk','離開前請確認行程表。'],
+  ['The museum is {closed} on Mondays.','ended|finished|stopped','博物館週一休館。'],
+  ['Employees must {wear} a badge in the building.','put|dress|take','員工在大樓內必須配戴識別證。'],
+  ['The package will {arrive} on Friday.','reach|get|come to','包裹週五會到。'],
+  ['We are {looking} for an experienced driver.','finding|seeing|watching','我們在找有經驗的司機。'],
+  ['Please {leave} a message after the beep.','say|tell|do','請在嗶聲後留言。'],
+],
+2: [
+  ['All applicants must {submit} a resume by June 1.','apply|attend|employ','所有應徵者必須在 6 月 1 日前提交履歷。'],
+  ['The hotel is {conveniently} located near the airport.','comfortably|recently|carefully','飯店位置方便，就在機場附近。'],
+  ['Please {confirm} your reservation 24 hours in advance.','conform|confuse|contain','請在 24 小時前確認您的預約。'],
+  ['The company plans to {expand} its business into Asia.','explain|expect|express','公司計畫將業務拓展到亞洲。'],
+  ['Ms. Ortiz has extensive {experience} in sales.','experiment|expense|expectation','歐提茲小姐有豐富的銷售經驗。'],
+  ['Our sales {increased} by 10 percent last quarter.','raised|grew up|added','上一季我們的銷售成長了 10%。'],
+  ['The seminar will {focus} on customer service.','point|put|stand','研討會將聚焦於客戶服務。'],
+  ['Please {forward} this email to the rest of the team.','reply|answer|respond','請把這封郵件轉寄給團隊其他人。'],
+  ['The {deadline} for the project is next Friday.','timeline|period|duration','專案截止日是下週五。'],
+  ['We {apologize} for the delay in your order.','regret|sorry|excuse','您的訂單延遲，我們深感抱歉。'],
+  ['The equipment is {available} for rent by the hour.','possible|capable|able','設備可以按小時出租。'],
+  ['Visitors are {required} to sign in at the front desk.','needed|wanted|demanded','訪客必須在櫃台登記。'],
+  ['Mr. Chen was {promoted} to sales manager last month.','raised|grown|lifted','陳先生上個月升為業務經理。'],
+  ['The store will {extend} its hours during the holiday season.','stretch|enlarge|widen','商店在假期期間會延長營業時間。'],
+  ['Please {refer} to the attached document for details.','look|see|read','詳情請參閱附件。'],
+  ['The training session was {postponed} until next week.','canceled|finished|attended','訓練課程延到下週。'],
+],
+3: [
+  ['The contract will be {renewed} automatically unless either party objects.','refreshed|restored|reviewed','除非任一方反對，合約將自動續約。'],
+  ['Please keep your receipt as {proof} of purchase.','sign|mark|reason','請保留收據作為購買證明。'],
+  ['The new policy will {take} effect on January 1.','make|have|go','新政策 1 月 1 日生效。'],
+  ['Our technicians will {address} any technical issues promptly.','speak|tell|talk','我們的技術人員會迅速處理任何技術問題。'],
+  ['The board {approved} the budget for next year.','consented|admitted|allowed to','董事會核准了明年的預算。'],
+  ['The factory is operating at full {capacity}.','ability|volume|quantity','工廠正以滿載產能運作。'],
+  ['Sales have risen {steadily} over the past three years.','firmly|tightly|nearly','過去三年銷售穩定成長。'],
+  ['The position {requires} at least three years of experience.','inquires|acquires|admits','這個職位需要至少三年經驗。'],
+  ['Please {notify} the front desk if you plan to check out late.','inform to|announce|remind','若打算晚退房，請通知櫃台。'],
+  ['The company has {launched} an investigation into the incident.','raised|built|grown','公司已針對這起事件展開調查。'],
+  ['We will {reimburse} you for any travel expenses.','repay to|refund to|return','我們會核銷您的所有差旅費。'],
+  ['The merger is {expected} to be completed by March.','waited|hoped|looked','合併案預計三月前完成。'],
+  ['Customers can {track} their orders online.','follow up|chase|hunt','顧客可以上網追蹤訂單。'],
+  ['The CEO will {deliver} the keynote speech.','carry|send|bring','執行長將發表主題演講。'],
+  ['Please {retain} a copy of this agreement for your records.','remain|contain|detain','請保留這份協議的影本存檔。'],
+  ['The renovation project is running {behind} schedule.','after|under|below','翻修工程進度落後。'],
+],
+4: [
+  ['The firm has a {proven} track record in project management.','proving|provable|proof','這家公司在專案管理上有經證實的實績。'],
+  ['The new software will {streamline} the ordering process.','straighten|stretch|strengthen','新軟體將簡化訂購流程。'],
+  ['Candidates should {possess} strong analytical skills.','process|obsess|assess','應徵者應具備很強的分析能力。'],
+  ['The agreement {stipulates} that payment be made within 30 days.','stimulates|speculates|stabilizes','協議規定須在 30 天內付款。'],
+  ['We regret to inform you that the item has been {discontinued}.','disconnected|discouraged|disqualified','很遺憾通知您，該商品已停產。'],
+  ['The budget will be {allocated} among the three departments.','located|relocated|dislocated','預算將分配給三個部門。'],
+  ['Mr. Wong was {instrumental} in securing the contract.','incremental|intentional|ornamental','黃先生在取得這份合約上功不可沒。'],
+  ['The delays were {attributed} to severe weather conditions.','distributed|contributed|attracted','延誤被歸因於惡劣天氣。'],
+  ['The proposal was rejected on the {grounds} that it was too costly.','reason|cause|purpose','提案以成本過高為由被否決。'],
+  ['Staff are encouraged to take {advantage} of the training programs.','benefit|profit|gain','鼓勵員工善用培訓課程。'],
+  ['The figures were {adjusted} to reflect seasonal changes.','adopted|admitted|addressed','數字已調整以反映季節變化。'],
+  ['The new branch is expected to {generate} significant revenue.','generalize|degenerate|germinate','新分公司預期將帶來可觀營收。'],
+  ['The warranty does not cover damage {resulting} from misuse.','causing|leading|making','保固不包含因使用不當造成的損壞。'],
+  ['Applications received after the deadline will not be {considered}.','considerate|considering|consideration','截止日後收到的申請將不予考慮。'],
+  ['The two companies reached a {mutually} beneficial agreement.','mutual|mutuality|mutualize','兩家公司達成互惠的協議。'],
+  ['Ms. Patel was {unanimously} elected as chairperson.','unanimous|anonymously|unusually','帕特爾女士以全票當選主席。'],
+],
+};
+[1, 2, 3, 4].forEach(lv => BANK[lv].push({n:'Part 5 字彙題（語意與搭配）', zh:'Part 5 約三分之一是字彙題：四個選項詞性相同，要靠語意和固定搭配判斷（例如 give a presentation、take effect、on the grounds that）。', s:P5_VOCAB[lv]}));
+
+// Part 5 題目分類與出題比重（估計值）
+const P5_CAT = {vocab:'字彙（語意與搭配）', form:'詞性判斷', verb:'動詞時態與語態', conj:'連接詞與介系詞', pron:'代名詞', rel:'關係詞與名詞子句', other:'其他'};
+const P5_W = {vocab:0.34, form:0.26, verb:0.14, conj:0.13, pron:0.05, rel:0.05, other:0.03};
+function p5Cat(item){
+  const p = item.split('|');
+  if (p[0] === 'g') { const id = p[1];
+    if (/wf|edng|cmp/.test(id)) return 'form'; if (/pron/.test(id)) return 'pron'; if (/time/.test(id)) return 'conj';
+    if (/quant/.test(id)) return 'other'; return 'verb'; }
+  const n = BANK[p[1]][+p[2]].n;
+  if (/字彙/.test(n)) return 'vocab'; if (/關係|名詞子句/.test(n)) return 'rel'; if (/代名詞/.test(n)) return 'pron';
+  if (/連接詞|介系詞|疑問詞/.test(n)) return 'conj'; if (/形容詞與副詞|分詞|比較/.test(n)) return 'form';
+  if (/時態|假設|要求語氣|倒裝/.test(n)) return 'verb'; return 'other';
+}
+function p5ByCat(lv){ const m = {}; gramPool(lv).forEach(it => (m[p5Cat(it)] = m[p5Cat(it)] || []).push(it)); return m; }
+function p5Pick(lv, rng){
+  const m = p5ByCat(lv), cats = Object.keys(P5_W).filter(c => m[c]), tot = cats.reduce((a, c) => a + P5_W[c], 0);
+  let r = rng() * tot;
+  for (const c of cats) { r -= P5_W[c]; if (r <= 0) return pick(rng, m[c]); }
+  return pick(rng, m[cats[0]]);
+}
+function p5Set(lv, n, rng){ const out = []; for (let i = 0; out.length < n && i < n * 20; i++) { const it = p5Pick(lv, rng); if (!out.includes(it) || /^g\|/.test(it)) out.push(it); } return out; }
+function p5Real(){ const rng = mulberry32(Date.now() & 0xffffff); runQuiz({title:`Part 5 實戰組合（${LV_SHORT[S.lv]}）`, items:p5Set(S.lv, 30, rng), noAuto:true}); }
+
+// ---------- 2. 800 分關鍵題型 ----------
+const QTYPE = {
+  infer:['推論題', '問「最可能」「暗示」的題目：答案不會原句出現，要從線索推斷。', /most likely|suggested|implied|imply|indicated|probably/i],
+  intent:['說話者意圖題', '「說這句話是什麼意思？」：要看前後文判斷語氣與目的，不是照字面翻譯。', /mean when|means when|imply when/i],
+  graphic:['圖表題', '先看圖表，再聽「和圖表不同的那個資訊」：答案通常要把聽到的內容和表格對應。', /graphic/i],
+  synonym:['同義字題', '「最接近的意思」：要選符合文中語境的意思，而不是最常見的意思。', /closest in meaning/i],
+  insert:['句子插入題', 'Part 6／7 的句子插入：看前後句的代名詞、連接詞與話題是否銜接。', null],
+  purpose:['目的・主旨題', '「為什麼寫信／打電話」「主要在講什麼」：答案通常在開頭兩句。', /purpose|mainly|main topic|why is the (man|woman|speaker) calling|why did .* (write|contact)|why is .* calling/i],
+};
+function qtypeOf(item){
+  const p = item.split('|');
+  if (p[0] === 'p6') { const b = PART6[+p[1]].blanks[+p[2]]; return b[0].length > 25 && /[.!?"]$/.test(b[0]) ? 'insert' : null; }
+  let q;
+  if (p[0] === 't') q = TALKS[+p[1]].qs[+p[2]][0]; else if (p[0] === 'p7') q = PART7[+p[1]].qs[+p[2]][0]; else return null;
+  for (const k of ['intent', 'graphic', 'synonym', 'purpose', 'infer']) if (QTYPE[k][2].test(q)) return k;
+  return null;
+}
+function qtypeItems(k){
+  const all = [...TALKS.flatMap((t, ti) => talkItems(ti)), ...PART6.flatMap((x, i) => p6Items(i)), ...PART7.flatMap((x, i) => p7Items(i))];
+  return all.filter(it => qtypeOf(it) === k);
+}
+function keyTypesMenu(){
+  view(header('800 分關鍵題型') + `<section class="panel"><p>從 650 衝到 800，失分多半不是單字不懂，而是這幾種「要想一下」的題型。每種題型會混合各階段的題目，由易到難。</p></section>
+   <section class="panel">${Object.entries(QTYPE).map(([k, v]) => { const n = qtypeItems(k).length; return `<button class="li" onclick="keyTypeGo('${k}')" ${n ? '' : 'disabled'}><b>${v[0]}（${n} 題）</b><small>${v[1]}</small></button>`; }).join('')}</section>
+   <section class="panel"><h2>Part 5 出題比重（估計）</h2><table class="gtab"><tr><th>類別</th><th>約佔</th></tr>${Object.entries(P5_W).map(([c, w]) => `<tr><td>${P5_CAT[c]}</td><td>${Math.round(w * 100)}%</td></tr>`).join('')}</table>
+   <p class="sub left">依公開備考資料整理的估計，不是官方數據。App 的 Part 5 實戰組合、迷你模考與每日練習都依這個比重抽題。</p><button class="next" onclick="p5Real()">Part 5 實戰組合 30 題 ›</button></section>`);
+}
+function keyTypeGo(k){
+  const rng = mulberry32(Date.now() & 0xffffff), its = qtypeItems(k);
+  const sorted = shuffle(rng, its).sort((a, b) => itemLevel(a) - itemLevel(b)).slice(0, 15);
+  runQuiz({title:QTYPE[k][0], items:sorted, noAuto:true});
+}
+
+// ---------- 3. Parroto 完整模考 ----------
+const PARROTO_URL = 'https://parroto.app/zh-TW/exams/toeic';
+const EXT_WEEKS = [6, 12, 18, 24, 25, 26];
+const PART_MAX = {1:6, 2:25, 3:39, 4:30, 5:30, 6:16, 7:54};
+const extLatest = () => (S.ext || [])[(S.ext || []).length - 1] || null;
+function extDue(){
+  const wk = curWeek(); if (!EXT_WEEKS.includes(wk)) return null;
+  const wStart = S.start + (wk - 1) * 7 * DAY, done = (S.ext || []).filter(x => x.date >= wStart).length;
+  const need = wk >= 25 ? 3 : 1;   // 最後兩週每兩天一回
+  return {wk, need, done};
+}
+function weakParts(){
+  const x = extLatest(); let acc = {};
+  if (x && x.parts && Object.keys(x.parts).length) Object.entries(x.parts).forEach(([k, v]) => acc[k] = v / PART_MAX[k]);
+  else { const lv = S.lv, rec = (S.mini || {})[lv] || {}, sum = {};
+    Object.values(rec).forEach(r => Object.entries(r.parts || {}).forEach(([k, [o, n]]) => { sum[k] = sum[k] || [0, 0]; sum[k][0] += o; sum[k][1] += n; }));
+    Object.entries(sum).forEach(([k, [o, n]]) => { if (n) acc[k] = o / n; }); }
+  return Object.entries(acc).filter(([k, a]) => a < 0.8).sort((a, b) => a[1] - b[1]).slice(0, 2).map(([k, a]) => ({k:+k, a}));
+}
+function partItems(k, lv, rng, n){
+  const T = talkIdx(lv);
+  const pool = k === 1 ? p1Items(lv) : k === 2 ? p2Items(lv) : k === 3 ? T.filter(i => TALKS[i].type === 'conv').flatMap(talkItems) : k === 4 ? T.filter(i => TALKS[i].type === 'talk').flatMap(talkItems)
+    : k === 5 ? p5Set(lv, n, rng) : k === 6 ? p6Idx(lv).flatMap(p6Items) : p7Idx(lv).flatMap(p7Items);
+  return shuffle(rng, pool).slice(0, n);
+}
+function extMenu(){
+  const d = extDue(), list = (S.ext || []).slice().reverse();
+  const plan = EXT_WEEKS.map(w => `<span class="chip ${w === curWeek() ? 'on' : ''}">第 ${w} 週${w >= 25 ? '（每兩天）' : ''}</span>`).join('');
+  view(header('Parroto 完整模考') + `<section class="panel"><p>Parroto 提供和正式多益相同格式的完整試題（200 題、120 分鐘、10～990 分計分）。請<b>在 Parroto 網站上計時作答</b>，做完把成績記在這裡：App 會用它校準預估分數，並依弱項加重每日練習。</p>
+   <a class="next linkbtn" href="${PARROTO_URL}" target="_blank" rel="noopener">🌐 前往 Parroto 多益模考 ↗</a>
+   <p class="sub left">題目版權屬於 Parroto／原出版者，本 App 只提供連結，不收錄題目。</p></section>
+   <section class="panel"><h2>建議時程</h2><div class="chips">${plan}</div>${d ? `<p>${d.done >= d.need ? '✅ 本週的完整模考已完成' : `📌 本週要做 ${d.need} 回，已完成 ${d.done} 回`}</p>` : ''}</section>
+   <section class="panel"><h2>登錄成績</h2>
+    <label class="row2">試題名稱 <input type="text" id="en" placeholder="例：TOEIC 2024 Test 1" class="tin"></label>
+    <label class="row2">聽力分數 <input type="number" id="el" min="5" max="495" step="5" inputmode="numeric"></label>
+    <label class="row2">閱讀分數 <input type="number" id="er" min="5" max="495" step="5" inputmode="numeric"></label>
+    <details class="mg"><summary>（選填）各 Part 答對題數，用來找出弱項</summary>${[1,2,3,4,5,6,7].map(k => `<label class="row2">${PART_NAME[k]}（共 ${PART_MAX[k]}）<input type="number" id="ep${k}" min="0" max="${PART_MAX[k]}" inputmode="numeric"></label>`).join('')}</details>
+    <button class="next" id="es">儲存成績</button></section>
+   ${list.length ? `<section class="panel"><h2>成績紀錄</h2>${list.map(x => `<div class="task"><span>${new Date(x.date).toLocaleDateString('zh-TW')} ${esc(x.name || '')}</span><span class="num">聽 ${x.L}・讀 ${x.R}</span><b class="${x.L + x.R >= 800 ? 'ok' : ''}">${x.L + x.R}</b></div>`).join('')}</section>` : ''}`);
+  $('#es').onclick = () => {
+    const L = +$('#el').value, R = +$('#er').value;
+    if (!(L >= 5 && L <= 495 && R >= 5 && R <= 495)) return toast('請輸入 5～495 之間的聽力與閱讀分數');
+    const parts = {};
+    for (const k of [1,2,3,4,5,6,7]) { const v = $('#ep' + k).value; if (v !== '') { const n = +v; if (!(n >= 0 && n <= PART_MAX[k])) return toast(`${PART_NAME[k]} 請輸入 0～${PART_MAX[k]}`); parts[k] = n; } }
+    S.ext = S.ext || []; S.ext.push({date:Date.now(), name:$('#en').value.trim().slice(0, 40), L, R, parts});
+    const dg = S.diag[S.diag.length - 1];
+    if (dg && Math.abs(Date.now() - dg.date) <= 14 * DAY) { S.calib = {L:Math.round(L - dg.L), R:Math.round(R - dg.R), date:Date.now()}; toast('已儲存，並用最近的實力診斷完成校準'); }
+    else toast('已儲存。一週內做一次實力診斷，App 就能自動校準預估分數');
+    save(); extMenu();
   };
 }
 
@@ -2435,6 +2634,8 @@ function home(){
     ['📕','錯題本','reviewMenu()', due ? `今天有 ${due} 題要複習` : `文法・聽力・閱讀 ${Object.keys(S.wrong).length} 題`],
     ['⭐','我的單字本','bookMenu()', `收藏 ${Object.keys(S.book).length} 字`],
     ['⏱️','60 秒快問快答','challengeGo()', S.best60 ? `最佳 ${S.best60} 題` : '和自己的紀錄比賽'],
+    ['🎯','800 關鍵題型','keyTypesMenu()', '推論・意圖・圖表・插入・同義字'],
+    ['🌐','Parroto 完整模考','extMenu()', extLatest() ? `最近 ${extLatest().L + extLatest().R} 分` : '200 題計時・登錄成績'],
     ['🏁','迷你模考','miniMenu()', '多益題型 Part 1→7・每回約 45 題'],
     ['📚','單字文法複習卷','mockMenu()', '每回 20 題・題目固定'],
   ];
@@ -2446,7 +2647,7 @@ function home(){
   <div class="lvtabs">${tabs}</div>
   <section class="panel streak"><div class="fire">🔥 <b>${S.streak.count}</b> 天</div><div class="frz">🧊 冰凍卡 ${S.streak.freeze} 張</div></section>
   <section class="panel"><h2>今日任務</h2>${tk.map(t => `<div class="task ${t.ok ? 'ok' : ''}"><span>${t.ok ? '✅' : '⬜'} ${t.n}</span><span class="prog"><i style="width:${t.v / t.max * 100}%"></i></span><span class="num">${Math.round(t.v)}/${t.max}</span></div>`).join('')}</section>
-  <section class="panel"><h2>📊 預估分數 <span class="num">（粗估，僅供參考）</span></h2><div class="scores">${scoreBox('最近一次實力診斷', dg)}${scoreBox('平常練習推估', est)}</div>
+  <section class="panel"><h2>📊 預估分數 <span class="num">（粗估，僅供參考）</span></h2><div class="scores">${(() => { const x = extLatest(); return `<div class="sc"><small>Parroto 完整模考</small><b>${x ? x.L + x.R : '—'}</b>${x ? `<span class="num">聽 ${x.L}・讀 ${x.R}</span>` : '<span class="num">最準</span>'}</div>`; })()}${scoreBox('實力診斷', dg)}${scoreBox('平常練習', est)}</div>
    ${est ? '' : '<p class="sub left">四個階段都練到一定題數後，才會顯示平常練習推估。</p>'}<div class="row"><button class="ghost" onclick="diagStart()">🎯 實力診斷（40 題）</button><button class="ghost" onclick="calibMenu()">📝 用官方試題校準</button></div></section>
   <div class="grid">${cards.map(c => `<button class="card" onclick="${c[2]}"><span class="ic">${c[0]}</span><b>${c[1]}</b><small>${c[3]}</small></button>`).join('')}</div>
   <div id="install"></div>
@@ -2661,7 +2862,7 @@ function gramMenu(){
   const lv = S.lv;
   const rules = GRAMMAR[lv].map(r => `<button class="li" onclick="gramGo('g','${r.id}')"><b>${esc(r.n)}</b><small>自動出題・每回 20 題</small></button>`).join('');
   const pats = BANK[lv].map((p, pi) => `<button class="li" onclick="gramGo('b',${pi})"><b>${esc(p.n)}</b><small>${esc(p.zh)}</small></button>`).join('');
-  view(header('Part 5 文法') + `<section class="panel"><p class="sub left">Part 5 共 30 題，建議每題 20 秒內作答。先看空格前後的詞性，再看語意。</p><button class="next" onclick="gramGo('all')">本階段文法綜合（20 題）›</button></section>
+  view(header('Part 5 文法') + `<section class="panel"><p class="sub left">Part 5 共 30 題，建議每題 20 秒內作答。先看空格前後的詞性，再看語意。</p><div class="row"><button class="next" onclick="p5Real()">Part 5 實戰組合 30 題 ›</button><button class="ghost" onclick="gramGo('all')">本階段文法綜合</button></div><p class="sub left">實戰組合依多益 Part 5 常見出題比重抽題：字彙約 1/3、詞性約 1/4，其餘為時態語態、連接詞介系詞、代名詞與關係詞。</p></section>
    <section class="panel"><h2>自動出題規則</h2>${rules}</section><section class="panel"><h2>句型重點</h2>${pats}</section>`);
 }
 function gramGo(t, x){
