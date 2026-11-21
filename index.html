@@ -3817,6 +3817,7 @@ function artFromLibrary(){
 
 // ---------- Gemini ----------
 const GEM = 'https://generativelanguage.googleapis.com/v1beta';
+const gemVer = id => { const m = id.match(/gemini-(\d+(?:\.\d+)?)/i); return m ? parseFloat(m[1]) : 0; };   // 版本號：清單由新到舊排序
 const gemPaidLikely = id => /pro|ultra|image|imagen|veo|carbon|argon|deep-research|computer/i.test(id);   // 這些通常不在免費方案
 async function gemModels(key){
   const r = await fetch(`${GEM}/models?pageSize=200&key=${encodeURIComponent(key)}`);
@@ -3824,7 +3825,7 @@ async function gemModels(key){
   if (!r.ok) throw new Error((j.error && j.error.message) || ('HTTP ' + r.status));
   return (j.models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent') && /gemini/i.test(m.name) && !/embed|image|tts|audio|live|vision/i.test(m.name))
     .map(m => { const id = m.name.replace(/^models\//, ''); return {id, name:(m.displayName || id) + (gemPaidLikely(id) ? '（可能需付費）' : /flash/i.test(id) ? '（免費方案常見）' : ''), paid:gemPaidLikely(id)}; })
-    .sort((a, b) => (a.paid - b.paid) || (/flash/i.test(b.id) - /flash/i.test(a.id)));
+    .sort((a, b) => (a.paid - b.paid) || (/flash/i.test(b.id) - /flash/i.test(a.id)) || (gemVer(b.id) - gemVer(a.id)));
 }
 function artPrompt(lv){
   const L = ART_LV[lv], [n6, n7] = ART_QN(lv), sit = artPickSit(), tags = artWeakTags();
@@ -3870,7 +3871,7 @@ function artFromAI(j, lv, sit){
   });
   return {id:'ai' + Date.now().toString(36), lv, sit, t:ok(j.title) ? j.title.trim() : 'Daily Reading', zh:ok(j.title_zh) ? j.title_zh : '', p, g, q, gr, src:'ai', date:Date.now()};
 }
-async function artGenerate(lv){
+async function artGenerate(lv, retried){
   const st = artState();
   if (!st.key || !st.model) throw new Error('尚未設定 Gemini 金鑰或模型');
   if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('目前沒有網路');
@@ -3878,7 +3879,13 @@ async function artGenerate(lv){
   const r = await fetch(`${GEM}/models/${encodeURIComponent(st.model)}:generateContent?key=${encodeURIComponent(st.key)}`, {method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({contents:[{role:'user', parts:[{text:pr.text}]}], generationConfig:{responseMimeType:'application/json', maxOutputTokens:16384}})});
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(r.status === 429 ? '今天的免費額度可能用完了，稍後再試' : ((j.error && j.error.message) || 'HTTP ' + r.status));
+  if (!r.ok) {
+    const msg = (j.error && j.error.message) || '';
+    // Google 停用舊模型時，訊息會建議新模型（例如 use models/gemini-3.8-flash）：自動改用並重試一次
+    const sug = msg.match(/no longer available[\s\S]*?models\/([\w.-]+)/i);
+    if (sug && !retried && sug[1] !== st.model) { st.model = sug[1]; save(); toast('舊模型已停用，自動改用 ' + sug[1]); return artGenerate(lv, true); }
+    throw new Error(r.status === 429 ? '今天的免費額度可能用完了，稍後再試' : (msg || 'HTTP ' + r.status));
+  }
   if (j.promptFeedback && j.promptFeedback.blockReason) throw new Error('生成被擋下（' + j.promptFeedback.blockReason + '）');
   const c = (j.candidates || [])[0];
   const txt = c && c.content && (c.content.parts || []).filter(x => !x.thought).map(x => x.text || '').join('');
@@ -4023,7 +4030,7 @@ function gemSetup(){
     ${st.key ? '<button class="ghost" id="gdel">刪除金鑰</button>' : ''}</section>`);
   const showModels = list => {
     $('#gm').innerHTML = list.length ? `<label class="row2">模型 <select id="gsel" class="tin">${list.map(m => `<option value="${esc(m.id)}" ${m.id === st.model ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label><button class="next" id="gtest">測試生成</button>` : '<p class="warn">找不到可用的模型。</p>';
-    if ($('#gsel')) { $('#gsel').onchange = e => { st.model = e.target.value; save(); }; if (!st.model || !list.some(m => m.id === st.model)) { const f = list.find(m => !m.paid && /flash/i.test(m.id) && !/lite/i.test(m.id)) || list.find(m => !m.paid) || list[0]; st.model = f.id; $('#gsel').value = f.id; save(); } }
+    if ($('#gsel')) { $('#gsel').onchange = e => { st.model = e.target.value; save(); }; if (!st.model || !list.some(m => m.id === st.model) || (st.model && gemVer(st.model) < 3 && list.some(m => gemVer(m.id) >= 3 && /flash/i.test(m.id)))) { const f = list.find(m => !m.paid && /flash/i.test(m.id) && !/lite|preview|exp/i.test(m.id)) || list.find(m => !m.paid && /flash/i.test(m.id)) || list.find(m => !m.paid) || list[0]; st.model = f.id; $('#gsel').value = f.id; save(); } }
     if ($('#gtest')) $('#gtest').onclick = async () => { $('#gtest').disabled = true; $('#gtest').textContent = '生成中…（約 20～60 秒）'; try { const a = await artGenerate(st.lv); ART.cache.push(a); artSave(); toast(`成功！已生成一篇 ${artWords(a)} 字的文章（存為備用）`); } catch(e) { toast('失敗：' + e.message); } gemSetup(); };
   };
   $('#gsave').onclick = async () => {
