@@ -238,6 +238,7 @@ h2.at{font-size:calc(20px * var(--z,1));margin:6px 0}
 .quote{background:var(--bg);border-left:4px solid var(--ind);padding:8px 10px;border-radius:8px;font-style:italic}
 ol.steps li{margin:6px 0}
 select.tin{font:inherit;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);max-width:62%}
+.fex{margin-top:12px;font-size:15px;line-height:1.5;text-align:left}.fex .dim{font-size:14px}
 </style>
 </head>
 <body>
@@ -2231,9 +2232,11 @@ function vocabAnswered(entry, ok){
 const dueWords = () => { const t = dnum(); return Object.keys(S.srs).filter(w => S.srs[w][1] <= t && VMAP[w]).sort((a, b) => S.srs[a][1] - S.srs[b][1] || S.srs[a][0] - S.srs[b][0]); };
 function revType(w, rng){
   const e = S.srs[w], s = e ? e[0] : 0, W = VMAP[w];
-  if (s <= 2 && !(e && e[4])) return pick(rng, ['e2c', 'e2c', 'listen']);
-  if (s <= 5) return pick(rng, ['c2e', 'c2e', 'listen', 'e2c']);
-  return canSpell(W) && rng() < 0.6 ? 'spell' : 'c2e';
+  // 第 2 次起混入例句題：先看懂例句（exz），再在句子裡填字（ex）
+  const ex = vexExact(w).length > 0, ez = vexHas(w);
+  if (s <= 2 && !(e && e[4])) return pick(rng, ['e2c', 'e2c', 'listen', ...(s >= 1 && ez ? ['exz', 'exz'] : [])]);
+  if (s <= 5) return pick(rng, ['c2e', 'c2e', 'listen', 'e2c', ...(ex ? ['ex', 'ex'] : []), ...(ez ? ['exz'] : [])]);
+  return canSpell(W) && rng() < 0.5 ? 'spell' : pick(rng, ['c2e', ...(ex ? ['ex', 'ex'] : [])]);
 }
 function retention(e){
   if (!e) return 0;
@@ -2290,7 +2293,7 @@ function lessonNew(n){
   flashList(words, `新字（${LV_SHORT[words[0].lv]}・依字頻）`, () => {
     // 每個新字練兩次：先認得（英翻中／聽力），間隔幾題後再說得出（中翻英／拼字）
     const a = shuffle(rng, words).map(w => ({it:`v|${w.w}|${rng() < 0.7 ? 'e2c' : 'listen'}`, mode:'learn'}));
-    const b = shuffle(rng, words).map(w => ({it:`v|${w.w}|${canSpell(w) && rng() < 0.4 ? 'spell' : 'c2e'}`, mode:'learn'}));
+    const b = shuffle(rng, words).map(w => { const r = rng(); return {it:`v|${w.w}|${vexExact(w.w).length && r < 0.35 ? 'ex' : canSpell(w) && r < 0.6 ? 'spell' : 'c2e'}`, mode:'learn'}; });
     const items = [];
     a.forEach((x, i) => { items.push(x); if (i >= 4 && b.length) items.push(b.shift()); });
     items.push(...b);
@@ -4753,6 +4756,55 @@ function sentMenu(){
     <section class="panel"><p class="sub left">例句來源：<a href="https://tatoeba.org" target="_blank" rel="noopener">Tatoeba ↗</a>（CC BY 2.0 FR），每句的編號可在 tatoeba.org/sentences/show/編號 查到原句與作者；中文已轉為台灣繁體。</p></section>`);
 }
 
+// ================= 單字例句（Tatoeba） =================
+// 每個 App 單字找出含有它的 Tatoeba 例句（第一次用到時才建索引）。
+//   ex  例句填空：把句中的這個字挖空，看中文選字（只用「原形一模一樣」出現的句子，答案才不會牽涉變化形）
+//   exz 例句理解：句中這個字標粗體，選出整句的中文（干擾選項是同一個字的其他例句，要看懂整句才選得對）
+let VEX = null;
+function vexStems(w){
+  const c = [w];
+  if (w.endsWith('ies')) c.push(w.slice(0, -3) + 'y');
+  if (w.endsWith('es')) c.push(w.slice(0, -2));
+  if (w.endsWith('s')) c.push(w.slice(0, -1));
+  if (w.endsWith('ied')) c.push(w.slice(0, -3) + 'y');
+  if (w.endsWith('ed')) c.push(w.slice(0, -2), w.slice(0, -1));
+  if (w.endsWith('ing')) c.push(w.slice(0, -3), w.slice(0, -3) + 'e');
+  return c;
+}
+function vexIndex(){
+  if (VEX) return VEX;
+  VEX = {};
+  TATO.forEach(x => {
+    const ws = x[1].match(/[A-Za-z]+/g) || [], hit = {};
+    // hit[b] = [出現次數, 原形出現次數]；填空只用「原形只出現一次、也沒有其他變化形」的句子
+    ws.forEach(t => { const l = t.toLowerCase(); const b = vexStems(l).find(s => VMAP[s] && !VMAP[s].w.includes(' ')); if (b) { const h = hit[b] = hit[b] || [0, 0]; h[0]++; if (l === b) h[1]++; } });
+    for (const b in hit) (VEX[b] = VEX[b] || []).push([x, hit[b][0] === 1 && hit[b][1] === 1, ws.length]);
+  });
+  for (const b in VEX) VEX[b].sort((a, c) => a[2] - c[2] || a[0][0] - c[0][0]);
+  return VEX;
+}
+const vexOf = w => (vexIndex()[w] || []);
+const vexExact = w => vexOf(w).filter(e => e[1]);
+const vexHas = w => vexOf(w).length > 0;
+// 例句：短句優先，但每次稍微換一下
+function vexPick(w, rng, exact){ const l = exact ? vexExact(w) : vexOf(w); return l.length ? l[Math.floor(rng() * Math.min(l.length, 3))][0] : null; }
+const vexBold = (en, w) => esc(en).replace(/[A-Za-z]+/g, t => vexStems(t.toLowerCase()).includes(w) ? `<b>${t}</b>` : t);
+function vexTip(x){ return x ? `\n例句：${x[1]}\n　　　${x[2]}（Tatoeba #${x[0]}）` : ''; }
+function buildVex(w, type, rng, base, info){
+  if (type === 'ex') {
+    const x = vexPick(w.w, rng, true);
+    const d = vDistract(rng, w, (y, o) => y.w !== w.w && !y.w.includes(' ') && zhOK(y, w, o) && !new RegExp(`(?<![A-Za-z])${y.w}(?![A-Za-z])`, 'i').test(x[1]) && o.every(z => z.w !== y.w));
+    const q = esc(x[1]).replace(new RegExp(`(?<![A-Za-z])${w.w}(?![A-Za-z])`, 'i'), '<span class="blank">______</span>');
+    return {...base, kind:'mc', prompt:`<div class="sent">${q}</div>`, sub:esc(x[2]), ans:w.w, opts:shuffle(rng, [w.w, ...d.map(y => y.w)]), say:x[1], tip:info + vexTip(x)};
+  }
+  const x = vexPick(w.w, rng, false);
+  const others = shuffle(rng, vexOf(w.w).map(e => e[0]).filter(y => y !== x && y[2] !== x[2])), opts = [x[2]];
+  for (const y of others) { if (opts.length === 3) break; if (!opts.includes(y[2])) opts.push(y[2]); }
+  const n = (x[1].match(/[A-Za-z]+/g) || []).length;
+  for (let i = 0; i < 400 && opts.length < 3; i++) { const y = TATO[Math.floor(rng() * TATO.length)], m = (y[1].match(/[A-Za-z]+/g) || []).length; if (Math.abs(m - n) <= 3 && !opts.includes(y[2])) opts.push(y[2]); }
+  return {...base, kind:'mc', ol:'zh-Hant', prompt:`<div class="sent">${vexBold(x[1], w.w)}</div>`, sub:'這句話的意思是？', ans:x[2], opts:shuffle(rng, opts), say:x[1], tip:info + vexTip(x)};
+}
+
 // ================= 句子結構課（原創）：8 課，每課說明＋標示例句＋8 題練習；另可用讀過的文章句子無限練習 =================
 // 例句與題目格式：[[主詞]] ((動詞)) / 意群 / 意群 ## 中文 ## 補充說明
 // 題目：['verb', 標示句]（點出主要動詞）、['subj', 標示句, 錯1, 錯2, 錯3]（選主詞）、['mc', 句子, 中文問題, 正解, 錯1, 錯2, 錯3, 解說]
@@ -5237,8 +5289,8 @@ const HOMO = [['right','write'],['week','weak'],['sale','sail'],['fare','fair'],
 const homoOf = w => { const g = HOMO.find(h => h.includes(w)); return g || [w]; };
 const sameSound = (a, b) => a === b || homoOf(a).includes(b);
 const canSpell = w => /^[a-z]{3,12}$/.test(w.w);
-function vTypes(w){ const t = ['e2c','c2e','listen']; if (canSpell(w)) t.push('spell'); return t; }
-const VT_NAME = {e2c:'英翻中', c2e:'中翻英', listen:'聽力', spell:'拼字'};
+function vTypes(w){ const t = ['e2c','c2e','listen']; if (canSpell(w)) t.push('spell'); if (vexExact(w.w).length) t.push('ex'); if (vexHas(w.w)) t.push('exz'); return t; }
+const VT_NAME = {e2c:'英翻中', c2e:'中翻英', listen:'聽力', spell:'拼字', ex:'例句填空', exz:'例句理解'};
 const pos1 = w => w.pos.split('/')[0];
 function vDistract(rng, w, test){
   const out = [], tryX = x => { if (x && x !== w && !out.includes(x) && test(x, out)) out.push(x); };
@@ -5251,7 +5303,10 @@ function vDistract(rng, w, test){
 const zhOK = (x, w, o) => !zhClash(x.zh, w.zh) && o.every(y => !zhClash(y.zh, x.zh));
 function buildVocab(w, type, rng){
   const base = {key:'v|' + w.w + '|' + type, tag:VT_NAME[type], lv:w.lv, sec:type === 'listen' ? 'L' : 'R'};
-  const info = `${w.e} ${w.w}（${w.pos}）＝${w.zh}`;
+  let info = `${w.e} ${w.w}（${w.pos}）＝${w.zh}`;
+  if ((type === 'ex' && vexExact(w.w).length) || (type === 'exz' && vexHas(w.w))) return buildVex(w, type, rng, base, info);
+  if (type === 'ex' || type === 'exz') return buildVocab(w, 'e2c', rng);
+  info += vexTip(vexPick(w.w, rng, false));
   if (type === 'e2c') { const d = vDistract(rng, w, (x, o) => zhOK(x, w, o)); return {...base, kind:'mc', ol:'zh-Hant', prompt:`<div class="big">${esc(w.w)}</div><div class="pos">${esc(w.pos)}</div>`, sub:'這個字的中文意思是？', ans:w.zh, opts:shuffle(rng, [w.zh, ...d.map(x => x.zh)]), say:w.w, tip:info}; }
   if (type === 'c2e') { const d = vDistract(rng, w, (x, o) => zhOK(x, w, o) && x.w !== w.w); return {...base, kind:'mc', pl:'zh-Hant', prompt:`<div class="big zhb">${w.e} ${esc(w.zh)}</div><div class="pos">${esc(w.pos)}</div>`, sub:'英文怎麼說？', ans:w.w, opts:shuffle(rng, [w.w, ...d.map(x => x.w)]), say:w.w, tip:info}; }
   if (type === 'listen') { const d = vDistract(rng, w, (x, o) => !sameSound(x.w, w.w) && o.every(y => !sameSound(y.w, x.w))); return {...base, kind:'mc', prompt:`<button class="say big-say" data-say="${esc(w.w)}">🔊 再聽一次</button>`, sub:'聽到的是哪一個字？', ans:w.w, opts:shuffle(rng, [w.w, ...d.map(x => x.w)]), say:w.w, autoSay:true, tip:info}; }
@@ -5518,7 +5573,7 @@ function optLabel(c, o, i){
 }
 function renderQ(){
   const c = Q.cur;
-  const sayBtn = c.say && !c.autoSay && !c.seqSay && c.kind === 'mc' && c.tag !== 'Part 5 文法' && c.tag !== 'Part 5 句型' ? `<button class="say" data-say="${esc(c.say)}">🔊</button>` : '';
+  const sayBtn = c.say && !c.autoSay && !c.seqSay && c.kind === 'mc' && c.tag !== 'Part 5 文法' && c.tag !== 'Part 5 句型' && c.tag !== '例句填空' ? `<button class="say" data-say="${esc(c.say)}">🔊</button>` : '';
   if (c.kind === 'mc') {
     const tgl = c.listenOpts ? `<label class="tgl"><input type="checkbox" id="p2t" ${S.p2text ? 'checked' : ''}> 顯示選項文字（初學練習用）</label>` : '';
     view(quizHead() + `<section class="q"><div class="prompt" lang="${c.pl || 'en'}">${c.prompt}${sayBtn}</div>${c.sub ? `<p class="sub">${c.sub}</p>` : ''}${tgl}
@@ -5655,15 +5710,18 @@ function todayLesson(){ lessonPage(); }
 
 // ---------- 單字卡 ----------
 function markSeen(w){ if (!S.seen[w.w]) { S.seen[w.w] = today(); } S.daily.cards++; save(); checkStreak(); }
+// 單字卡背面附一句例句（Tatoeba，短句優先）
+function fex(w){ const l = vexOf(w.w); if (!l.length) return ''; const x = l[0][0];
+  return `<div class="fex"><button class="say sm" data-say="${esc(x[1])}">🔊</button> ${vexBold(x[1], w.w)}<div class="dim">${esc(x[2])}</div></div>`; }
 function flashList(list, title, onDone){
   let k = 0, flip = false;
   const counted = new Set();
   const draw = () => {
     const w = list[k];
-    view(header(esc(title)) + `<section class="flash" id="fc"><div class="fe">${w.e}</div><div class="fw">${esc(w.w)}</div><div class="pos">${esc(w.pos)}</div>${flip ? `<div class="fz">${esc(w.zh)}</div><div class="fs">${esc(w.top)}</div>` : '<div class="fz dim">點卡片看中文</div>'}<div>${starBtn(w.w)}</div></section>
+    view(header(esc(title)) + `<section class="flash" id="fc"><div class="fe">${w.e}</div><div class="fw">${esc(w.w)}</div><div class="pos">${esc(w.pos)}</div>${flip ? `<div class="fz">${esc(w.zh)}</div><div class="fs">${esc(w.top)}</div>${fex(w)}` : '<div class="fz dim">點卡片看中文</div>'}<div>${starBtn(w.w)}</div></section>
      <div class="row"><button class="ghost" id="pv">‹ 上一張</button><button class="say" data-say="${esc(w.w)}">🔊</button><span class="num">${k + 1}/${list.length}</span><button class="ghost" id="nv">${onDone && k === list.length - 1 ? '開始練習 ›' : '下一張 ›'}</button></div>`);
     if (!flip) setTimeout(() => say(w.w), 200);
-    $('#fc').onclick = () => { flip = !flip; draw(); };
+    $('#fc').onclick = e => { if (e.target.closest('[data-say],[data-star]')) return; flip = !flip; draw(); };
     $('#pv').onclick = () => { k = (k - 1 + list.length) % list.length; flip = false; draw(); };
     $('#nv').onclick = () => { if (!counted.has(w.w)) { counted.add(w.w); markSeen(w); } if (onDone && k === list.length - 1) return onDone(); k = (k + 1) % list.length; flip = false; draw(); };
   };
