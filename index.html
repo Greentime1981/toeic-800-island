@@ -15,6 +15,7 @@
 :root{--bg:#f3f5f9;--card:#ffffff;--ink:#1d2433;--mute:#667085;--line:#dde3ec;--red:#1d4f91;--red2:#d6e3f5;--ind:#b7791f;--good:#2e7d4f;--goodbg:#e3f3e8;--bad:#b3261e;--badbg:#fbe4e2;--shadow:0 2px 8px rgba(80,50,20,.08)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141922;--card:#1d2430;--ink:#e8edf5;--mute:#9aa6b8;--line:#2e3747;--red:#7fb0ff;--red2:#24395a;--ind:#e0b25c;--good:#6fcf97;--goodbg:#1f3a2a;--bad:#ff8a80;--badbg:#45211f;--shadow:none}}
 :root[data-theme="dark"]{--bg:#141922;--card:#1d2430;--ink:#e8edf5;--mute:#9aa6b8;--line:#2e3747;--red:#7fb0ff;--red2:#24395a;--ind:#e0b25c;--good:#6fcf97;--goodbg:#1f3a2a;--bad:#ff8a80;--badbg:#45211f;--shadow:none}
+.task a{color:var(--red);font-weight:600;text-decoration:none}.task small{color:var(--mute)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:calc(16px * var(--z,1))/1.6 "PingFang TC","Microsoft JhengHei","Noto Sans TC","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif}
 #app{max-width:calc(640px * var(--z,1));margin:0 auto;padding:0 16px calc(32px + env(safe-area-inset-bottom))}
@@ -3753,7 +3754,7 @@ const TAG_RX = {tense:/時態|現在|過去|未來|完成/, passive:/被動/, re
 // ---------- 儲存（文章另存一個 key，避免主進度檔太大） ----------
 const AKEY = 'toeic800.articles';
 let ART = null;
-function artLoad(){ try { ART = JSON.parse(localStorage.getItem(AKEY) || 'null'); } catch(e) { ART = null; } ART = Object.assign({saved:[], cache:[]}, ART || {}); }
+function artLoad(){ try { ART = JSON.parse(localStorage.getItem(AKEY) || 'null'); } catch(e) { ART = null; } ART = Object.assign({saved:[], cache:[]}, ART || {}); artDbReady = artDbLoad().catch(() => {}); }
 function artSave(){ try { localStorage.setItem(AKEY, JSON.stringify(ART)); } catch(e) { toast('手機儲存空間不足，舊文章可能無法保存'); } }
 function artState(){
   const d = {lv:0, since:0, hist:[], today:null, extra:0, key:'', model:'', gen:{date:0, n:0}, myWords:{}};
@@ -3762,7 +3763,7 @@ function artState(){
   if (!S.art.lv) S.art.lv = Math.min(12, 3 * ((S.lv || 1) - 1) + 1);
   return S.art;
 }
-const artById = id => ARTICLES.find(a => a.id === id) || ART.saved.find(a => a.id === id) || ART.cache.find(a => a.id === id) || null;
+const artById = id => ARTICLES.find(a => a.id === id) || ART.saved.find(a => a.id === id) || ARTDB.find(a => a.id === id) || null;
 const artWords = a => a.p.join(' ').split(/\s+/).filter(Boolean).length;
 const artStage = lv => Math.min(4, Math.ceil(lv / 3));
 function artKeep(a){ // 保留最近 30 篇（錯題本還在用的文章不刪）
@@ -3869,72 +3870,92 @@ function artFromAI(j, lv, sit){
     const okP = ok(x.practice) && /\{[^}]+\}/.test(x.practice) && Array.isArray(x.practice_wrong) && x.practice_wrong.filter(ok).length === 3 && !x.practice_wrong.includes(x.practice.match(/\{([^}]+)\}/)[1]);
     return [ART_TAGS[x.tag] ? x.tag : 'phrase', ok(x.title_zh) ? x.title_zh : (ART_TAGS[x.tag] || '文法重點'), x.quote.trim(), x.explain_zh.trim(), ok(x.example) ? x.example : '', ok(x.example_zh) ? x.example_zh : '', okP ? x.practice.trim() : '', okP ? x.practice_wrong.join('|') : ''];
   });
-  return {id:'ai' + Date.now().toString(36), lv, sit, t:ok(j.title) ? j.title.trim() : 'Daily Reading', zh:ok(j.title_zh) ? j.title_zh : '', p, g, q, gr, src:'ai', date:Date.now()};
+  return {id:'ai' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), lv, sit, t:ok(j.title) ? j.title.trim() : 'Daily Reading', zh:ok(j.title_zh) ? j.title_zh : '', p, g, q, gr, src:'ai', date:Date.now()};
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let gemWait = [3000, 8000];   // 伺服器忙碌時的重試間隔（測試時可調短）
-let gemFirst = 75000, gemIdle = 30000, gemMax = 180000;   // 逾時：等第一段回應、兩段之間、總時間（毫秒）
+let gemFirst = 150000, gemIdle = 60000, gemMax = 300000;   // 逾時：等第一段回應、兩段之間、總時間（毫秒）；在背景生成，可以等久一點
+let gemGap = 15000;          // 每日連續生成時，每篇之間間隔（免費方案每分鐘次數有限）
 let gemNoThink = false;      // 模型不接受 thinkingConfig 時改為不帶
-let gemProg = null;          // 進度回呼：(已收到字數) => {}
+let gemProg = null;          // 進度回呼：(已收到字數, 是否還在構思) => {}
 const gemBusy = (status, msg) => status === 503 || status === 500 || /high demand|overloaded|unavailable|try again later/i.test(msg);
-// 少「思考」：Gemini 3 以上用 low，2.x Flash 關閉思考；文章不需要深度推理，可大幅縮短等待
-const gemThink = model => gemVer(model) >= 3 ? {thinkingLevel:'low'} : /flash/i.test(model) ? {thinkingBudget:0} : null;
+// 少「思考」：Gemini 3 以上用 low，2.x Flash 關閉思考。includeThoughts 讓 Google 在構思時也先傳回摘要，
+// 連線不會整整一分鐘沒有資料（有些手機網路會切斷 60 秒沒有資料的連線）
+const gemThink = model => gemVer(model) >= 3 ? {thinkingLevel:'low', includeThoughts:true} : /flash/i.test(model) ? {thinkingBudget:0} : null;
+// ---------- 生成紀錄（最近 10 次，Gemini 設定頁可看；不含金鑰） ----------
+const GLKEY = 'toeic800.gemlog';
+function gemLog(x){ try { const L = JSON.parse(localStorage.getItem(GLKEY) || '[]'); L.push(x); localStorage.setItem(GLKEY, JSON.stringify(L.slice(-10))); } catch(e) {} }
+function gemLogs(){ try { return JSON.parse(localStorage.getItem(GLKEY) || '[]'); } catch(e) { return []; } }
 // 把串流（SSE）的每一段合併成一個回應
 function gemMerge(chunks){
-  let text = '', fin = '', fb = null, err = null;
+  let text = '', fin = '', fb = null, err = null, thought = 0;
   for (const c of chunks) {
     if (c.error) err = c.error;
     if (c.promptFeedback) fb = c.promptFeedback;
     const cd = (c.candidates || [])[0]; if (!cd) continue;
     if (cd.finishReason) fin = cd.finishReason;
-    for (const p of (cd.content && cd.content.parts) || []) if (!p.thought && p.text) text += p.text;
+    for (const p of (cd.content && cd.content.parts) || []) { if (p.thought) thought++; else if (p.text) text += p.text; }
   }
-  return {err, j:{promptFeedback:fb, candidates:[{content:{parts:[{text}]}, finishReason:fin}]}, text};
+  return {err, thought, fin, j:{promptFeedback:fb, candidates:[{content:{parts:[{text}]}, finishReason:fin}]}, text};
 }
 function gemSse(buf, chunks){ // 解析完整的 data: 行，回傳剩下未完成的部分
   const lines = buf.split(/\r?\n/), rest = lines.pop();
   for (const l of lines) if (l.startsWith('data:')) { try { chunks.push(JSON.parse(l.slice(5))); } catch(e) {} }
   return rest;
 }
-// 送出一次串流請求；逾時自動中止
-async function gemFetch(model, text){
+// 送出一次請求（預設串流）；逾時自動中止；每次都寫入生成紀錄
+async function gemFetch(model, text, stream = true){
   const st = artState();
   const gc = {responseMimeType:'application/json', maxOutputTokens:16384};
   const th = !gemNoThink && gemThink(model); if (th) gc.thinkingConfig = th;
   const ac = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const t0 = Date.now(), log = {t:t0, model, mode:stream ? '串流' : '一般', think:th ? (th.thinkingLevel || 'off') : '—', first:0, chunks:0, words:0, ms:0, res:''};
   let why = '', idle, first = true;
   const kick = ms => { clearTimeout(idle); idle = setTimeout(() => { why = first ? 'first' : 'idle'; ac && ac.abort(); }, ms); };
   const hard = setTimeout(() => { why = 'max'; ac && ac.abort(); }, gemMax);
   kick(gemFirst);
+  const end = res => { log.ms = Date.now() - t0; log.res = res; gemLog(log); };
   try {
-    const r = await fetch(`${GEM}/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(st.key)}`, {method:'POST', headers:{'Content-Type':'application/json'},
+    const r = await fetch(`${GEM}/models/${encodeURIComponent(model)}:${stream ? 'streamGenerateContent?alt=sse&' : 'generateContent?'}key=${encodeURIComponent(st.key)}`, {method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{role:'user', parts:[{text}]}], generationConfig:gc}), signal:ac ? ac.signal : undefined});
-    if (!r.ok) { const j = await r.json().catch(() => ({})); return {ok:false, status:r.status, msg:(j.error && j.error.message) || ''}; }
+    log.head = Date.now() - t0;
+    if (!r.ok) { const j = await r.json().catch(() => ({})); const msg = (j.error && j.error.message) || ''; end('HTTP ' + r.status + ' ' + msg.slice(0, 120)); return {ok:false, status:r.status, msg}; }
     const chunks = [];
-    if (r.body && r.body.getReader && typeof TextDecoder !== 'undefined') {
+    if (!stream) { const j = await r.json(); chunks.push(j); }
+    else if (r.body && r.body.getReader && typeof TextDecoder !== 'undefined') {
       const rd = r.body.getReader(), dec = new TextDecoder(); let buf = '';
       for (;;) {
         const {done, value} = await rd.read(); if (done) break;
+        if (first) log.first = Date.now() - t0;
         first = false; kick(gemIdle);
         buf = gemSse(buf + dec.decode(value, {stream:true}), chunks);
-        if (gemProg) gemProg((gemMerge(chunks).text.match(/[A-Za-z]+/g) || []).length);
+        const m = gemMerge(chunks); log.chunks = chunks.length; log.words = (m.text.match(/[A-Za-z]+/g) || []).length;
+        if (gemProg) gemProg(log.words, !m.text);
       }
       gemSse(buf + '\n', chunks);
     } else gemSse((await r.text()) + '\n', chunks);
-    const m = gemMerge(chunks);
-    if (m.err) return {ok:false, status:m.err.code || 500, msg:m.err.message || ''};
+    const m = gemMerge(chunks); log.chunks = chunks.length; log.words = (m.text.match(/[A-Za-z]+/g) || []).length; log.fin = m.fin;
+    if (m.err) { end('錯誤 ' + (m.err.message || '').slice(0, 120)); return {ok:false, status:m.err.code || 500, msg:m.err.message || ''}; }
+    end('完成' + (m.fin && m.fin !== 'STOP' ? '（' + m.fin + '）' : ''));
     return {ok:true, j:m.j};
   } catch(e) {
-    if (why || (e && e.name === 'AbortError')) { const x = new Error('Gemini 太久沒有回應（' + (why === 'max' ? '超過 3 分鐘' : why === 'first' ? `${Math.round(gemFirst / 1000)} 秒都沒開始回應` : '寫到一半停住') + '），可能是 Google 伺服器忙碌；今天先讀文章庫，晚點再試。'); x.timeout = true; throw x; }
-    throw new Error('連不上 Gemini（請確認網路）');
+    if (why || (e && e.name === 'AbortError')) {
+      end('逾時：' + (why === 'max' ? '總時間' : why === 'first' ? '沒開始回應' : '中途停住'));
+      const x = new Error('Gemini 太久沒有回應（' + (why === 'max' ? `超過 ${Math.round(gemMax / 60000)} 分鐘` : why === 'first' ? `${Math.round(gemFirst / 1000)} 秒都沒開始回應` : '寫到一半停住') + '），可能是 Google 伺服器忙碌。'); x.timeout = true; throw x;
+    }
+    end('連線中斷：' + ((e && e.message) || '').slice(0, 80));
+    const x = new Error(`連線在 ${Math.round((Date.now() - t0) / 1000)} 秒時中斷（網路不穩或手機進入休眠）`); x.net = true; throw x;
   } finally { clearTimeout(idle); clearTimeout(hard); }
 }
-// 呼叫一次；伺服器忙碌（503）時自動等待重試
+// 呼叫一次；伺服器忙碌（503）時自動等待重試；串流連線被切斷時改用一般模式再試一次
 async function gemCall(model, text){
+  let stream = true;
   for (let i = 0; ; i++) {
-    const r = await gemFetch(model, text);
+    let r;
+    try { r = await gemFetch(model, text, stream); }
+    catch(e) { if (e.net && stream) { stream = false; i--; continue; } throw e; }
     if (r.ok) return r.j;
-    if (r.status === 400 && /thinking/i.test(r.msg) && !gemNoThink) { gemNoThink = true; i--; continue; }   // 模型不支援思考設定
+    if (r.status === 400 && /thinking|thought/i.test(r.msg) && !gemNoThink) { gemNoThink = true; i--; continue; }   // 模型不支援思考設定
     if (gemBusy(r.status, r.msg) && i < gemWait.length) { toast(`Gemini 目前忙碌，${Math.round(gemWait[i] / 1000)} 秒後自動重試…`); await sleep(gemWait[i]); continue; }
     const e = new Error(r.msg || 'HTTP ' + r.status); e.status = r.status; e.busy = gemBusy(r.status, r.msg); throw e;
   }
@@ -3947,15 +3968,14 @@ async function artGenerate(lv, retried){
   let j;
   try { j = await gemCall(st.model, pr.text); }
   catch (e) {
-    if (e.timeout) throw e;
     // Google 停用舊模型時，訊息會建議新模型（例如 use models/gemini-3.8-flash）：自動改用並重試一次
     const sug = e.message.match(/no longer available[\s\S]*?models\/([\w.-]+)/i);
     if (sug && !retried && sug[1] !== st.model) { st.model = sug[1]; save(); toast('舊模型已停用，自動改用 ' + sug[1]); return artGenerate(lv, true); }
-    // 主要模型一直忙碌：改用備用的免費 Flash 模型（例如 Flash-Lite）試一次，不改變你的設定
-    const alt = e.busy && (st.models || []).find(m => m !== st.model && /flash/i.test(m) && !gemPaidLikely(m));
+    // 主要模型忙碌或太慢：改用備用的免費 Flash 模型（優先 Flash-Lite，速度較快）試一次，不改變你的設定
+    const alts = (st.models || []).filter(m => m !== st.model && /flash/i.test(m) && !gemPaidLikely(m)).sort((a, b) => /lite/i.test(b) - /lite/i.test(a));
+    const alt = (e.busy || e.timeout || e.net) && alts[0];
     if (alt) { toast('改用備用模型 ' + alt + ' 再試一次…'); try { j = await gemCall(alt, pr.text); } catch (e2) { e = e2; } }
     if (!j) {
-      if (e.timeout) throw e;
       if (e.status === 429) throw new Error('今天的免費額度可能用完了，明天會恢復；今天先讀文章庫的文章');
       if (e.busy) throw new Error('Google 的 Gemini 伺服器目前太忙（Google 端的暫時狀況，不是金鑰或設定的問題），已自動重試仍失敗。請過幾分鐘再試；今天的文章會先改用文章庫。');
       throw e;
@@ -3969,52 +3989,119 @@ async function artGenerate(lv, retried){
   const t = dnum(); if (st.gen.date !== t) st.gen = {date:t, n:0}; st.gen.n++; save();
   return artFromAI(data, lv, pr.sit);
 }
-// 同一時間只跑一個生成（免費方案每分鐘次數有限，同時送反而更慢）
-let artBusy = false, artPending = null;
+
+// ---------- 文章資料庫：Gemini 生成的文章全部保存（IndexedDB，可存數百篇；不支援時改存最近 60 篇） ----------
+let ARTDB = [], artDbH = null, artDbReady = Promise.resolve();
+function artDbOpen(){
+  if (!artDbH) artDbH = new Promise((res, rej) => {
+    if (typeof indexedDB === 'undefined') return rej(new Error('no indexedDB'));
+    const r = indexedDB.open('toeic800', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('arts', {keyPath:'id'});
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  return artDbH;
+}
+async function artDbLoad(){
+  let got = [];
+  try {
+    const db = await artDbOpen();
+    got = await new Promise((res, rej) => { const q = db.transaction('arts').objectStore('arts').getAll(); q.onsuccess = () => res(q.result || []); q.onerror = () => rej(q.error); });
+  } catch(e) { got = (ART.pool || []).slice(); }
+  ARTDB = got.concat(ARTDB.filter(x => !got.some(y => y.id === x.id)));   // 載入期間新存的文章不要被覆蓋
+  const old = (ART.cache || []).concat(ART.saved.filter(a => a.src === 'ai'));   // 舊版的備用文章與讀過的生成文章搬進資料庫
+  for (const a of old) if (!ARTDB.some(x => x.id === a.id)) await artDbPut(Object.assign({}, a, {read:a.read || (ART.cache.includes(a) ? 0 : a.date || 1)}));
+  if (ART.cache && ART.cache.length) { ART.cache = []; artSave(); }
+  ARTDB.sort((a, b) => (a.date || 0) - (b.date || 0));
+}
+async function artDbPut(a){
+  ARTDB = ARTDB.filter(x => x.id !== a.id); ARTDB.push(a);
+  try { const db = await artDbOpen(); await new Promise((res, rej) => { const tx = db.transaction('arts', 'readwrite'); tx.objectStore('arts').put(a); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+  catch(e) { ART.pool = ARTDB.slice(-60); artSave(); }
+}
+const artUnread = () => ARTDB.filter(a => !a.read);
+function artMarkRead(a){ const x = ARTDB.find(y => y.id === a.id); if (x && !x.read) { x.read = Date.now(); artDbPut(x); } }
+
+// ---------- 每天在背景生成 5 篇（同一時間只跑一個請求） ----------
+const ART_DAY = 5;
+let artPending = null, artDayRun = false, artDayMsg = '';
+const artGenToday = () => { const g = artState().gen; return g.date === dnum() ? g.n : 0; };
 function artGenOne(lv){
   if (artPending) return artPending;
-  artPending = artGenerate(lv).finally(() => { artPending = null; });
+  artPending = artGenerate(lv).then(async a => { a.read = 0; await artDbPut(a); return a; }).finally(() => { artPending = null; artDayShow(); });
   return artPending;
 }
-async function artTopUp(){ // 有網路時多生成 2 篇備用（背景進行）
-  const st = artState();
-  if (artBusy || !st.key || !st.model || ART.cache.length >= 2) return;
-  artBusy = true;
-  try { while (ART.cache.length < 2) { const a = await artGenOne(st.lv); if (!ART.cache.includes(a) && !artById(a.id)) { ART.cache.push(a); artSave(); } } } catch(e) {} finally { artBusy = false; }
+function artDayShow(){ const el = typeof document !== 'undefined' && document.querySelector('#adst'); if (el) el.innerHTML = artDayText(); }
+function artDayText(){
+  const st = artState(); if (!st.key) return '尚未設定 Gemini：目前讀的是內建文章庫。';
+  return `Gemini：${esc(st.model || '未選模型')}・今天已生成 <b>${artGenToday()}／${ART_DAY}</b> 篇${artPending ? '（生成中…）' : ''}・資料庫 <b>${ARTDB.length}</b> 篇（未讀 ${artUnread().length}）` + (artDayMsg && artGenToday() < ART_DAY && !artPending ? `<br><span class="warn">上次生成失敗：${esc(artDayMsg)}</span>` : '');
 }
+async function artDaily(){
+  const st = artState();
+  if (artDayRun || !st.key || !st.model) return;
+  artDayRun = true; let fails = 0;
+  try {
+    await artDbReady;
+    while (artGenToday() < ART_DAY && fails < 2 && !(typeof navigator !== 'undefined' && navigator.onLine === false)) {
+      try { await artGenOne(st.lv); fails = 0; artDayMsg = ''; }
+      catch(e) { fails++; artDayMsg = e.message; artDayShow(); if (e.status === 429 || /額度/.test(e.message)) break; }
+      if (artGenToday() < ART_DAY) await sleep(gemGap * (fails ? 2 : 1));
+    }
+  } finally { artDayRun = false; artDayShow(); }
+}
+const artTopUp = artDaily;   // 舊名稱
 // 等待畫面：顯示經過秒數與已收到字數，可選「不等了」
 function artWait(lv){
-  const t0 = Date.now(); let got = 0, stop;
+  const t0 = Date.now(); let got = 0, think = true, stop;
   const cancel = new Promise(r => { stop = r; });
   view(header('每日文章') + `<section class="panel result"><div class="score">✍️</div><p>Gemini 正在依你目前的程度（Lv${lv}）寫今天的文章…</p>
     <p class="sub" id="awp">已等 0 秒</p><button class="ghost" id="awc">不等了，先讀文章庫的文章</button>
-    <p class="sub">寫好的文章會存成備用，下次直接讀。</p></section>`);
+    <p class="sub">寫好的文章會存進文章資料庫，之後可以讀。</p></section>`);
   const tick = setInterval(() => { const el = $('#awp'); if (!el) return clearInterval(tick); el.textContent = `已等 ${Math.round((Date.now() - t0) / 1000)} 秒` + (got ? `・已收到約 ${got} 字` : '・Gemini 構思中'); }, 500);
   $('#awc').onclick = () => stop('cancel');
-  gemProg = n => { got = n; };
+  gemProg = (n, th) => { got = n; think = th; };
   return {cancel, done(){ clearInterval(tick); gemProg = null; }};
 }
 
 // ---------- 今天的文章 ----------
 async function artToday(forceNew){
   const st = artState(), t = dnum();
+  await artDbReady;
   if (!forceNew && st.today && st.today.date === t) { const a = artById(st.today.id); if (a) return a; }
   let a = null, note = '';
-  const take = () => { const ci = ART.cache.findIndex(x => Math.abs(x.lv - st.lv) <= 1); return ci >= 0 ? ART.cache.splice(ci, 1)[0] : null; };
+  const take = () => artUnread().filter(x => Math.abs(x.lv - st.lv) <= 1).sort((x, y) => (y.date || 0) - (x.date || 0))[0] || null;
   a = take();
   if (!a && st.key && st.model) {
     const w = artWait(st.lv);
-    const job = artGenOne(st.lv);
-    job.then(x => { if (!artById(x.id) && !ART.cache.includes(x)) { ART.cache.push(x); artSave(); } }, () => {});   // 背景完成的文章存成備用
-    try { const r = await Promise.race([job, w.cancel]); if (r === 'cancel') note = '這次先讀文章庫；Gemini 寫好的文章會存成備用'; else { a = r; const i = ART.cache.indexOf(r); if (i >= 0) ART.cache.splice(i, 1); } }
-    catch(e) { note = e.message; }
+    try { const r = await Promise.race([artGenOne(st.lv), w.cancel]); if (r === 'cancel') note = '這次先讀文章庫；Gemini 寫好的文章會存進文章資料庫'; else a = r; }
+    catch(e) { note = e.message + ' 今天先讀文章庫的文章。'; }
     w.done();
   }
   if (!a) { a = artFromLibrary(); a = {...a, src:'lib'}; if (!note && !st.key) note = '還沒設定 Gemini，今天先讀文章庫的文章'; }
   if (forceNew) st.extra = (st.extra || 0) + 1; else st.today = {date:t, id:a.id};
+  if (a.src === 'ai') artMarkRead(a);
   artKeep(a); save();
-  setTimeout(artTopUp, 500);
+  setTimeout(artDaily, 500);
   return Object.assign(a, {note});
+}
+// ---------- 隨機閱讀與文章資料庫 ----------
+function artReadOld(a){ if (!a) return toast('找不到文章'); if (a.src === 'ai') artMarkRead(a); artKeep(a); a.note = ''; artOpen(a); }
+async function artRandom(){
+  await artDbReady;
+  const st = artState(), near = ARTDB.filter(a => Math.abs(a.lv - st.lv) <= 2);
+  const pool = near.length ? near : ARTDB.length ? ARTDB : ARTICLES.map(a => ({...a, src:'lib'}));
+  artReadOld(pick(mulberry32(Date.now() & 0xffffff), pool));
+}
+async function artDbMenu(lvF){
+  await artDbReady;
+  const st = artState(), sc = {}; st.hist.forEach(h => { sc[h.id] = h.sc; });
+  const list = ARTDB.filter(a => !lvF || a.lv === lvF).slice().sort((a, b) => (b.date || 0) - (a.date || 0));
+  const lvs = [...new Set(ARTDB.map(a => a.lv))].sort((a, b) => a - b);
+  const d = ms => { const x = new Date(ms); return `${x.getMonth() + 1}/${x.getDate()}`; };
+  view(header('文章資料庫') + `<section class="panel"><p class="sub left">Gemini 生成的文章都存在這裡（共 ${ARTDB.length} 篇，未讀 ${artUnread().length} 篇），只存在這支手機。</p>
+    <div class="row"><button class="next" onclick="artRandom()">🎲 隨機讀一篇</button></div>
+    ${lvs.length > 1 ? `<div class="row">${['全部', ...lvs].map(l => `<button class="${(l === '全部' ? !lvF : l === lvF) ? 'next' : 'ghost'} inl" onclick="artDbMenu(${l === '全部' ? 0 : l})">${l === '全部' ? l : 'Lv' + l}</button>`).join('')}</div>` : ''}</section>
+    <section class="panel">${list.length ? list.slice(0, 200).map(a => `<div class="task"><span><a href="#" onclick="event.preventDefault();artReadOld(artById('${a.id}'))">${esc(a.t)}</a><br><small>${esc(a.zh || '')}</small></span><span class="num">${d(a.date || 0)}・Lv${a.lv}・${esc(SIT_NAME[a.sit] || '')}・${sc[a.id] != null ? sc[a.id] + '%' : a.read ? '讀過' : '未讀'}</span></div>`).join('') : '<p class="sub">還沒有生成的文章。設定 Gemini 金鑰後，每天會自動生成 5 篇。</p>'}</section>
+    <button class="ghost" onclick="articleMenu()">‹ 回每日文章</button>`);
 }
 
 // ---------- 閱讀畫面 ----------
@@ -4111,7 +4198,8 @@ function articleMenu(){
   view(header('每日文章') + `<section class="panel"><div class="mgrid"><div><b>Lv${st.lv}</b><small>目前程度</small></div><div><b>${ART_LV[st.lv].w}</b><small>字／篇</small></div><div><b>${avg || '—'}</b><small>平均字／分</small></div><div><b>${ART_WPM[artStage(st.lv)]}</b><small>目標字／分</small></div></div>
    <p class="sub left">最近 5 篇平均答對 85% 以上就升一級、低於 60% 降一級。文章主要用你學過的字，並多用你較弱的文法：${artWeakTags().map(t => ART_TAGS[t]).join('、')}。</p>
    <div class="row"><button class="next" onclick="articleGo()">${done ? '重讀今天的文章' : '▶ 今天的文章'}</button><button class="ghost" onclick="articleGo(1)">加讀一篇</button></div>
-   <p class="sub left">${st.key ? `Gemini：${esc(st.model || '未選模型')}・今天已生成 ${st.gen.date === dnum() ? st.gen.n : 0} 篇・備用 ${ART.cache.length} 篇` : '尚未設定 Gemini：目前讀的是內建文章庫。'}　<button class="ghost inl" onclick="gemSetup()">⚙️ Gemini 設定</button></p></section>
+   <div class="row"><button class="ghost" onclick="artRandom()">🎲 隨機讀以前的文章</button><button class="ghost" onclick="artDbMenu()">📚 文章資料庫（${ARTDB.length}）</button></div>
+   <p class="sub left"><span id="adst">${artDayText()}</span>　${st.key && artGenToday() < ART_DAY && !artPending ? '<button class="ghost inl" onclick="artDaily();setTimeout(artDayShow,300)">立即補生成</button>' : ''}<button class="ghost inl" onclick="gemSetup()">⚙️ Gemini 設定</button></p></section>
    ${last.length ? `<section class="panel"><h2>最近讀過</h2>${last.map(h => { const a = artById(h.id); return `<div class="task"><span>${a ? `<a href="#" onclick="event.preventDefault();artOpen(artById('${h.id}'))">${esc(a.t)}</a>` : '（已刪除）'}</span><span class="num">Lv${h.lv}・${h.sc}%・${h.wpm} 字／分</span></div>`; }).join('')}</section>` : ''}`);
 }
 
@@ -4127,12 +4215,13 @@ function gemSetup(){
    <p class="sub left">⚠️ 金鑰只存在這支手機的瀏覽器，不會上傳到其他地方；但請不要分享給別人。免費額度與可用模型由 Google 決定，可能隨時調整；Google 條款寫明免費方案的內容可能用於改進其產品。</p></section>
    <section class="panel"><label class="row2">API 金鑰 <input type="password" id="gk" class="tin" autocomplete="off" value="${esc(st.key || '')}" placeholder="貼上金鑰"></label>
     <button class="next" id="gsave">儲存並取得模型清單</button><div id="gm"></div>
-    ${st.key ? '<button class="ghost" id="gdel">刪除金鑰</button>' : ''}</section>`);
+    ${st.key ? '<button class="ghost" id="gdel">刪除金鑰</button>' : ''}</section>
+   ${gemLogs().length ? `<section class="panel"><h2>最近生成紀錄</h2><p class="sub left">生成失敗時，請截這一段給開發者看（不含金鑰）。</p>${gemLogs().slice().reverse().map(x => { const d = new Date(x.t); return `<div class="task"><span>${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}・${esc(x.model)}・${esc(x.mode)}・思考 ${esc(x.think)}<br><small>${esc(x.res)}</small></span><span class="num">共 ${Math.round(x.ms / 1000)} 秒<br><small>連上 ${x.head != null ? Math.round(x.head / 1000) + ' 秒' : '—'}・首段 ${x.first ? Math.round(x.first / 1000) + ' 秒' : '—'}・${x.chunks} 段・${x.words} 字</small></span></div>`; }).join('')}</section>` : ''}`);
   const showModels = list => {
     $('#gm').innerHTML = list.length ? `<label class="row2">模型 <select id="gsel" class="tin">${list.map(m => `<option value="${esc(m.id)}" ${m.id === st.model ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label><button class="next" id="gtest">測試生成</button>` : '<p class="warn">找不到可用的模型。</p>';
     st.models = list.filter(m => !m.paid).map(m => m.id); save();   // 記住可用的免費模型，忙碌時當備用
     if ($('#gsel')) { $('#gsel').onchange = e => { st.model = e.target.value; save(); }; if (!st.model || !list.some(m => m.id === st.model) || (st.model && gemVer(st.model) < 3 && list.some(m => gemVer(m.id) >= 3 && /flash/i.test(m.id)))) { const f = list.find(m => !m.paid && /flash/i.test(m.id) && !/lite|preview|exp/i.test(m.id)) || list.find(m => !m.paid && /flash/i.test(m.id)) || list.find(m => !m.paid) || list[0]; st.model = f.id; $('#gsel').value = f.id; save(); } }
-    if ($('#gtest')) $('#gtest').onclick = async () => { const b = $('#gtest'), t0 = Date.now(); b.disabled = true; let got = 0; gemProg = n => { got = n; }; const tk = setInterval(() => { if (b.isConnected) b.textContent = `生成中…已等 ${Math.round((Date.now() - t0) / 1000)} 秒` + (got ? `・約 ${got} 字` : ''); }, 500); try { const a = await artGenOne(st.lv); if (!ART.cache.includes(a)) { ART.cache.push(a); artSave(); } toast(`成功！${Math.round((Date.now() - t0) / 1000)} 秒生成一篇 ${artWords(a)} 字的文章（存為備用）`); } catch(e) { toast('失敗：' + e.message); } clearInterval(tk); gemProg = null; gemSetup(); };
+    if ($('#gtest')) $('#gtest').onclick = async () => { const b = $('#gtest'), t0 = Date.now(); b.disabled = true; let got = 0; gemProg = n => { got = n; }; const tk = setInterval(() => { if (b.isConnected) b.textContent = `生成中…已等 ${Math.round((Date.now() - t0) / 1000)} 秒` + (got ? `・約 ${got} 字` : ''); }, 500); try { const a = await artGenOne(st.lv); toast(`成功！${Math.round((Date.now() - t0) / 1000)} 秒生成一篇 ${artWords(a)} 字的文章（已存進文章資料庫）`); } catch(e) { toast('失敗：' + e.message); } clearInterval(tk); gemProg = null; gemSetup(); };
   };
   $('#gsave').onclick = async () => {
     const k = $('#gk').value.trim(); if (!k) return toast('請先貼上金鑰');
@@ -4140,7 +4229,7 @@ function gemSetup(){
     try { const list = await gemModels(k); st.key = k; save(); showModels(list); toast('金鑰可以使用'); } catch(e) { toast('金鑰無法使用：' + e.message); }
     $('#gsave').disabled = false; $('#gsave').textContent = '儲存並取得模型清單';
   };
-  if ($('#gdel')) $('#gdel').onclick = () => { st.key = ''; st.model = ''; ART.cache = []; artSave(); save(); toast('已刪除金鑰'); gemSetup(); };
+  if ($('#gdel')) $('#gdel').onclick = () => { st.key = ''; st.model = ''; save(); toast('已刪除金鑰'); gemSetup(); };
   if (st.key) gemModels(st.key).then(showModels).catch(() => {});
 }
 
@@ -5019,7 +5108,7 @@ function iosGuide(force){
 }
 
 // ---------- 啟動 ----------
-load(); artLoad(); artState(); applyFont(); initVoice(); setTimeout(() => { try { artTopUp(); } catch(e) {} }, 4000);
+load(); artLoad(); artState(); applyFont(); initVoice(); setTimeout(() => { try { artDaily(); } catch(e) {} }, 4000);
 { const wk = curWeek(), P = PLAN[wk - 1]; if (S.lastWk !== wk) { if (P.lv) S.lv = P.lv; S.lastWk = wk; save(); } }
 home();
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
