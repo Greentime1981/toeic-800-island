@@ -3874,7 +3874,7 @@ function artFromAI(j, lv, sit){
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let gemWait = [3000, 8000];   // 伺服器忙碌時的重試間隔（測試時可調短）
-let gemFirst = 150000, gemIdle = 60000, gemMax = 300000;   // 逾時：等第一段回應、兩段之間、總時間（毫秒）；在背景生成，可以等久一點
+let gemFirst = 45000, gemIdle = 60000, gemMax = 300000;   // 逾時：等第一段回應（正常 2～10 秒就開始回應；45 秒沒動靜就換模型）、兩段之間、總時間（毫秒）
 let gemGap = 15000;          // 每日連續生成時，每篇之間間隔（免費方案每分鐘次數有限）
 let gemNoThink = false;      // 模型不接受 thinkingConfig 時改為不帶
 let gemProg = null;          // 進度回呼：(已收到字數, 是否還在構思) => {}
@@ -3948,7 +3948,7 @@ async function gemFetch(model, text, stream = true){
   } finally { clearTimeout(idle); clearTimeout(hard); }
 }
 // 呼叫一次；伺服器忙碌（503）時自動等待重試；串流連線被切斷時改用一般模式再試一次
-async function gemCall(model, text){
+async function gemCall(model, text, waits = gemWait){
   let stream = true;
   for (let i = 0; ; i++) {
     let r;
@@ -3956,7 +3956,7 @@ async function gemCall(model, text){
     catch(e) { if (e.net && stream) { stream = false; i--; continue; } throw e; }
     if (r.ok) return r.j;
     if (r.status === 400 && /thinking|thought/i.test(r.msg) && !gemNoThink) { gemNoThink = true; i--; continue; }   // 模型不支援思考設定
-    if (gemBusy(r.status, r.msg) && i < gemWait.length) { toast(`Gemini 目前忙碌，${Math.round(gemWait[i] / 1000)} 秒後自動重試…`); await sleep(gemWait[i]); continue; }
+    if (gemBusy(r.status, r.msg) && i < waits.length) { toast(`Gemini 目前忙碌，${Math.round(waits[i] / 1000)} 秒後自動重試…`); await sleep(waits[i]); continue; }
     const e = new Error(r.msg || 'HTTP ' + r.status); e.status = r.status; e.busy = gemBusy(r.status, r.msg); throw e;
   }
 }
@@ -3965,22 +3965,32 @@ async function artGenerate(lv, retried){
   if (!st.key || !st.model) throw new Error('尚未設定 Gemini 金鑰或模型');
   if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('目前沒有網路');
   const pr = artPrompt(lv);
-  let j;
-  try { j = await gemCall(st.model, pr.text); }
-  catch (e) {
-    // Google 停用舊模型時，訊息會建議新模型（例如 use models/gemini-3.8-flash）：自動改用並重試一次
-    const sug = e.message.match(/no longer available[\s\S]*?models\/([\w.-]+)/i);
-    if (sug && !retried && sug[1] !== st.model) { st.model = sug[1]; save(); toast('舊模型已停用，自動改用 ' + sug[1]); return artGenerate(lv, true); }
-    // 主要模型忙碌或太慢：改用備用的免費 Flash 模型（優先 Flash-Lite，速度較快）試一次，不改變你的設定
-    const alts = (st.models || []).filter(m => m !== st.model && /flash/i.test(m) && !gemPaidLikely(m)).sort((a, b) => /lite/i.test(b) - /lite/i.test(a));
-    const alt = (e.busy || e.timeout || e.net) && alts[0];
-    if (alt) { toast('改用備用模型 ' + alt + ' 再試一次…'); try { j = await gemCall(alt, pr.text); } catch (e2) { e = e2; } }
-    if (!j) {
-      if (e.status === 429) throw new Error('今天的免費額度可能用完了，明天會恢復；今天先讀文章庫的文章');
-      if (e.busy) throw new Error('Google 的 Gemini 伺服器目前太忙（Google 端的暫時狀況，不是金鑰或設定的問題），已自動重試仍失敗。請過幾分鐘再試；今天的文章會先改用文章庫。');
-      throw e;
+  // 試的順序：今天已證實可用的模型 → 你選的模型 → 備用免費 Flash（優先 Flash-Lite，速度快）
+  const alts = (st.models || []).filter(m => m !== st.model && /flash/i.test(m) && !gemPaidLikely(m)).sort((x, y) => /lite/i.test(y) - /lite/i.test(x));
+  const pref = st.prefer && st.prefer.date === dnum() && st.prefer.model;
+  const order = [...new Set([pref, st.model, alts[0]].filter(Boolean))];
+  let j, e, used = '';
+  for (let k = 0; k < order.length && !j; k++) {
+    const m = order[k], more = k < order.length - 1;
+    if (k) toast((order[k - 1] === st.model ? '你選的模型' : order[k - 1]) + ' 目前忙碌，改用 ' + m + ' …');
+    try { j = await gemCall(m, pr.text, more ? [3000] : gemWait); used = m; }
+    catch (x) {
+      e = x;
+      // Google 停用舊模型時，訊息會建議新模型（例如 use models/gemini-3.8-flash）：自動改用並重試一次
+      const sug = x.message.match(/no longer available[\s\S]*?models\/([\w.-]+)/i);
+      if (sug && m === st.model && !retried && sug[1] !== st.model) { st.model = sug[1]; save(); toast('舊模型已停用，自動改用 ' + sug[1]); return artGenerate(lv, true); }
+      if (!(x.busy || x.timeout || x.net)) break;   // 金鑰、額度等問題換模型也沒用
     }
   }
+  if (!j) {
+    if (e.status === 429) throw new Error('今天的免費額度可能用完了，明天會恢復；今天先讀文章庫的文章');
+    if (e.busy) throw new Error('Google 的 Gemini 伺服器目前太忙（Google 端的暫時狀況，不是金鑰或設定的問題），已自動重試仍失敗。請過幾分鐘再試；今天的文章會先改用文章庫。');
+    throw e;
+  }
+  // 記住今天可用的模型：主模型忙碌時，今天後面的文章直接用備用模型，不再每篇空等
+  if (used !== st.model) { if (!pref || pref !== used) toast('今天先改用 ' + used + '（你選的模型目前忙碌）'); st.prefer = {model:used, date:dnum()}; }
+  else if (st.prefer) st.prefer = null;
+  save();
   if (j.promptFeedback && j.promptFeedback.blockReason) throw new Error('生成被擋下（' + j.promptFeedback.blockReason + '）');
   const c = (j.candidates || [])[0];
   const txt = c && c.content && (c.content.parts || []).filter(x => !x.thought).map(x => x.text || '').join('');
@@ -4033,7 +4043,8 @@ function artGenOne(lv){
 function artDayShow(){ const el = typeof document !== 'undefined' && document.querySelector('#adst'); if (el) el.innerHTML = artDayText(); }
 function artDayText(){
   const st = artState(); if (!st.key) return '尚未設定 Gemini：目前讀的是內建文章庫。';
-  return `Gemini：${esc(st.model || '未選模型')}・今天已生成 <b>${artGenToday()}／${ART_DAY}</b> 篇${artPending ? '（生成中…）' : ''}・資料庫 <b>${ARTDB.length}</b> 篇（未讀 ${artUnread().length}）` + (artDayMsg && artGenToday() < ART_DAY && !artPending ? `<br><span class="warn">上次生成失敗：${esc(artDayMsg)}</span>` : '');
+  const pf = st.prefer && st.prefer.date === dnum() && st.prefer.model;
+  return `Gemini：${esc(st.model || '未選模型')}${pf ? `（今天改用 ${esc(pf)}）` : ''}・今天已生成 <b>${artGenToday()}／${ART_DAY}</b> 篇${artPending ? '（生成中…）' : ''}・資料庫 <b>${ARTDB.length}</b> 篇（未讀 ${artUnread().length}）` + (artDayMsg && artGenToday() < ART_DAY && !artPending ? `<br><span class="warn">上次生成失敗：${esc(artDayMsg)}</span>` : '');
 }
 async function artDaily(){
   const st = artState();
