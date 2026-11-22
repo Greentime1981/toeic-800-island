@@ -4374,7 +4374,7 @@ function articleMenu(){
    <div class="row"><button class="next" onclick="articleGo()">${done ? '重讀今天的精讀' : '▶ 今天的精讀'}</button><button class="ghost" onclick="artExtGo()">📖 泛讀${S.daily.ext ? ' ✓' : ''}</button></div>
    <div class="row">${rd ? `<button class="ghost" onclick="artRereadGo()">🔁 重讀（${rd} 篇到期）</button>` : ''}<button class="ghost" onclick="articleGo(1)">加讀一篇精讀</button></div>`
    : `<p>第一次使用：先做 <b>閱讀程度檢測</b>（約 5 分鐘），App 會依結果給你剛好讀得懂的文章。</p><button class="next" onclick="artPlace()">📏 開始閱讀程度檢測</button>`}
-   <div class="row"><button class="ghost" onclick="artRandom()">🎲 隨機讀以前的文章</button><button class="ghost" onclick="artDbMenu()">📚 文章資料庫（${ARTDB.length}）</button><button class="ghost" onclick="sentMenu()">✍️ 句子練習（到期 ${sentDue().length}）</button>${st.placed ? '<button class="ghost" onclick="artPlace()">📏 重新檢測程度</button>' : ''}</div>
+   <div class="row"><button class="ghost" onclick="artRandom()">🎲 隨機讀以前的文章</button><button class="ghost" onclick="artDbMenu()">📚 文章資料庫（${ARTDB.length}）</button><button class="ghost" onclick="sentMenu()">✍️ 句子練習（到期 ${sentDue().length}）</button><button class="ghost" onclick="structMenu()">🧱 句子結構課</button>${st.placed ? '<button class="ghost" onclick="artPlace()">📏 重新檢測程度</button>' : ''}</div>
    <p class="sub left"><span id="adst">${artDayText()}</span>　${st.key && artGenToday() < artDayN() && !artPending ? '<button class="ghost inl" onclick="artDaily();setTimeout(artDayShow,300)">立即補生成</button>' : ''}<button class="ghost inl" onclick="gemSetup()">⚙️ Gemini 設定</button></p>
    ${st.key ? `<p class="sub left">每天生成：${ART_DAY_OPTS.map(n => `<button class="${n === artDayN() ? 'next' : 'ghost'} inl" onclick="artState().perDay=${n};save();articleMenu();setTimeout(artDaily,300)">${n} 篇</button>`).join('')}<br>精讀與泛讀約 2：3。每篇約用 2 次免費額度；額度用完會自動停到明天，不會收費。</p>` : ''}</section>
    ${last.length ? `<section class="panel"><h2>最近讀過</h2>${last.map(h => { const a = artById(h.id); return `<div class="task"><span>${a ? `<a href="#" onclick="event.preventDefault();artReadOld(artById('${h.id}'))">${esc(a.t)}</a>` : '（已刪除）'}</span><span class="num">${h.kind === 'ext' ? '泛讀' : '精讀'}・Lv${h.lv}・${h.sc}%・${h.wpm} 字／分</span></div>`; }).join('')}</section>` : ''}`);
@@ -4751,6 +4751,229 @@ function sentMenu(){
     <p class="sub left">精讀時看不懂的句子會收進這裡，依遺忘曲線隔天、2 天、4 天、7 天…再出現；第一次先讀懂，之後改成「看中文排英文」。新句來自 Tatoeba 英中例句，依你的程度挑選。</p>
     <div class="row"><button class="next" onclick="sentGo()">▶ 開始（10 句）</button><button class="ghost" onclick="sentGo(1)">只練新句</button></div></section>
     <section class="panel"><p class="sub left">例句來源：<a href="https://tatoeba.org" target="_blank" rel="noopener">Tatoeba ↗</a>（CC BY 2.0 FR），每句的編號可在 tatoeba.org/sentences/show/編號 查到原句與作者；中文已轉為台灣繁體。</p></section>`);
+}
+
+// ================= 句子結構課（原創）：8 課，每課說明＋標示例句＋8 題練習；另可用讀過的文章句子無限練習 =================
+// 例句與題目格式：[[主詞]] ((動詞)) / 意群 / 意群 ## 中文 ## 補充說明
+// 題目：['verb', 標示句]（點出主要動詞）、['subj', 標示句, 錯1, 錯2, 錯3]（選主詞）、['mc', 句子, 中文問題, 正解, 錯1, 錯2, 錯3, 解說]
+const ST_TYPES = ['① 主詞＋動詞', '② 主詞＋動詞＋補語', '③ 主詞＋動詞＋受詞', '④ 主詞＋動詞＋人＋東西', '⑤ 主詞＋動詞＋受詞＋補語'];
+const stT = (k, ...w) => [ST_TYPES[k - 1], ...w.map(x => ST_TYPES[x - 1])];
+const STRUCT = [
+ {t:'句子的骨架：主詞＋動詞', intro:`<p>每個完整的英文句子，至少有一個<b>主詞</b>（誰／什麼）和一個<b>動詞</b>（做什麼／是什麼）。這兩個就是句子的「骨架」，其他部分都是補充說明。</p>
+  <p><b>讀長句的方法：先找動詞，再往前找主詞。</b>動詞可能是一個字（works），也可能是好幾個字（will send、has finished、can be used）；am / is / are / was / were 也是動詞。</p>
+  <p>主詞後面常常跟著修飾語（例如 on the third floor），不要被它騙了，動詞要往後找。</p>`,
+  ex:['[[The meeting]] ((starts)) / at nine. ## 會議九點開始。 ## 最簡單的骨架：主詞 The meeting＋動詞 starts。',
+   '[[My manager]] ((will call)) / you / tomorrow. ## 我的主管明天會打給你。 ## 動詞是兩個字：will call。',
+   '[[The new printer]] / on the third floor / ((is)) / very fast. ## 三樓的新印表機很快。 ## on the third floor 是在說明 printer，真正的動詞在後面：is。',
+   '[[All the boxes]] ((have been sent)) / to the store. ## 所有箱子都已經寄到店裡了。 ## 動詞可以很長：have been sent（已經被寄出）。'],
+  q:[['verb', '[[Our office]] ((opens)) / at 8:30 / every day. ## 我們辦公室每天八點半開門。'],
+   ['verb', '[[The client]] ((has signed)) / the contract. ## 客戶已經簽了合約。'],
+   ['subj', '[[The woman]] / at the front desk / ((can help)) / you. ## 櫃台的那位女士可以幫你。', 'the front desk', 'you', 'can help'],
+   ['verb', '[[The price]] / of the tickets / ((went)) / up / last month. ## 票價上個月漲了。'],
+   ['subj', '[[The report]] / from the sales team / ((was)) / late. ## 業務團隊的報告遲交了。', 'the sales team', 'late', 'from the sales team'],
+   ['verb', '[[Our new website]] ((will be)) / ready / next week. ## 我們的新網站下週會好。'],
+   ['subj', '[[Two of my coworkers]] ((are)) / on vacation / this week. ## 我的兩位同事這週在休假。', 'vacation', 'this week', 'my'],
+   ['verb', '[[Everyone]] / in the meeting room / ((agreed)) / with the plan. ## 會議室裡的每個人都同意這個計畫。']]},
+ {t:'五種基本句型', intro:`<p>動詞後面接什麼，決定了句子的「句型」：</p><ol class="steps">
+  <li><b>主詞＋動詞</b>：The train arrived.（火車到了。）後面的時間、地點只是補充。</li>
+  <li><b>主詞＋動詞＋補語</b>：補語說明主詞「是什麼／怎麼樣」。常見動詞：be、become、look、feel、seem、taste。She is a nurse. / The room looks clean.</li>
+  <li><b>主詞＋動詞＋受詞</b>：受詞是動作的對象。We need a new printer.</li>
+  <li><b>主詞＋動詞＋人＋東西</b>：give、send、show、tell、buy。Amy sent me the file.</li>
+  <li><b>主詞＋動詞＋受詞＋補語</b>：make、keep、find、call。The news made us happy.</li></ol>
+  <p>看懂句型，就知道動詞後面每個部分在做什麼。</p>`,
+  ex:['[[The package]] ((arrived)) / yesterday. ## 包裹昨天到了。 ## 句型①：yesterday 只是時間補充。',
+   '[[Mr. Chen]] ((became)) / the new manager. ## 陳先生成了新經理。 ## 句型②：the new manager 說明 Mr. Chen 是什麼。',
+   '[[The hotel]] ((gave)) / us / a free upgrade. ## 飯店免費幫我們升等。 ## 句型④：gave＋人（us）＋東西（a free upgrade）。',
+   '[[The long meeting]] ((made)) / everyone / tired. ## 冗長的會議讓大家都累了。 ## 句型⑤：made＋受詞（everyone）＋補語（tired）。'],
+  q:[['mc', 'The bus arrived late this morning.', '這句是哪一種句型？', ...stT(1, 3, 2, 5), 'arrived 後面沒有受詞，late 和 this morning 都是補充說明。'],
+   ['mc', 'Our new office looks very modern.', '這句是哪一種句型？', ...stT(2, 3, 1, 4), 'look「看起來」後面接形容詞補語，說明主詞怎麼樣。'],
+   ['mc', 'Please send me the price list.', '這句是哪一種句型？', ...stT(4, 3, 5, 2), 'send＋人（me）＋東西（the price list）。'],
+   ['mc', 'The good news made the whole team happy.', '這句是哪一種句型？', ...stT(5, 4, 3, 2), 'made＋受詞（the whole team）＋補語（happy）。'],
+   ['mc', 'Our team finished the project early.', '這句是哪一種句型？', ...stT(3, 1, 2, 5), 'finished 的對象是 the project（受詞）；early 是補充。'],
+   ['mc', 'This soup tastes a little salty.', '這句是哪一種句型？', ...stT(2, 3, 5, 1), 'taste「嚐起來」後面接形容詞 salty，是補語。'],
+   ['mc', 'The manager showed the visitors our new factory.', '這句是哪一種句型？', ...stT(4, 3, 5, 1), 'showed＋人（the visitors）＋東西（our new factory）。'],
+   ['mc', 'Please keep the door closed.', '這句是哪一種句型？', ...stT(5, 3, 2, 4), 'keep＋受詞（the door）＋補語（closed）：讓門保持關著。']]},
+ {t:'修飾語讓主詞變長', intro:`<p>主詞常常帶著修飾語：形容詞放前面（the <u>new</u> printer），<b>介系詞片語放後面</b>（the printer <u>on the third floor</u>）。</p>
+  <p>找主詞時，先找「核心名詞」。後面 in / on / of / from / with / at 開頭的片語，都是在說明它。<b>動詞要和核心名詞一致</b>：The list of new customers <b>is</b>…（核心是 list，單數）。</p>`,
+  ex:['[[The list]] / of new customers / ((is)) / on my desk. ## 新客戶名單在我桌上。 ## 核心是 list（單數），所以用 is，不是 are。',
+   '[[The boxes]] / in the storage room / ((are)) / empty. ## 儲藏室裡的箱子是空的。 ## 核心是 boxes（複數），用 are。',
+   '[[A man]] / with a blue bag / ((is waiting)) / for you. ## 一位拿藍色包包的男士在等你。 ## with a blue bag 說明是哪個男士。',
+   '[[The cost]] / of the new machines / ((was)) / higher than we planned. ## 新機器的成本比我們計畫的高。 ## 核心是 cost（單數）→ was。'],
+  q:[['mc', 'The price of these chairs ___ too high.', '空格應填？', 'is', 'are', 'were', 'be', '核心名詞是 price（單數），of these chairs 是修飾語。'],
+   ['mc', 'The reports from the Tokyo office ___ late.', '空格應填？', 'are', 'is', 'was', 'be', '核心名詞是 reports（複數）。'],
+   ['subj', '[[The woman]] / in the gray jacket / ((is)) / our new client. ## 穿灰色外套的女士是我們的新客戶。', 'the gray jacket', 'our new client', 'in the gray jacket'],
+   ['verb', '[[The keys]] / to the meeting room / ((are)) / at the front desk. ## 會議室的鑰匙在櫃台。'],
+   ['mc', 'One of my coworkers ___ in Japan.', '空格應填？', 'lives', 'live', 'living', 'are live', 'one of＋複數名詞，核心是 one（單數）。'],
+   ['subj', '[[The results]] / of the customer survey / ((were)) / very good. ## 顧客問卷的結果非常好。', 'the customer survey', 'very good', 'of the customer survey'],
+   ['mc', 'The man ___ the camera is our photographer.', '空格應填？', 'with', 'at', 'of', 'to', 'with the camera「拿著相機的」，說明是哪個人。'],
+   ['verb', '[[Workers]] / from the factory / ((will join)) / the meeting / on Friday. ## 工廠的員工星期五會參加會議。']]},
+ {t:'連接兩個句子', intro:`<p>一個句子可以有<b>兩組主詞＋動詞</b>，用連接詞接起來：</p><ul class="steps">
+  <li><b>and / but / so / or</b>：前後兩半一樣重要。</li>
+  <li><b>because / when / if / although / after / before</b>：帶出「從屬子句」，說明原因、時間、條件或讓步；<b>主要的意思在另一半</b>。</li></ul>
+  <p>讀法：先用逗號或連接詞把句子切成兩半，每一半各找主詞＋動詞，再看哪一半是主要的。</p>`,
+  ex:['[[I]] ((called)) / the hotel, / but no one answered. ## 我打電話給飯店，但沒有人接。 ## 兩半一樣重要：I called… / no one answered。',
+   'When the meeting ends, / [[we]] ((will have)) / lunch. ## 會議結束後，我們會吃午餐。 ## When… 是時間；主要的是 we will have lunch。',
+   '[[The shop]] ((closed)) / early / because it was a holiday. ## 商店提早關門，因為那天是假日。 ## because 後面是原因。',
+   'Although the hotel was small, / [[it]] ((was)) / very clean. ## 雖然飯店很小，但非常乾淨。 ## Although「雖然」：主要的是 it was very clean。'],
+  q:[['mc', 'The train was late, ___ I took a taxi.', '空格應填？', 'so', 'but', 'because', 'if', '前面是原因，後面是結果 → so。'],
+   ['mc', 'I could not join the call ___ my internet was down.', '空格應填？', 'because', 'so', 'but', 'or', '後面說原因 → because。'],
+   ['mc', '___ you have any questions, please call me.', '空格應填？', 'If', 'But', 'So', 'And', '「如果」有問題 → If。'],
+   ['mc', '___ it was raining, we walked to the station.', '空格應填？', 'Although', 'Because of', 'So', 'Or', '下雨卻走路，前後相反 → Although「雖然」。'],
+   ['mc', 'When the boss arrives, we will start the meeting.', '哪一部分是主要的意思？', 'we will start the meeting', 'When the boss arrives', 'the boss arrives', 'When the boss', 'When… 是時間；主要子句是後半。'],
+   ['verb', 'Before you leave the office, / [[you]] ((must lock)) / the door. ## 離開辦公室前，你必須鎖門。'],
+   ['verb', 'If the client agrees, / [[we]] ((will start)) / next month. ## 如果客戶同意，我們下個月開始。'],
+   ['mc', 'She was very tired, ___ she finished the report.', '空格應填？', 'but', 'because', 'so', 'if', '很累卻完成了，前後相反 → but。']]},
+ {t:'關係子句：who / which / that', intro:`<p>名詞後面接 <b>who / which / that＋動詞…</b>，是在說明這個名詞是「哪一個」。who 指人，which 指東西，that 兩者都可以。</p>
+  <p>讀的時候，把整個關係子句當成一個大形容詞，<b>先跳過它，找主要動詞</b>：The woman <u>who called this morning</u> <b>is</b> a new client.</p>`,
+  ex:['[[The woman]] / who called this morning / ((is)) / a new client. ## 今天早上打電話來的女士是新客戶。 ## who called this morning 說明是哪位女士；主要動詞是 is。',
+   '[[The printer]] / that we bought last year / ((has broken)) / again. ## 我們去年買的印表機又壞了。 ## that we bought last year 說明是哪台印表機。',
+   '[[We]] ((need)) / someone / who can speak Japanese. ## 我們需要一位會說日文的人。 ## who can speak Japanese 說明 someone。',
+   '[[I]] ((read)) / the email / which you sent yesterday. ## 我讀了你昨天寄的信。 ## which you sent yesterday 說明是哪封信。'],
+  q:[['mc', 'The man ___ fixed the computer works in IT.', '空格應填？', 'who', 'which', 'where', 'what', '指人用 who。'],
+   ['mc', 'This is the laptop ___ I told you about.', '空格應填？', 'that', 'who', 'where', 'whose', '指東西用 that 或 which。'],
+   ['verb', '[[The client]] / who visited us yesterday / ((wants)) / a new price. ## 昨天來拜訪的客戶想要新的報價。'],
+   ['verb', '[[The files]] / that you need / ((are)) / in the shared folder. ## 你需要的檔案在共用資料夾裡。'],
+   ['subj', '[[The hotel]] / which we booked for the trip / ((is)) / near the beach. ## 我們這趟訂的飯店在海邊附近。', 'we', 'the trip', 'the beach'],
+   ['mc', 'The shop ___ sells our products is closing.', '空格應填？', 'which', 'who', 'where', 'when', '指商店（東西）用 which。'],
+   ['mc', 'The report that Ken wrote was excellent.', '誰寫了報告？', 'Ken', 'The manager', 'The writer of this sentence', 'Nobody knows', 'that Ken wrote 說明這份報告：是 Ken 寫的。'],
+   ['verb', '[[Customers]] / who order online / ((get)) / free shipping. ## 線上訂購的客人可以免運費。']]},
+ {t:'名詞子句：that / what / if / how', intro:`<p>一整個句子也可以當「名詞」，放在動詞後面：I think <u>that the plan is good</u>.／I don't know <u>what he wants</u>.</p>
+  <p>常見開頭：that、what、if（是否）、how、when、where、why。<b>疑問詞開頭的名詞子句，用直述句的順序</b>：Do you know where <b>the bank is</b>?（不是 where is the bank）。</p>
+  <p>這種句子的主要動詞通常是前面的 think、know、say、ask、tell。</p>`,
+  ex:['[[I]] ((think)) / that the plan is good. ## 我認為這個計畫很好。 ## 主要動詞是 think；that the plan is good 是「想的內容」。',
+   '[[She]] ((asked)) / me / what time the meeting starts. ## 她問我會議幾點開始。 ## what time the meeting starts 用直述句順序。',
+   '[[We]] ((do not know)) / if the client will come. ## 我們不知道客戶會不會來。 ## if「是否」。',
+   '((Please tell)) / me / when the bus leaves. ## 請告訴我公車什麼時候開。 ## when the bus leaves，不是 when does the bus leave。'],
+  q:[['mc', 'Do you know where ___?', '空格應填？', 'the bank is', 'is the bank', 'does the bank', 'the bank does be', '名詞子句用直述句順序：主詞＋動詞。'],
+   ['mc', "I'm not sure ___ he will come.", '空格應填？', 'if', 'what', 'which', 'who', '「是否」→ if。'],
+   ['mc', 'She said ___ the report was ready.', '空格應填？', 'that', 'what', 'who', 'which', 'said that＋句子：轉述內容。'],
+   ['mc', 'Please tell me ___ you want for lunch.', '空格應填？', 'what', 'that', 'who', 'if what', '「你想要什麼」→ what。'],
+   ['mc', "I don't know how ___ this machine.", '空格應填？', 'to use', 'using', 'use', 'used', 'how to＋原形動詞：「怎麼…」。'],
+   ['verb', '[[I]] ((believe)) / that our team will win. ## 我相信我們隊會贏。'],
+   ['verb', '[[Nobody]] ((knows)) / why the meeting was canceled. ## 沒有人知道會議為什麼取消。'],
+   ['mc', 'Can you tell me when ___?', '空格應填？', 'the store opens', 'does the store open', 'opens the store', 'the store open', '直述句順序，主詞 the store 是單數 → opens。']]},
+ {t:'分詞片語與 to 不定詞', intro:`<ul class="steps"><li><b>V-ing 片語</b>：主動、正在。the man <u>waiting outside</u>（在外面等的人）</li>
+  <li><b>過去分詞片語</b>：被動。the products <u>made in Taiwan</u>（在台灣製造的產品）</li>
+  <li><b>句首的分詞片語</b>：Built in 1990, the hotel…　先跳過逗號前面，找後面的主詞＋動詞。</li>
+  <li><b>to＋動詞</b>放句首或句尾，表示目的「為了…」：To save money, we…</li></ul>
+  <p>這些片語都沒有自己的主詞，<b>不是句子的主要動詞</b>。</p>`,
+  ex:['[[The man]] / waiting outside / ((is)) / my coworker. ## 在外面等的人是我的同事。 ## waiting outside 說明是哪個人；主要動詞是 is。',
+   '[[The products]] / made in this factory / ((are sold)) / in Japan. ## 這家工廠生產的產品在日本販售。 ## made in this factory 是被動的說明。',
+   'Built in 1990, / [[the hotel]] ((was recently updated)). ## 這家 1990 年建的飯店最近整修過。 ## 句首 Built in 1990 說明 hotel；主要動詞在逗號後面。',
+   'To save time, / [[we]] ((took)) / a taxi. ## 為了節省時間，我們搭了計程車。 ## To save time 表示目的。'],
+  q:[['mc', 'The woman ___ to the manager is from Spain.', '空格應填？', 'talking', 'talked', 'talks', 'to talk', '「正在和經理說話的」女士 → V-ing。'],
+   ['mc', 'The cars ___ in this factory are very popular.', '空格應填？', 'made', 'making', 'make', 'makes', '車是「被製造」的 → 過去分詞 made。'],
+   ['verb', '[[The letter]] / sent last week / ((has not arrived)) / yet. ## 上週寄出的信還沒到。'],
+   ['verb', 'Located near the station, / [[the hotel]] ((is)) / easy to find. ## 這家飯店在車站附近，很好找。'],
+   ['mc', '___ more customers, the shop lowered its prices.', '空格應填？', 'To get', 'Get', 'Got', 'For get', '「為了」得到更多客人 → To get。'],
+   ['subj', 'Tired after the long trip, / [[the team]] ((went)) / straight to the hotel. ## 長途旅行後很累，團隊直接回飯店。', 'the long trip', 'the hotel', 'Tired'],
+   ['mc', 'Please read the instructions ___ on the box.', '空格應填？', 'printed', 'printing', 'prints', 'print', '說明是「被印」在盒子上的 → printed。'],
+   ['verb', '[[People]] / living in the city / ((often take)) / the train. ## 住在城市的人常搭火車。']]},
+ {t:'長句拆解三步驟', intro:`<p>遇到很長的句子，照這三步：</p><ol class="steps">
+  <li><b>切塊</b>：用逗號、連接詞（because、when、although）、關係詞（who、which、that）把句子切成幾塊。</li>
+  <li><b>找骨架</b>：在每一塊找主詞＋動詞，找出「主要的」那一組。</li>
+  <li><b>先讀骨架，再加細節</b>：把修飾語暫時拿掉讀懂主幹，再一塊一塊把細節加回來。</li></ol>
+  <p>多益 Part 7 的長句，幾乎都可以這樣拆開。</p>`,
+  ex:['[[The new system]], / which was installed last week, / ((will help)) / our staff / handle orders more quickly. ## 上週安裝的新系統會幫助員工更快處理訂單。 ## 骨架：The new system will help our staff.',
+   'Because the flight was delayed, / [[the managers]] / from the Tokyo office / ((arrived)) / after the meeting had started. ## 因為班機延誤，東京辦公室的經理們在會議開始後才到。 ## 骨架：the managers arrived。',
+   '[[Customers]] / who sign up before May 31 / ((will receive)) / a 20 percent discount / on their first order. ## 五月三十一日前註冊的客人，首次訂購可享八折。 ## 骨架：Customers will receive a discount。'],
+  q:[['mc', 'The report that the marketing team prepared for the board was finished on time.', '這句的骨架是？', 'The report was finished on time.', 'The marketing team prepared.', 'The board was finished.', 'The team was on time.', '核心主詞 The report，主要動詞 was finished；that… 是修飾語。'],
+   ['verb', '[[The manager]] / who interviewed the candidates / ((has decided)) / to hire two of them. ## 面試應徵者的經理已決定錄取其中兩位。'],
+   ['subj', 'After reviewing the budget, / [[the finance team]] ((suggested)) / several changes. ## 審查預算後，財務團隊提出了幾項修改。', 'the budget', 'several changes', 'After reviewing'],
+   ['mc', 'Employees who want to join the training should sign up by Friday.', '哪一種斷句最好？', 'Employees who want to join the training / should sign up / by Friday.', 'Employees who / want to join the / training should sign / up by Friday.', 'Employees / who want to / join the training should / sign up by Friday.', 'Employees who want / to join the training should sign up by / Friday.', '意群要照意思切：主詞（含修飾）/ 動詞 / 時間。'],
+   ['verb', '[[All visitors]] / entering the factory / ((must wear)) / safety glasses. ## 所有進入工廠的訪客都必須戴護目鏡。'],
+   ['mc', 'Since sales have increased, the company, which opened in 2015, plans to hire more staff.', '這句主要的動詞是？', 'plans', 'have increased', 'opened', 'hire', '主詞 the company 的動詞是 plans；其他在從屬子句或 to 片語裡。'],
+   ['subj', '[[The hotel]] / where we held last year\'s conference / ((has raised)) / its prices. ## 我們去年舉辦研討會的飯店漲價了。', 'we', "last year's conference", 'its prices'],
+   ['verb', 'Although the weather was bad, / [[most of the guests]] / invited to the party / ((came)) / on time. ## 雖然天氣不好，大部分受邀的客人都準時到了。']]},
+];
+
+// ---------- 解析與畫面 ----------
+function stParse(line){
+  const [en, zh = '', note = ''] = line.split(' ## ');
+  const parts = en.trim().split(' / ').map(c => c.trim());
+  const sj = (en.match(/\[\[(.+?)\]\]/) || [])[1] || '', vb = (en.match(/\(\((.+?)\)\)/) || [])[1] || '';
+  const clean = parts.map(c => c.replace(/\[\[|\]\]|\(\(|\)\)/g, ''));
+  return {t:clean.join(' '), c:clean.length > 1 ? clean : null, sv:[sj, vb], zh:zh.trim(), note:note.trim()};
+}
+const stHint = x => (artHintHtml(x) || '').replace(/<p class="sub left">[\s\S]*$/, '') || `<div class="shint">${esc(x.t)}</div>`;
+let SR = null;
+function structMenu(){
+  const sc = S.struct || {}, done = STRUCT.filter((_, i) => sc[i] >= 6).length;
+  view(header('句子結構課') + `<section class="panel"><p class="sub left">看不懂長句，通常是找不到句子的「骨架」。這 8 課由淺到深，教你找主詞和動詞、看懂句型、跳過修飾語、拆解長句。每課約 10 分鐘，答對 6 題以上算完成（${done}／${STRUCT.length}）。</p></section>
+    <section class="panel">${STRUCT.map((L, i) => `<div class="task"><span><a href="#" onclick="event.preventDefault();structLesson(${i})">第 ${i + 1} 課　${esc(L.t)}</a></span><span class="num">${sc[i] != null ? (sc[i] >= 6 ? '✅ ' : '') + sc[i] + '／8' : '未開始'}</span></div>`).join('')}</section>
+    <section class="panel"><h2>用讀過的文章句子練習</h2><p class="sub left">從你讀過的文章挑 10 句，練「點出主要動詞」和「選出主詞」，可以無限練習。</p><button class="next" onclick="structAuto()">開始 10 題 ›</button></section>`);
+}
+function structLesson(i){
+  const L = STRUCT[i];
+  view(header('句子結構課') + `<section class="panel"><div class="num">第 ${i + 1} 課／共 ${STRUCT.length} 課</div><h2>${esc(L.t)}</h2><div class="left">${L.intro}</div></section>
+    <section class="panel"><h2>例句</h2>${L.ex.map(stParse).map(x => `<div class="pv">${stHint(x)}<div class="sub left">${esc(x.zh)}</div>${x.note ? `<p class="sub left">💡 ${esc(x.note)}</p>` : ''}<button class="ghost inl" data-w="${esc(x.t)}" onclick="say(this.dataset.w)">🔊</button></div>`).join('')}
+      <p class="sub left"><span class="su">主詞</span>　<span class="vb">動詞</span>　<span class="sl">/</span> 意群</p></section>
+    <section class="panel"><button class="next" onclick="structStart(${i})">開始練習（8 題）›</button><button class="ghost" onclick="structMenu()">‹ 回課程列表</button></section>`);
+}
+function structStart(i){ SR = {lesson:i, items:STRUCT[i].q.slice(), qi:0, ok:0, seed:Date.now()}; structQ(); }
+// 用讀過的文章句子出題：點動詞或選主詞
+function structAuto(){
+  const st = artState(), read = new Set(st.hist.map(h => h.id));
+  let pool = ARTICLES.concat(ARTDB).filter(a => artAnn(a) && a.lv <= (st.lv || 1) + 1);
+  const pri = pool.filter(a => read.has(a.id)); if (pri.length >= 3) pool = pri;
+  const ss = []; pool.forEach(a => artAnn(a).s.forEach(x => { if (x.sv && x.sv[1] && x.t.split(' ').length >= 5) ss.push(x); }));
+  if (!ss.length) return toast('先讀幾篇精讀文章再來練');
+  const rng = mulberry32(Date.now() & 0xffffff), pick10 = shuffle(rng, ss).slice(0, 10);
+  const items = pick10.map((x, k) => {
+    const others = (x.c || []).map(c => c.replace(/[.,!?]+$/, '')).filter(c => x.sv[0] && !c.includes(x.sv[0]) && !x.sv[0].includes(c) && c.split(' ').length <= 6);
+    return k % 2 && x.sv[0] && others.length >= 3 ? {auto:'subj', x, w:shuffle(rng, others).slice(0, 3)} : {auto:'verb', x};
+  });
+  SR = {lesson:-1, items, qi:0, ok:0, seed:Date.now()}; structQ();
+}
+function structQ(){
+  const it = SR.items[SR.qi], n = SR.items.length, head = `<div class="qmeta"><span>${SR.lesson >= 0 ? '第 ' + (SR.lesson + 1) + ' 課練習' : '文章句子練習'}</span><span>${SR.qi + 1}／${n}</span></div><div class="prog"><i style="width:${Math.round(SR.qi / n * 100)}%"></i></div>`;
+  const kind = it.auto || it[0], x = it.auto ? it.x : (kind === 'mc' ? null : stParse(it[1]));
+  SR.cur = {kind, x, it, done:false};
+  if (kind === 'verb') {
+    const toks = []; x.t.replace(/[A-Za-z0-9$][A-Za-z0-9'’,.$:-]*/g, (m, off) => { toks.push({w:m, a:off, b:off + m.length}); return m; });
+    SR.cur.toks = toks;
+    view(header('句子結構課') + `<section class="panel">${head}<h2>點出這句的<span class="vb">主要動詞</span></h2><p class="sub left">動詞有好幾個字時，點其中一個就可以。</p>
+      <div class="spool" id="vtok">${toks.map((t, k) => `<button class="tile" data-k="${k}">${esc(t.w)}</button>`).join('')}</div><div id="sres"></div></section>`);
+    $('#vtok').onclick = e => { const b = e.target.closest('.tile'); if (b && !SR.cur.done) structVerb(+b.dataset.k, b); };
+    return;
+  }
+  let q, ans, opts, sent;
+  if (kind === 'subj') { sent = x.t; q = '這句的主詞（核心）是？'; ans = x.sv[0]; opts = [ans, ...(it.auto ? it.w : it.slice(2, 5))]; }
+  else { sent = it[1]; q = it[2]; ans = it[3]; opts = it.slice(3, 7); }
+  SR.cur.ans = ans;
+  const o = shuffle(mulberry32((SR.seed + SR.qi * 53) & 0xffffff), opts);
+  view(header('句子結構課') + `<section class="panel">${head}<div class="ssent">${esc(sent)}</div><h2>${esc(q)}</h2>
+    <div class="opts left" id="sopts">${o.map((t, k) => `<button class="opt" data-k="${k}">${esc(t)}</button>`).join('')}</div><div id="sres"></div></section>`);
+  $('#sopts').onclick = e => { const b = e.target.closest('.opt'); if (!b || SR.cur.done) return; const ok = o[+b.dataset.k] === ans;
+    document.querySelectorAll('#sopts .opt').forEach(el => { if (o[+el.dataset.k] === ans) el.classList.add('right'); else if (el === b) el.classList.add('bad'); });
+    structDone(ok); };
+}
+function structVerb(k, btn){
+  const c = SR.cur, x = c.x, t = x.t, [sj, vb] = x.sv, si = sj ? t.indexOf(sj) : -1;
+  let vi = t.indexOf(vb, si >= 0 ? si + sj.length : 0); if (vi < 0) vi = t.indexOf(vb);
+  const tok = c.toks[k], ok = vi >= 0 && tok.a < vi + vb.length && tok.b > vi;
+  c.toks.forEach((tk, j) => { const inV = vi >= 0 && tk.a < vi + vb.length && tk.b > vi; const el = document.querySelector(`#vtok [data-k="${j}"]`); if (inV) el.classList.add('sel'); });
+  if (!ok) btn.classList.add('used');
+  structDone(ok);
+}
+function structDone(ok){
+  const c = SR.cur; c.done = true; if (ok) SR.ok++;
+  const x = c.x, ex = c.kind === 'mc' ? c.it[7] : '';
+  $('#sres').innerHTML = `<p class="${ok ? 'ok' : 'warn'}">${ok ? '✅ 正確！' : '❌ 正確答案：' + esc(c.kind === 'verb' ? x.sv[1] : c.ans)}</p>
+    ${x ? stHint(x) + (x.zh ? `<div class="sub left">${esc(x.zh)}</div>` : '') : ''}${ex ? `<p class="sub left">💡 ${esc(ex)}</p>` : ''}
+    <button class="next" onclick="structNext()">${SR.qi + 1 < SR.items.length ? '下一題 ›' : '看結果 ›'}</button>`;
+}
+function structNext(){
+  SR.qi++;
+  if (SR.qi < SR.items.length) return structQ();
+  if (SR.lesson >= 0) { S.struct = S.struct || {}; S.struct[SR.lesson] = Math.max(S.struct[SR.lesson] || 0, SR.ok); }
+  S.daily.correct = (S.daily.correct || 0) + SR.ok; save(); checkStreak();
+  const n = SR.items.length, L = SR.lesson, pass = SR.ok >= Math.ceil(n * 0.75);
+  view(header('練習結果') + `<section class="panel result"><div class="score">${SR.ok}<small>／${n}</small></div>
+    <p>${pass ? '很好！這一課的重點你掌握了。' : '再看一次例句，多練幾次就會熟。'}</p>
+    ${L >= 0 && L + 1 < STRUCT.length ? `<button class="next" onclick="structLesson(${L + 1})">下一課 ›</button>` : ''}
+    ${L >= 0 ? `<button class="ghost" onclick="structLesson(${L})">再看一次這課</button>` : `<button class="next" onclick="structAuto()">再練 10 題</button>`}
+    <button class="ghost" onclick="structMenu()">回課程列表</button></section>`);
 }
 
 // ================= 以 800 分為目標的調整 =================
@@ -5230,6 +5453,8 @@ function home(){
   const tabs = LEVELS.map(l => `<button class="lvbtn ${l === lv ? 'on' : ''}" onclick="setLv(${l})"><small>階段${l}</small>${LV_SHORT[l]}</button>`).join('');
   const cards = [
     ['📰','每日閱讀','articleMenu()', artState().placed ? `精讀 Lv${artState().lv}・泛讀 Lv${Math.max(1, artState().lv - 1)}` : '先做閱讀程度檢測'],
+    ['🧱','句子結構課','structMenu()', `8 課：找主詞動詞・句型・長句拆解（完成 ${STRUCT.filter((_, i) => (S.struct || {})[i] >= 6).length}／8）`],
+    ['✍️','句子練習','sentMenu()', `看中文排英文・到期 ${sentDue().length} 句`],
     ['📈','學習曲線','curveView()', `已學 ${ms.L}・熟練 ${ms.M}・記得約 ${ms.R}`],
     ['📇','單字卡','flash()', `${VBY(lv).length} 字・${TOPICS(lv).length} 個主題`],
     ['📝','單字練習','vocabMenu()', '英翻中・中翻英・聽力・拼字'],
