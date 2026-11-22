@@ -16,6 +16,15 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141922;--card:#1d2430;--ink:#e8edf5;--mute:#9aa6b8;--line:#2e3747;--red:#7fb0ff;--red2:#24395a;--ind:#e0b25c;--good:#6fcf97;--goodbg:#1f3a2a;--bad:#ff8a80;--badbg:#45211f;--shadow:none}}
 :root[data-theme="dark"]{--bg:#141922;--card:#1d2430;--ink:#e8edf5;--mute:#9aa6b8;--line:#2e3747;--red:#7fb0ff;--red2:#24395a;--ind:#e0b25c;--good:#6fcf97;--goodbg:#1f3a2a;--bad:#ff8a80;--badbg:#45211f;--shadow:none}
 .task a{color:var(--red);font-weight:600;text-decoration:none}.task small{color:var(--mute)}
+.prog{height:6px;background:var(--line);border-radius:3px;margin:4px 0 12px;overflow:hidden}.prog i{display:block;height:100%;background:var(--red)}
+.sprev{color:var(--mute);font-size:calc(15px * var(--z,1));line-height:1.7;margin:0 0 10px}
+.ssent{font-size:calc(21px * var(--z,1));line-height:1.75;margin:6px 0 12px;text-align:left}
+.shint{font-size:calc(19px * var(--z,1));line-height:1.9;background:var(--bg);border-radius:10px;padding:10px;text-align:left;margin:0 0 6px}
+.su{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;text-decoration-color:var(--good)}.vb{font-weight:800;color:var(--ind)}.sl{color:var(--red);font-weight:800}
+.szh{background:var(--red2);border-radius:10px;padding:10px;margin:6px 0 10px;text-align:left;font-size:calc(17px * var(--z,1))}
+.cov{background:var(--bg);border-radius:10px;padding:8px 10px;margin:8px 0}
+.pv{padding:8px 0;border-top:1px dashed var(--line);text-align:left}
+.sbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line);margin:8px 0}.sbar i{display:block;height:100%}.sbar .u{background:var(--good)}.sbar .h{background:var(--ind)}.sbar .z{background:var(--bad)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:calc(16px * var(--z,1))/1.6 "PingFang TC","Microsoft JhengHei","Noto Sans TC","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif}
 #app{max-width:calc(640px * var(--z,1));margin:0 auto;padding:0 16px calc(32px + env(safe-area-inset-bottom))}
@@ -2253,11 +2262,14 @@ function lessonPage(){
   const due = dueWords().length, nq = newQuota(), left = Math.max(0, S.daily.quota0 - (S.daily.newDone || 0)), wdue = dueKeys().length, ms = memStats();
   const step = (n, ok, title, desc, btn, fn) => `<div class="lstep ${ok ? 'ok' : ''}"><div class="ln2">${ok ? '✅' : n}</div><div class="lbody"><b>${title}</b><small>${desc}</small></div>${btn ? `<button class="next sm2" onclick="${fn}">${btn}</button>` : ''}</div>`;
   view(header('今日課表') + `<section class="panel">
-    ${step('①', !!S.daily.article, '每日文章', S.daily.article ? '今天的文章已讀完（可以加讀）' : `Lv${artState().lv}・約 ${ART_LV[artState().lv].w} 字＋多益 Part 6・7 測驗＋文法重點`, S.daily.article ? '加讀 ›' : '開始 ›', S.daily.article ? 'articleGo(1)' : 'articleGo()')}
-    ${step('②', due === 0, '複習到期單字', due ? `${due} 個字今天到期（快忘記了，先救回來）` : '今天沒有到期的字', due ? `複習 ${Math.min(due, 80)} 個 ›` : '', 'lessonReview()')}
-    ${step('③', left <= 0, '學新字', left > 0 ? `還有 ${left} 個（${esc(nq.why)}）` : `今天的新字完成了（已學 ${S.daily.newDone || 0} 個）`, left > 0 ? `學 ${Math.min(left, 20)} 個 ›` : '再學 10 個', left > 0 ? `lessonNew(${Math.min(left, 20)})` : 'lessonNew(10)')}
-    ${step('④', S.daily.mix, '文法・聽力', `本週文法＋Part 2～5${weakParts().length ? `＋弱項加強（${weakParts().map(w => 'Part ' + w.k).join('、')}）` : ''}${wdue ? `＋錯題 ${wdue} 題` : ''}`, '開始 ›', 'lessonMix()')}
-    ${extDue() ? step('⑤', extDue().done >= extDue().need, 'Parroto 完整模考', `第 ${extDue().wk} 週要做 ${extDue().need} 回（已完成 ${extDue().done}）：200 題計時，做完回來登錄成績`, '前往 ›', 'extMenu()') : ''}
+    ${step('①', due === 0, '複習到期單字', due ? `${due} 個字今天到期（快忘記了，先救回來）` : '今天沒有到期的字', due ? `複習 ${Math.min(due, 80)} 個 ›` : '', 'lessonReview()')}
+    ${step('②', left <= 0, '學新字', left > 0 ? `還有 ${left} 個（${esc(nq.why)}）` : `今天的新字完成了（已學 ${S.daily.newDone || 0} 個）`, left > 0 ? `學 ${Math.min(left, 20)} 個 ›` : '再學 10 個', left > 0 ? `lessonNew(${Math.min(left, 20)})` : 'lessonNew(10)')}
+    ${artState().placed ? step('③', !!S.daily.article, '精讀', S.daily.article ? '今天的精讀完成了（可以加讀）' : `Lv${artState().lv}・約 ${ART_LV[artState().lv].w} 字：預習生字 → 一句一句讀懂 → 段落大意 → 多益題`, S.daily.article ? '加讀 ›' : '開始 ›', S.daily.article ? 'articleGo(1)' : 'articleGo()')
+      : step('③', false, '閱讀程度檢測', '第一次先做（約 5 分鐘），之後每天的文章才會剛好讀得懂', '開始 ›', 'artPlace()')}
+    ${artState().placed ? step('④', !!S.daily.ext, '泛讀', S.daily.ext ? '今天的泛讀完成了' : `Lv${Math.max(1, artState().lv - 1)} 的簡單文章，不查字、順順讀完，答段落大意`, S.daily.ext ? '再讀 ›' : '開始 ›', S.daily.ext ? 'artExtGo(1)' : 'artExtGo()') : ''}
+    ${artRereadDue().length ? step('🔁', !!S.daily.reread, '重讀', `3 天前讀過的文章再讀一次，看看懂的比例進步多少（${artRereadDue().length} 篇）`, '開始 ›', 'artRereadGo()') : ''}
+    ${step('⑤', S.daily.mix, '文法・聽力', `本週文法＋Part 2～5${weakParts().length ? `＋弱項加強（${weakParts().map(w => 'Part ' + w.k).join('、')}）` : ''}${wdue ? `＋錯題 ${wdue} 題` : ''}`, '開始 ›', 'lessonMix()')}
+    ${extDue() ? step('⑥', extDue().done >= extDue().need, 'Parroto 完整模考', `第 ${extDue().wk} 週要做 ${extDue().need} 回（已完成 ${extDue().done}）：200 題計時，做完回來登錄成績`, '前往 ›', 'extMenu()') : ''}
   </section>
   <section class="panel"><h2>🧠 記憶狀態</h2><div class="mgrid"><div><b>${ms.L}</b><small>已學</small></div><div><b>${ms.M}</b><small>熟練</small></div><div><b>${ms.R}</b><small>預估目前記得</small></div><div><b>${ms.leech.length}</b><small>難記字</small></div></div>
    <button class="ghost" onclick="curveView()">📈 看學習曲線與遺忘曲線</button></section>`);
@@ -3732,20 +3744,24 @@ ARTICLES.push(
 //   題目 ['p6', '含 {答案} 的句子（須出自文中）', '錯1|錯2|錯3', '中文說明'] 或 ['p7', '英文問題', '中文問題', '正解', '錯1', '錯2', '錯3']
 //   文法 [tag, '中文標題', '文中原句', '中文解說', '新例句', '例句中文', '練習題 {答案}', '錯1|錯2|錯3']
 
-const ART_LV = [null,
-  {w:200, cefr:'A2', s:'very short, simple sentences (8-12 words); present and past simple; the most common everyday and office words'},
-  {w:250, cefr:'A2', s:'short simple sentences; present, past and future (will); common office words'},
-  {w:300, cefr:'A2+', s:'mostly simple sentences with and/but/because; can/should/must; some phrasal verbs'},
-  {w:330, cefr:'B1', s:'some compound sentences; present perfect; comparatives; common business words'},
-  {w:370, cefr:'B1', s:'passive voice, infinitives and gerunds, basic relative clauses'},
-  {w:420, cefr:'B1', s:'mixed tenses, conditionals (if + present), linking words such as however and although'},
-  {w:500, cefr:'B1+', s:'relative clauses, participle phrases, noun clauses; TOEIC business vocabulary'},
-  {w:600, cefr:'B1+', s:'longer sentences, formal email and memo style, prepositional phrases such as due to and in addition to'},
-  {w:700, cefr:'B2', s:'formal business register, subjunctive (if I were / had known), reported speech'},
-  {w:800, cefr:'B2', s:'complex sentences, advanced collocations, inversion such as Should you require'},
-  {w:900, cefr:'B2+', s:'article or report style, nuanced vocabulary, implied meaning that requires inference'},
+const ART_LV = [null,   // 2026-11 改版：從「一讀就懂九成」的短文開始
+  {w:120, cefr:'A1+', s:'very short sentences of 6-10 words; simple present and past only; one idea per sentence; only the most common everyday words'},
+  {w:150, cefr:'A2-', s:'short sentences of 8-12 words; present, past and will; and/but/because; very common office words'},
+  {w:180, cefr:'A2', s:'short simple sentences; can/should/must; a few compound sentences; common office words'},
+  {w:220, cefr:'A2+', s:'mostly simple sentences, some with when/if/because; present perfect; common phrasal verbs'},
+  {w:260, cefr:'B1-', s:'simple and compound sentences; comparatives; basic passive voice; common business words'},
+  {w:300, cefr:'B1', s:'passive voice, infinitives and gerunds, basic relative clauses (who/which/that)'},
+  {w:350, cefr:'B1', s:'mixed tenses, conditionals (if + present), linking words such as however and although'},
+  {w:420, cefr:'B1+', s:'relative clauses, participle phrases, noun clauses; TOEIC business vocabulary'},
+  {w:500, cefr:'B1+', s:'longer sentences, formal email and memo style, prepositional phrases such as due to and in addition to'},
+  {w:600, cefr:'B2', s:'formal business register, subjunctive (if I were / had known), reported speech'},
+  {w:800, cefr:'B2+', s:'complex sentences, advanced collocations, inversion such as Should you require; implied meaning'},
   {w:1000, cefr:'C1', s:'dense professional texts (reports, analyses, multi-party correspondence); high-level TOEIC 800+ vocabulary'},
 ];
+// 內建文章庫原本依舊等級寫成（Lv1 約 200 字），換算到新等級
+const ART_LIBMAP = [0, 3, 3, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8];
+ARTICLES.forEach(a => { if (!a.lv0) { a.lv0 = a.lv; a.lv = ART_LIBMAP[a.lv]; } });
+const artLvByWords = a => { const w = artWords(a); let best = 1; for (let l = 1; l <= 12; l++) if (Math.abs(ART_LV[l].w - w) < Math.abs(ART_LV[best].w - w)) best = l; return best; };
 const ART_WPM = {1:80, 2:110, 3:140, 4:170};       // 各階段目標閱讀速度（字／分）
 const ART_QN = lv => lv <= 3 ? [2, 4] : lv <= 9 ? [3, 5] : [4, 6];   // [Part 6 題數, Part 7 題數]
 const ART_TAGS = {tense:'時態', passive:'被動語態', relative:'關係詞', conj:'連接詞', prep:'介系詞', wordform:'詞性', compare:'比較級', gerund:'不定詞與動名詞', participle:'分詞', conditional:'假設與條件句', agreement:'主詞動詞一致', pronoun:'代名詞', modal:'助動詞', noun_clause:'名詞子句', inversion:'倒裝', article:'冠詞與數量詞', phrase:'片語搭配'};
@@ -3757,10 +3773,10 @@ let ART = null;
 function artLoad(){ try { ART = JSON.parse(localStorage.getItem(AKEY) || 'null'); } catch(e) { ART = null; } ART = Object.assign({saved:[], cache:[]}, ART || {}); artDbReady = artDbLoad().catch(() => {}); }
 function artSave(){ try { localStorage.setItem(AKEY, JSON.stringify(ART)); } catch(e) { toast('手機儲存空間不足，舊文章可能無法保存'); } }
 function artState(){
-  const d = {lv:0, since:0, hist:[], today:null, extra:0, key:'', model:'', gen:{date:0, n:0}, myWords:{}};
+  const d = {lv:0, since:0, hist:[], today:null, extra:0, key:'', model:'', gen:{date:0, n:0}, myWords:{}, placed:null, histFrom:0, reread:{}, ext:null, ann:{}};
   if (!S.art) S.art = {};
   for (const k in d) if (S.art[k] === undefined) S.art[k] = d[k];   // 原地補預設值，維持同一個物件
-  if (!S.art.lv) S.art.lv = Math.min(12, 3 * ((S.lv || 1) - 1) + 1);
+  if (!S.art.lv) S.art.lv = 1;
   return S.art;
 }
 const artById = id => ARTICLES.find(a => a.id === id) || ART.saved.find(a => a.id === id) || ARTDB.find(a => a.id === id) || null;
@@ -3768,18 +3784,19 @@ const artWords = a => a.p.join(' ').split(/\s+/).filter(Boolean).length;
 const artStage = lv => Math.min(4, Math.ceil(lv / 3));
 function artKeep(a){ // 保留最近 30 篇（錯題本還在用的文章不刪）
   ART.saved = ART.saved.filter(x => x.id !== a.id); ART.saved.push(a);
-  const used = new Set(Object.keys(S.wrong).filter(k => k.startsWith('ar|')).map(k => k.split('|')[1]));
+  const used = new Set(Object.keys(S.wrong).filter(k => k.startsWith('ar|')).map(k => k.split('|')[1]).concat(Object.keys(S.sent || {}).map(k => k.split('|')[0]), Object.keys(artState().reread)));
   while (ART.saved.length > 30) { const i = ART.saved.findIndex(x => !used.has(x.id)); if (i < 0) break; ART.saved.splice(i, 1); }
   artSave();
 }
 
 // ---------- 程度升降 ----------
-function artAfterQuiz(a, ok, n, wpm){
-  const st = artState(), sc = n ? ok / n : 0;
-  st.hist.push({id:a.id, date:Date.now(), lv:a.lv, sc:Math.round(sc * 100), wpm, w:artWords(a), src:a.src});
+function artAfterQuiz(a, ok, n, wpm, study){
+  // 精讀的分數 = 第一次就懂的句子 40% ＋ 段落大意 30% ＋ 測驗 30%
+  const st = artState(), qz = n ? ok / n : 0, sc = study ? 0.4 * study.u + 0.3 * (study.gn ? study.g / study.gn : qz) + 0.3 * qz : qz;
+  st.hist.push({id:a.id, date:Date.now(), lv:a.lv, sc:Math.round(sc * 100), wpm, w:artWords(a), src:a.src, kind:'int'});
   if (st.hist.length > 200) st.hist.shift();
   if (a.lv === st.lv) st.since++;
-  const recent = st.hist.filter(h => h.lv === st.lv).slice(-5), avg = recent.length ? recent.reduce((s, h) => s + h.sc, 0) / recent.length : 0;
+  const recent = st.hist.filter(h => h.lv === st.lv && h.kind !== 'ext' && (h.date || 0) >= (st.histFrom || 0)).slice(-5), avg = recent.length ? recent.reduce((s, h) => s + h.sc, 0) / recent.length : 0;
   let msg = '';
   if (st.since >= 3 && avg >= 85 && st.lv < 12) { st.lv++; st.since = 0; msg = `🎉 最近 ${recent.length} 篇平均 ${Math.round(avg)}%，文章升到 Lv${st.lv}（約 ${ART_LV[st.lv].w} 字）`; }
   else if (st.since >= 2 && avg < 60 && st.lv > 1) { st.lv--; st.since = 0; msg = `最近平均 ${Math.round(avg)}%，文章先回到 Lv${st.lv}，打穩基礎再升級`; }
@@ -3803,6 +3820,43 @@ function artWeakTags(){
   const top = Object.entries(c).sort((a, b) => b[1] - a[1]).map(x => x[0]).slice(0, 3);
   return top.length ? top : ['tense', 'conj'];
 }
+// ---------- 認識的字：在 App 學過或檢測判定會的字、最常用的功能字 ----------
+const ART_FUNC = new Set(('a an the and or but so if of to in on at by for with from as into about up down out over after before is am are was were be been being do does did done have has had ' +
+  'i you he she it we they me him her us them my your his its our their mine yours this that these those there here what who whom whose which when where why how not no yes ' +
+  'can could will would shall should may might must than then also very too just only all some any each every more most many much one two three four five six seven eight nine ten ' +
+  'first second next last mr mrs ms dr ok please thank thanks hello hi dear oh').split(' '));
+function artKnownSet(){ const k = new Set(Object.keys(S.srs)); VOCAB.forEach(w => { if (w.src === 'N' && w.p <= 200) k.add(w.w); }); return k; }
+function artIsKnown(w, known){ return ART_FUNC.has(w) || stemOf(w).some(x => known.has(x) || ART_FUNC.has(x)); }
+// 回傳這篇認識的字比例與生字（依出現次數）；句中大寫字（人名、地名）不算
+function artCoverage(a, known){
+  known = known || artKnownSet();
+  let tot = 0, ok = 0; const unk = {};
+  a.p.forEach(par => artSplit(par).forEach(sen => {
+    (sen.match(/[A-Za-z][A-Za-z'’-]*/g) || []).forEach((raw, i) => {
+      if (i > 0 && /^[A-Z]/.test(raw)) return;
+      const w = raw.toLowerCase().replace(/[’']s$/, '').replace(/[’'-]+$/, ''); if (!w) return;
+      tot++; if (artIsKnown(w, known)) ok++; else { const r = lookupWord(w, a); const key = r && r.zh ? r.w : w; unk[key] = (unk[key] || 0) + 1; }
+    }); }));
+  return {pct:tot ? ok / tot : 1, tot, unk};
+}
+// 讀前預習：最多 10 個生字（有中文的優先、出現多的優先）＋文中出現、還沒學過的 App 片語
+function artPreview(a, known){
+  known = known || artKnownSet();
+  const c = artCoverage(a, known), flat = a.p.join(' '), low = flat.toLowerCase();
+  const phr = VOCAB.filter(w => /\s/.test(w.w) && !known.has(w.w) && low.includes(w.w)).slice(0, 3).map(w => ({w:w.w, zh:w.zh, n:1, phr:true}));
+  const words = Object.entries(c.unk).map(([w, n]) => { const r = lookupWord(w, a) || {}; return {w, zh:r.zh || a.g[w] || '', n}; })
+    .sort((x, y) => (!!y.zh - !!x.zh) || (y.n - x.n)).slice(0, 10 - phr.length);
+  const list = phr.concat(words).map(x => { const rx = new RegExp('\\b' + x.w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').split(' ').join('\\s+'), 'i'); const sen = artSents(a).find(z => rx.test(z.t)); return {...x, sen:sen ? sen.t : ''}; });
+  const add = words.reduce((s, x) => s + x.n, 0);
+  return {list, pct:c.pct, after:c.tot ? Math.min(1, c.pct + add / c.tot) : 1};
+}
+// 斷句：保護縮寫與小數點
+function artSplit(par){
+  const D = '․';   // 暫時代替縮寫、小數點裡的句點
+  const t = par.replace(/\b(Mr|Mrs|Ms|Dr|St|Jr|Inc|Ltd|Co|vs|No|etc|approx|Ave|Corp)\./g, '$1' + D).replace(/\b([ap])\.m\./gi, '$1' + D + 'm' + D).replace(/(\d)\.(\d)/g, '$1' + D + '$2').replace(/\b(e)\.g\./gi, '$1' + D + 'g' + D).replace(/\b(i)\.e\./gi, '$1' + D + 'e' + D);
+  return (t.match(/[^.!?]+(?:[.!?]+["'’”)\]]*|$)/g) || []).map(x => x.trim()).filter(Boolean).map(x => x.split(D).join('.'));
+}
+const artSents = a => a.p.flatMap((par, p) => artSplit(par).map(t => ({p, t})));
 function artKnownWords(n){
   const L = Object.keys(S.srs).filter(w => VMAP[w] && !/\s/.test(w));
   return shuffle(mulberry32(Date.now() & 0xffff), L).slice(0, n);
@@ -3828,28 +3882,61 @@ async function gemModels(key){
     .map(m => { const id = m.name.replace(/^models\//, ''); return {id, name:(m.displayName || id) + (gemPaidLikely(id) ? '（可能需付費）' : /flash/i.test(id) ? '（免費方案常見）' : ''), paid:gemPaidLikely(id)}; })
     .sort((a, b) => (a.paid - b.paid) || (/flash/i.test(b.id) - /flash/i.test(a.id)) || (gemVer(b.id) - gemVer(a.id)));
 }
-function artPrompt(lv){
-  const L = ART_LV[lv], [n6, n7] = ART_QN(lv), sit = artPickSit(), tags = artWeakTags();
-  const known = artKnownWords(150), fresh = artNewWords(lv, 12);
-  return {sit, tags, text:`You are writing a TOEIC reading lesson for a Taiwanese adult learner preparing for a TOEIC score of 800.
+function artPrompt(lv, kind){
+  const ext = kind === 'ext', L = ART_LV[lv], [n6, n7] = ART_QN(lv), sit = artPickSit(), tags = artWeakTags();
+  const known = artKnownWords(250), fresh = ext ? [] : artNewWords(lv, 8), nNew = ext ? 2 : Math.max(3, Math.ceil(L.w * 0.03));
+  return {sit, tags, text:`You are writing a TOEIC reading lesson for a Taiwanese adult learner. The learner's English is still weak (junior-high level), so the text MUST be easy enough to understand at least 90% without a dictionary.
 Write ONE original English text and the exercises below. Output ONLY valid JSON (no markdown) in exactly this shape:
 {"title":"","title_zh":"","paragraphs":[""],"glossary":[{"word":"","zh":""}],
  "questions":[{"type":"p6","sentence":"","wrong":["","",""],"explain_zh":""},{"type":"p7","question":"","question_zh":"","answer":"","wrong":["","",""]}],
  "grammar":[{"tag":"","title_zh":"","quote":"","explain_zh":"","example":"","example_zh":"","practice":"","practice_wrong":["","",""]}]}
 
 Level: ${lv} of 12 (CEFR about ${L.cefr}). Style: ${L.s}.
-Length: about ${L.w} words in total, split into ${Math.max(3, Math.round(L.w / 110))} paragraphs.
-Situation (TOEIC test context): ${SIT_NAME[sit]} (${sit}). Make it a realistic workplace text type for this level (email, notice, article, memo, report, letter, chat, or advertisement).
-Use mainly words this learner already knows, for example: ${known.join(', ') || '(beginner: use the most common English words)'}.
-About 3-5% of the words may be new TOEIC words; if natural, include some of these: ${fresh.join(', ')}. Put every word a learner at this level may not know into "glossary" (base form, with a short Traditional Chinese meaning, Taiwan usage).
+${ext ? 'This is EASY EXTENSIVE READING: make it clearly easier than the level above suggests, like a graded reader. Short clear sentences, a simple story or message with a clear point, repeated key words.\n' : ''}Length: about ${L.w} words in total, split into ${Math.max(2, Math.round(L.w / 70))} short paragraphs.
+Situation (TOEIC test context): ${SIT_NAME[sit]} (${sit}). Make it a realistic workplace text type for this level (email, notice, memo, chat, short article, or advertisement).
+VOCABULARY RULES (very important):
+- Use ONLY (1) the 1000 most common English words and (2) words this learner already knows, for example: ${known.join(', ') || '(beginner: use only the most common English words)'}.
+- Use at most ${nNew} other words in the whole text${fresh.length ? '; if natural, choose them from: ' + fresh.join(', ') : ''}. List every such word in "glossary" (base form, short Traditional Chinese meaning, Taiwan usage).
+- Prefer short, common words over long or formal ones. Avoid idioms the learner cannot guess.
 Grammar focus — use these patterns several times naturally: ${tags.map(t => t + ' (' + ART_TAGS[t] + ')').join(', ')}.
 
 Questions: exactly ${n6} items of type "p6" then ${n7} items of type "p7".
 - "p6" (TOEIC Part 6 style): "sentence" must be copied EXACTLY from the text, with the tested word or phrase wrapped in curly braces {like this}; give 3 wrong options of the same word class that are clearly wrong in context; "explain_zh" explains why in Traditional Chinese.
-- "p7" (TOEIC Part 7 style): mix main idea, detail${lv >= 4 ? ', inference ("most likely", "suggested")' : ''}${lv >= 7 ? ', and vocabulary-in-context ("closest in meaning")' : ''}. One correct "answer" and 3 plausible but wrong options; all four options similar in length.
+- "p7" (TOEIC Part 7 style): mix main idea, detail${lv >= 4 ? ', inference ("most likely", "suggested")' : ''}${lv >= 7 ? ', and vocabulary-in-context ("closest in meaning")' : ''}. One correct "answer" and 3 plausible but wrong options; all four options similar in length. Keep questions as easy to read as the text.
 Grammar: exactly 3 items, one for each focus pattern above when possible. "tag" must be one of: ${Object.keys(ART_TAGS).join(', ')}. "quote" = a sentence copied exactly from the text that shows the pattern. "explain_zh" = a short explanation in Traditional Chinese. "example" = a NEW English sentence using the same pattern, "example_zh" its translation. "practice" = a new sentence with the answer in {curly braces}, plus 3 wrong options in "practice_wrong".
 All Chinese must be Traditional Chinese used in Taiwan. Keep the content positive and suitable for a workplace.`};
 }
+// 斷句、主詞動詞、逐句翻譯、每段大意題（精讀用）
+function artAnnPrompt(a){
+  const ss = artSents(a);
+  return `You are helping a Taiwanese adult with weak English (junior-high level) read the English text below sentence by sentence.
+Output ONLY valid JSON (no markdown) in exactly this shape:
+{"s":[{"i":0,"chunks":["",""],"subj":"","verb":"","zh":""}],"gist":[{"para":0,"answer":"","wrong":["","",""]}]}
+For EVERY numbered sentence (i = its number):
+- "chunks": split the sentence into sense groups (meaning units) of about 2-6 words for slash reading. The chunks joined with single spaces must give back EXACTLY the original sentence (same words, same punctuation).
+- "subj": the subject of the main clause, copied exactly from the sentence (keep it short: the core noun phrase). Use "" for imperatives.
+- "verb": the main verb of the main clause with its auxiliaries (e.g. "will send", "was"), copied exactly from the sentence.
+- "zh": a natural, easy Traditional Chinese (Taiwan) translation.
+For EVERY paragraph (para = its number, starting at 0), write one multiple-choice question "這段在講什麼？": "answer" = the correct one-sentence summary in Traditional Chinese; "wrong" = 3 wrong summaries of similar length that a reader who only looks at key words might choose (use words from the paragraph but get the point wrong).
+
+Sentences:
+${ss.map((x, i) => `[${i}] (para ${x.p}) ${x.t}`).join('\n')}`;
+}
+function artAnnFrom(j, a){
+  const ss = artSents(a), norm = x => x.replace(/\s+/g, ' ').trim(), ok = x => typeof x === 'string' && x.trim();
+  const by = {}; (j && Array.isArray(j.s) ? j.s : []).forEach(x => { if (x && Number.isInteger(+x.i)) by[+x.i] = x; });
+  const s = ss.map((x, i) => {
+    const r = by[i] || {};
+    const c = Array.isArray(r.chunks) && r.chunks.every(ok) && norm(r.chunks.join(' ')) === norm(x.t) ? r.chunks.map(z => z.trim()) : null;
+    const subj = ok(r.subj) && x.t.includes(r.subj.trim()) ? r.subj.trim() : '', verb = ok(r.verb) && x.t.includes(r.verb.trim()) ? r.verb.trim() : '';
+    return {p:x.p, t:x.t, c, sv:[subj, verb], zh:ok(r.zh) ? r.zh.trim() : ''};
+  });
+  const gist = a.p.map((_, pi) => { const g = (j && Array.isArray(j.gist) ? j.gist : []).find(x => x && +x.para === pi);
+    return g && ok(g.answer) && Array.isArray(g.wrong) && g.wrong.filter(ok).length === 3 && new Set([g.answer, ...g.wrong].map(z => z.trim())).size === 4 ? [g.answer.trim(), ...g.wrong.map(z => z.trim())] : null; });
+  if (s.filter(x => x.zh).length < ss.length * 0.7) throw new Error('逐句翻譯不完整');
+  return {s, gist, n:ss.length};
+}
+const artAnn = a => a && (a.ann || artState().ann[a.id]) || null;
 function artFromAI(j, lv, sit){
   const ok = x => typeof x === 'string' && x.trim();
   if (!j || !Array.isArray(j.paragraphs) || j.paragraphs.filter(ok).length < 2) throw new Error('文章內容不完整');
@@ -3960,12 +4047,11 @@ async function gemCall(model, text, waits = gemWait){
     const e = new Error(r.msg || 'HTTP ' + r.status); e.status = r.status; e.busy = gemBusy(r.status, r.msg); throw e;
   }
 }
-async function artGenerate(lv, retried){
+// 依序試：今天已證實可用的模型 → 你選的模型 → 備用免費 Flash（優先 Flash-Lite，速度快）；回傳解析後的 JSON
+async function gemAsk(text, retried){
   const st = artState();
   if (!st.key || !st.model) throw new Error('尚未設定 Gemini 金鑰或模型');
   if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new Error('目前沒有網路');
-  const pr = artPrompt(lv);
-  // 試的順序：今天已證實可用的模型 → 你選的模型 → 備用免費 Flash（優先 Flash-Lite，速度快）
   const alts = (st.models || []).filter(m => m !== st.model && /flash/i.test(m) && !gemPaidLikely(m)).sort((x, y) => /lite/i.test(y) - /lite/i.test(x));
   const pref = st.prefer && st.prefer.date === dnum() && st.prefer.model;
   const order = [...new Set([pref, st.model, alts[0]].filter(Boolean))];
@@ -3973,12 +4059,12 @@ async function artGenerate(lv, retried){
   for (let k = 0; k < order.length && !j; k++) {
     const m = order[k], more = k < order.length - 1;
     if (k) toast((order[k - 1] === st.model ? '你選的模型' : order[k - 1]) + ' 目前忙碌，改用 ' + m + ' …');
-    try { j = await gemCall(m, pr.text, more ? [3000] : gemWait); used = m; }
+    try { j = await gemCall(m, text, more ? [3000] : gemWait); used = m; }
     catch (x) {
       e = x;
       // Google 停用舊模型時，訊息會建議新模型（例如 use models/gemini-3.8-flash）：自動改用並重試一次
       const sug = x.message.match(/no longer available[\s\S]*?models\/([\w.-]+)/i);
-      if (sug && m === st.model && !retried && sug[1] !== st.model) { st.model = sug[1]; save(); toast('舊模型已停用，自動改用 ' + sug[1]); return artGenerate(lv, true); }
+      if (sug && m === st.model && !retried && sug[1] !== st.model) { st.model = sug[1]; save(); toast('舊模型已停用，自動改用 ' + sug[1]); return gemAsk(text, true); }
       if (!(x.busy || x.timeout || x.net)) break;   // 金鑰、額度等問題換模型也沒用
     }
   }
@@ -3987,17 +4073,30 @@ async function artGenerate(lv, retried){
     if (e.busy) throw new Error('Google 的 Gemini 伺服器目前太忙（Google 端的暫時狀況，不是金鑰或設定的問題），已自動重試仍失敗。請過幾分鐘再試；今天的文章會先改用文章庫。');
     throw e;
   }
-  // 記住今天可用的模型：主模型忙碌時，今天後面的文章直接用備用模型，不再每篇空等
+  // 記住今天可用的模型：主模型忙碌時，今天後面直接用備用模型，不再每次空等
   if (used !== st.model) { if (!pref || pref !== used) toast('今天先改用 ' + used + '（你選的模型目前忙碌）'); st.prefer = {model:used, date:dnum()}; }
   else if (st.prefer) st.prefer = null;
   save();
   if (j.promptFeedback && j.promptFeedback.blockReason) throw new Error('生成被擋下（' + j.promptFeedback.blockReason + '）');
   const c = (j.candidates || [])[0];
   const txt = c && c.content && (c.content.parts || []).filter(x => !x.thought).map(x => x.text || '').join('');
-  if (!txt) throw new Error('沒有收到文章內容' + (c && c.finishReason ? '（' + c.finishReason + '）' : ''));
-  let data; try { data = JSON.parse(txt.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch(e) { throw new Error('回傳格式不是 JSON' + (c.finishReason === 'MAX_TOKENS' ? '（文章被截斷）' : '')); }
+  if (!txt) throw new Error('沒有收到內容' + (c && c.finishReason ? '（' + c.finishReason + '）' : ''));
+  try { return JSON.parse(txt.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch(x) { throw new Error('回傳格式不是 JSON' + (c.finishReason === 'MAX_TOKENS' ? '（內容被截斷）' : '')); }
+}
+async function artGenerate(lv, kind){
+  const st = artState(), pr = artPrompt(lv, kind);
+  const data = await gemAsk(pr.text);
+  const a = artFromAI(data, lv, pr.sit); a.kind = kind === 'ext' ? 'ext' : 'int'; a.v2 = 1;
   const t = dnum(); if (st.gen.date !== t) st.gen = {date:t, n:0}; st.gen.n++; save();
-  return artFromAI(data, lv, pr.sit);
+  return a;
+}
+// 幫文章加上斷句、主詞動詞、翻譯與段落大意；資料庫文章存回資料庫，文章庫文章存在進度裡
+async function artAnnotate(a){
+  if (artAnn(a)) return artAnn(a);
+  const ann = artAnnFrom(await gemAsk(artAnnPrompt(a)), a);
+  const x = ARTDB.find(y => y.id === a.id);
+  if (x) { x.ann = ann; a.ann = ann; await artDbPut(x); } else { artState().ann[a.id] = ann; save(); }
+  return ann;
 }
 
 // ---------- 文章資料庫：Gemini 生成的文章全部保存（IndexedDB，可存數百篇；不支援時改存最近 60 篇） ----------
@@ -4021,6 +4120,7 @@ async function artDbLoad(){
   const old = (ART.cache || []).concat(ART.saved.filter(a => a.src === 'ai'));   // 舊版的備用文章與讀過的生成文章搬進資料庫
   for (const a of old) if (!ARTDB.some(x => x.id === a.id)) await artDbPut(Object.assign({}, a, {read:a.read || (ART.cache.includes(a) ? 0 : a.date || 1)}));
   if (ART.cache && ART.cache.length) { ART.cache = []; artSave(); }
+  for (const a of ARTDB) if (!a.v2) { a.lv = artLvByWords(a); a.v2 = 1; a.kind = a.kind || 'int'; artDbPut(a); }   // 舊版文章換算到新等級
   ARTDB.sort((a, b) => (a.date || 0) - (b.date || 0));
 }
 async function artDbPut(a){
@@ -4035,16 +4135,19 @@ function artMarkRead(a){ const x = ARTDB.find(y => y.id === a.id); if (x && !x.r
 const ART_DAY = 5;
 let artPending = null, artDayRun = false, artDayMsg = '';
 const artGenToday = () => { const g = artState().gen; return g.date === dnum() ? g.n : 0; };
-function artGenOne(lv){
+const ART_PLAN = ['int', 'ext', 'int', 'ext', 'ext'];   // 每天 2 篇精讀＋3 篇泛讀
+const artKindLv = kind => kind === 'ext' ? Math.max(1, artState().lv - 1) : artState().lv;
+function artGenOne(lv, kind){
   if (artPending) return artPending;
-  artPending = artGenerate(lv).then(async a => { a.read = 0; await artDbPut(a); return a; }).finally(() => { artPending = null; artDayShow(); });
+  kind = kind || 'int'; lv = lv || artKindLv(kind);
+  artPending = artGenerate(lv, kind).then(async a => { a.read = 0; await artDbPut(a); try { await artAnnotate(a); } catch(e) {} return a; }).finally(() => { artPending = null; artDayShow(); });
   return artPending;
 }
 function artDayShow(){ const el = typeof document !== 'undefined' && document.querySelector('#adst'); if (el) el.innerHTML = artDayText(); }
 function artDayText(){
   const st = artState(); if (!st.key) return '尚未設定 Gemini：目前讀的是內建文章庫。';
   const pf = st.prefer && st.prefer.date === dnum() && st.prefer.model;
-  return `Gemini：${esc(st.model || '未選模型')}${pf ? `（今天改用 ${esc(pf)}）` : ''}・今天已生成 <b>${artGenToday()}／${ART_DAY}</b> 篇${artPending ? '（生成中…）' : ''}・資料庫 <b>${ARTDB.length}</b> 篇（未讀 ${artUnread().length}）` + (artDayMsg && artGenToday() < ART_DAY && !artPending ? `<br><span class="warn">上次生成失敗：${esc(artDayMsg)}</span>` : '');
+  return `Gemini：${esc(st.model || '未選模型')}${pf ? `（今天改用 ${esc(pf)}）` : ''}・今天已生成 <b>${artGenToday()}／${ART_DAY}</b> 篇${artPending ? '（生成中…）' : ''}・資料庫 <b>${ARTDB.length}</b> 篇（未讀精讀 ${artUnread().filter(a => a.kind !== 'ext').length}、泛讀 ${artUnread().filter(a => a.kind === 'ext').length}）` + (artDayMsg && artGenToday() < ART_DAY && !artPending ? `<br><span class="warn">上次生成失敗：${esc(artDayMsg)}</span>` : '');
 }
 async function artDaily(){
   const st = artState();
@@ -4053,7 +4156,7 @@ async function artDaily(){
   try {
     await artDbReady;
     while (artGenToday() < ART_DAY && fails < 2 && !(typeof navigator !== 'undefined' && navigator.onLine === false)) {
-      try { await artGenOne(st.lv); fails = 0; artDayMsg = ''; }
+      try { const k = ART_PLAN[artGenToday() % ART_PLAN.length]; await artGenOne(artKindLv(k), k); fails = 0; artDayMsg = ''; }
       catch(e) { fails++; artDayMsg = e.message; artDayShow(); if (e.status === 429 || /額度/.test(e.message)) break; }
       if (artGenToday() < ART_DAY) await sleep(gemGap * (fails ? 2 : 1));
     }
@@ -4073,17 +4176,22 @@ function artWait(lv){
   return {cancel, done(){ clearInterval(tick); gemProg = null; }};
 }
 
-// ---------- 今天的文章 ----------
+// ---------- 今天的文章（精讀） ----------
+// 挑選：未讀、等級接近、認識的字比例高的優先；認識不到 85% 的排後面
+function artPickFrom(list, lv, need){
+  const known = artKnownSet();
+  return list.map(a => ({a, c:artCoverage(a, known).pct})).sort((x, y) => ((x.c < need) - (y.c < need)) || (Math.abs(x.a.lv - lv) - Math.abs(y.a.lv - lv)) || ((y.a.date || 0) - (x.a.date || 0)))[0] || null;
+}
 async function artToday(forceNew){
   const st = artState(), t = dnum();
   await artDbReady;
   if (!forceNew && st.today && st.today.date === t) { const a = artById(st.today.id); if (a) return a; }
   let a = null, note = '';
-  const take = () => artUnread().filter(x => Math.abs(x.lv - st.lv) <= 1).sort((x, y) => (y.date || 0) - (x.date || 0))[0] || null;
-  a = take();
+  const best = artPickFrom(artUnread().filter(x => x.kind !== 'ext' && Math.abs(x.lv - st.lv) <= 1), st.lv, 0.85);
+  if (best) a = best.a;
   if (!a && st.key && st.model) {
     const w = artWait(st.lv);
-    try { const r = await Promise.race([artGenOne(st.lv), w.cancel]); if (r === 'cancel') note = '這次先讀文章庫；Gemini 寫好的文章會存進文章資料庫'; else a = r; }
+    try { const r = await Promise.race([artGenOne(st.lv, 'int'), w.cancel]); if (r === 'cancel') note = '這次先讀文章庫；Gemini 寫好的文章會存進文章資料庫'; else a = r; }
     catch(e) { note = e.message + ' 今天先讀文章庫的文章。'; }
     w.done();
   }
@@ -4094,8 +4202,23 @@ async function artToday(forceNew){
   setTimeout(artDaily, 500);
   return Object.assign(a, {note});
 }
+// 泛讀：比目前程度簡單、認識 95% 以上的文章；沒有就用簡單的文章庫或讀過的舊文章
+async function artExtPick(){
+  const st = artState(), t = dnum();
+  await artDbReady;
+  if (st.ext && st.ext.date === t) { const a = artById(st.ext.id); if (a) return a; }
+  const lv = Math.max(1, st.lv - 1);
+  let c = artPickFrom(artUnread().filter(x => x.kind === 'ext' && x.lv <= st.lv), lv, 0.95);
+  if (!c || c.c < 0.9) { const lib = artPickFrom(ARTICLES.filter(x => !st.hist.some(h => h.id === x.id)).map(x => ({...x, src:'lib'})), lv, 0.95); if (lib && (!c || lib.c > c.c)) c = lib; }
+  if (!c) c = artPickFrom(ARTDB.filter(x => x.lv <= st.lv), lv, 0.95);
+  if (!c) c = {a:{...ARTICLES.slice().sort((x, y) => x.lv - y.lv)[0], src:'lib'}};
+  const a = c.a; st.ext = {date:t, id:a.id};
+  if (a.src === 'ai') artMarkRead(a);
+  artKeep(a); save(); setTimeout(artDaily, 500);
+  return a;
+}
 // ---------- 隨機閱讀與文章資料庫 ----------
-function artReadOld(a){ if (!a) return toast('找不到文章'); if (a.src === 'ai') artMarkRead(a); artKeep(a); a.note = ''; artOpen(a); }
+function artReadOld(a){ if (!a) return toast('找不到文章'); if (a.src === 'ai') artMarkRead(a); artKeep(a); a.note = ''; artStudy(a); }
 async function artRandom(){
   await artDbReady;
   const st = artState(), near = ARTDB.filter(a => Math.abs(a.lv - st.lv) <= 2);
@@ -4111,7 +4234,7 @@ async function artDbMenu(lvF){
   view(header('文章資料庫') + `<section class="panel"><p class="sub left">Gemini 生成的文章都存在這裡（共 ${ARTDB.length} 篇，未讀 ${artUnread().length} 篇），只存在這支手機。</p>
     <div class="row"><button class="next" onclick="artRandom()">🎲 隨機讀一篇</button></div>
     ${lvs.length > 1 ? `<div class="row">${['全部', ...lvs].map(l => `<button class="${(l === '全部' ? !lvF : l === lvF) ? 'next' : 'ghost'} inl" onclick="artDbMenu(${l === '全部' ? 0 : l})">${l === '全部' ? l : 'Lv' + l}</button>`).join('')}</div>` : ''}</section>
-    <section class="panel">${list.length ? list.slice(0, 200).map(a => `<div class="task"><span><a href="#" onclick="event.preventDefault();artReadOld(artById('${a.id}'))">${esc(a.t)}</a><br><small>${esc(a.zh || '')}</small></span><span class="num">${d(a.date || 0)}・Lv${a.lv}・${esc(SIT_NAME[a.sit] || '')}・${sc[a.id] != null ? sc[a.id] + '%' : a.read ? '讀過' : '未讀'}</span></div>`).join('') : '<p class="sub">還沒有生成的文章。設定 Gemini 金鑰後，每天會自動生成 5 篇。</p>'}</section>
+    <section class="panel">${list.length ? list.slice(0, 200).map(a => `<div class="task"><span><a href="#" onclick="event.preventDefault();artReadOld(artById('${a.id}'))">${esc(a.t)}</a><br><small>${esc(a.zh || '')}</small></span><span class="num">${d(a.date || 0)}・Lv${a.lv}・${esc(SIT_NAME[a.sit] || '')}・${a.kind === 'ext' ? '泛讀' : '精讀'}・${sc[a.id] != null ? sc[a.id] + '%' : a.read ? '讀過' : '未讀'}</span></div>`).join('') : '<p class="sub">還沒有生成的文章。設定 Gemini 金鑰後，每天會自動生成 5 篇。</p>'}</section>
     <button class="ghost" onclick="articleMenu()">‹ 回每日文章</button>`);
 }
 
@@ -4141,19 +4264,22 @@ function artTap(word, a){
   if (r.zh) say(r.w);
 }
 const ART_T = {};
-function artOpen(a){
-  const st = artState(), words = artWords(a), stage = artStage(a.lv), target = ART_WPM[stage];
-  const body = a.p.map((par, pi) => `<p class="ap">${esc(par).replace(/([A-Za-z][A-Za-z'’-]*)/g, '<span class="tw">$1</span>')}</p>`).join('');
-  view(header('每日文章') + `<section class="panel"><div class="num">Lv${a.lv}・${SIT_NAME[a.sit] || ''}・約 ${words} 字・${a.src === 'ai' ? 'Gemini 生成' : '文章庫'}</div>
+// 整篇閱讀：mode 'int' = 精讀最後一步（不看提示、計時，讀完做多益題）；'ext' = 泛讀（讀完答段落大意）
+function artOpen(a, opt = {}){
+  if (!opt.mode) return artStudy(a);
+  const ext = opt.mode === 'ext', words = artWords(a), target = ART_WPM[artStage(a.lv)];
+  const body = a.p.map(par => `<p class="ap">${tapHtml(par)}</p>`).join('');
+  view(header(ext ? '泛讀' : '精讀・整篇再讀一次') + `<section class="panel"><div class="num">Lv${a.lv}・${SIT_NAME[a.sit] || ''}・約 ${words} 字・${a.src === 'ai' ? 'Gemini 生成' : '文章庫'}</div>
    <h2 class="at">${esc(a.t)}</h2>${a.note ? `<p class="sub left">ℹ️ ${esc(a.note)}</p>` : ''}
-   <p class="sub left">點任何單字看中文（點過的字會排進單字複習）。目標速度：每分鐘 ${target} 字。</p>
+   <p class="sub left">${ext ? `泛讀：<b>盡量不查字</b>，順順讀下去、抓住每段大意就好。` : '這次不看提示，從頭到尾讀一次，感受整篇的意思。'}目標速度：每分鐘 ${target} 字。</p>
    <button class="next" id="ast">▶ 開始閱讀（開始計時）</button></section>
-   <section class="panel article hide" id="abody">${body}<button class="next" id="aend">讀完了，開始測驗 ›</button></section>`);
+   <section class="panel article hide" id="abody">${body}<button class="next" id="aend">${ext ? '讀完了 ›' : '讀完了，開始測驗 ›'}</button></section>`);
   $('#ast').onclick = () => { ART_T[a.id] = Date.now(); $('#abody').classList.remove('hide'); $('#ast').remove(); };
-  $('#abody').onclick = e => { const s = e.target.closest('.tw'); if (s) { s.classList.add('seen'); artTap(s.textContent, a); } };
+  tapBind('#abody', a);
   $('#aend').onclick = () => {
-    const mins = Math.max(0.5, (Date.now() - (ART_T[a.id] || Date.now())) / 60000), wpm = Math.round(words / mins);
-    runQuiz({title:a.t, items:a.q.map((x, i) => `ar|${a.id}|${i}`), noSupp:true, noAuto:true, art:{id:a.id, wpm}});
+    const mins = Math.max(0.3, (Date.now() - (ART_T[a.id] || Date.now())) / 60000), wpm = Math.round(words / mins);
+    if (ext) return artExtEnd(a, wpm);
+    runQuiz({title:a.t, items:a.q.map((x, i) => `ar|${a.id}|${i}`), noSupp:true, noAuto:true, art:{id:a.id, wpm, study:opt.study || null}});
   };
 }
 function buildArt(item, rng){
@@ -4174,12 +4300,15 @@ function buildArt(item, rng){
   return {key:item, kind:'mc', tag:'文章 Part 7', lv, sec:'R', prompt:`<details class="script"><summary>看文章</summary><div class="passage">${a.p.map(s => `<p>${esc(s)}</p>`).join('')}</div></details><div class="sent qline">${esc(x[1])}</div>`, sub:lv <= 2 && x[2] ? esc(x[2]) : '', ans:x[3], opts:shuffle(rng, x.slice(3, 7)), abc:true, tip:x[2] ? '題目：' + x[2] : ''};
 }
 function artQuizEnd(){
-  const a = artById(Q.art.id), msg = artAfterQuiz(a, Q.ok, Q.n, Q.art.wpm);
+  const a = artById(Q.art.id), sd = Q.art.study, msg = artAfterQuiz(a, Q.ok, Q.n, Q.art.wpm, sd);
   if (artState().today && artState().today.id === a.id) S.daily.article = true; else S.daily.extraArt = (S.daily.extraArt || 0) + 1;
   save(); checkStreak();
   const target = ART_WPM[artStage(a.lv)], pct = Q.n ? Math.round(Q.ok / Q.n * 100) : 0;
-  view(header('文章結果') + `<section class="panel result"><div class="score">${pct}<small>%</small></div><p>答對 ${Q.ok}／${Q.n} 題・閱讀速度 <b>${Q.art.wpm}</b> 字／分（目標 ${target}）</p>${msg ? `<p class="ok">${esc(msg)}</p>` : ''}
-   <p class="sub">${Q.ok < Q.n ? '答錯的題目已收進錯題本。' : '全部答對！'}</p><button class="next" onclick="artGrammar('${a.id}')">看今天的文法重點 ›</button><button class="ghost" onclick="home()">回首頁</button></section>`);
+  const sc = sd ? Math.round(40 * sd.u + 30 * (sd.gn ? sd.g / sd.gn : Q.ok / Math.max(1, Q.n)) + 30 * Q.ok / Math.max(1, Q.n)) : pct;
+  view(header('精讀結果') + `<section class="panel result"><div class="score">${sc}<small>分</small></div>
+   ${sd ? `<p class="sub">第一次就懂 ${Math.round(sd.u * 100)}%（佔 40%）・段落大意 ${sd.g}／${sd.gn}（30%）・多益題 ${Q.ok}／${Q.n}（30%）</p>` : `<p>答對 ${Q.ok}／${Q.n} 題</p>`}
+   <p>閱讀速度 <b>${Q.art.wpm}</b> 字／分（目標 ${target}）</p>${msg ? `<p class="ok">${esc(msg)}</p>` : ''}
+   <p class="sub">${Q.ok < Q.n ? '答錯的題目已收進錯題本。' : '多益題全部答對！'}</p><button class="next" onclick="artGrammar('${a.id}')">看今天的文法重點 ›</button><button class="ghost" onclick="lessonPage()">回今日課表</button></section>`);
 }
 function artGrammar(id){
   const a = artById(id); if (!a) return home();
@@ -4202,16 +4331,18 @@ function artGramPool(tag){
 }
 
 // ---------- 入口 ----------
-async function articleGo(extra){ const a = await artToday(!!extra); artOpen(a); }
 function articleMenu(){
-  const st = artState(), last = st.hist.slice(-10).reverse(), done = st.today && st.today.date === dnum() && S.daily.article;
+  const st = artState(), last = st.hist.slice(-10).reverse(), done = st.today && st.today.date === dnum() && S.daily.article, rd = artRereadDue().length, xl = Math.max(1, st.lv - 1);
+  const ints = st.hist.filter(h => h.kind !== 'ext' && (h.date || 0) >= (st.histFrom || 0));
   const wpms = st.hist.slice(-20).map(h => h.wpm).filter(Boolean), avg = wpms.length ? Math.round(wpms.reduce((s, x) => s + x, 0) / wpms.length) : 0;
-  view(header('每日文章') + `<section class="panel"><div class="mgrid"><div><b>Lv${st.lv}</b><small>目前程度</small></div><div><b>${ART_LV[st.lv].w}</b><small>字／篇</small></div><div><b>${avg || '—'}</b><small>平均字／分</small></div><div><b>${ART_WPM[artStage(st.lv)]}</b><small>目標字／分</small></div></div>
-   <p class="sub left">最近 5 篇平均答對 85% 以上就升一級、低於 60% 降一級。文章主要用你學過的字，並多用你較弱的文法：${artWeakTags().map(t => ART_TAGS[t]).join('、')}。</p>
-   <div class="row"><button class="next" onclick="articleGo()">${done ? '重讀今天的文章' : '▶ 今天的文章'}</button><button class="ghost" onclick="articleGo(1)">加讀一篇</button></div>
-   <div class="row"><button class="ghost" onclick="artRandom()">🎲 隨機讀以前的文章</button><button class="ghost" onclick="artDbMenu()">📚 文章資料庫（${ARTDB.length}）</button></div>
+  view(header('每日文章') + `<section class="panel"><div class="mgrid"><div><b>Lv${st.lv}</b><small>精讀（${ART_LV[st.lv].w} 字）</small></div><div><b>Lv${xl}</b><small>泛讀（${ART_LV[xl].w} 字）</small></div><div><b>${avg || '—'}</b><small>平均字／分</small></div><div><b>${ART_WPM[artStage(st.lv)]}</b><small>目標字／分</small></div></div>
+   ${st.placed ? `<p class="sub left">最近 5 篇精讀平均 85 分以上升一級、低於 60 分降一級（分數 = 第一次就懂的句子 40%＋段落大意 30%＋多益題 30%）。已讀 ${ints.length} 篇。</p>
+   <div class="row"><button class="next" onclick="articleGo()">${done ? '重讀今天的精讀' : '▶ 今天的精讀'}</button><button class="ghost" onclick="artExtGo()">📖 泛讀${S.daily.ext ? ' ✓' : ''}</button></div>
+   <div class="row">${rd ? `<button class="ghost" onclick="artRereadGo()">🔁 重讀（${rd} 篇到期）</button>` : ''}<button class="ghost" onclick="articleGo(1)">加讀一篇精讀</button></div>`
+   : `<p>第一次使用：先做 <b>閱讀程度檢測</b>（約 5 分鐘），App 會依結果給你剛好讀得懂的文章。</p><button class="next" onclick="artPlace()">📏 開始閱讀程度檢測</button>`}
+   <div class="row"><button class="ghost" onclick="artRandom()">🎲 隨機讀以前的文章</button><button class="ghost" onclick="artDbMenu()">📚 文章資料庫（${ARTDB.length}）</button>${st.placed ? '<button class="ghost" onclick="artPlace()">📏 重新檢測程度</button>' : ''}</div>
    <p class="sub left"><span id="adst">${artDayText()}</span>　${st.key && artGenToday() < ART_DAY && !artPending ? '<button class="ghost inl" onclick="artDaily();setTimeout(artDayShow,300)">立即補生成</button>' : ''}<button class="ghost inl" onclick="gemSetup()">⚙️ Gemini 設定</button></p></section>
-   ${last.length ? `<section class="panel"><h2>最近讀過</h2>${last.map(h => { const a = artById(h.id); return `<div class="task"><span>${a ? `<a href="#" onclick="event.preventDefault();artOpen(artById('${h.id}'))">${esc(a.t)}</a>` : '（已刪除）'}</span><span class="num">Lv${h.lv}・${h.sc}%・${h.wpm} 字／分</span></div>`; }).join('')}</section>` : ''}`);
+   ${last.length ? `<section class="panel"><h2>最近讀過</h2>${last.map(h => { const a = artById(h.id); return `<div class="task"><span>${a ? `<a href="#" onclick="event.preventDefault();artReadOld(artById('${h.id}'))">${esc(a.t)}</a>` : '（已刪除）'}</span><span class="num">${h.kind === 'ext' ? '泛讀' : '精讀'}・Lv${h.lv}・${h.sc}%・${h.wpm} 字／分</span></div>`; }).join('')}</section>` : ''}`);
 }
 
 // ---------- Gemini 設定與申請教學 ----------
@@ -4242,6 +4373,235 @@ function gemSetup(){
   };
   if ($('#gdel')) $('#gdel').onclick = () => { st.key = ''; st.model = ''; save(); toast('已刪除金鑰'); gemSetup(); };
   if (st.key) gemModels(st.key).then(showModels).catch(() => {});
+}
+
+// ================= 精讀・泛讀・重讀・閱讀程度檢測 =================
+// 精讀：讀前預習生字 → 一次一句（懂了／給提示：主詞動詞＋/斷句／看翻譯）→ 每段「這段在講什麼」→ 整篇再讀一次（計時）→ 多益題 → 文法重點
+// 看不懂的句子收進句子複習（S.sent，間隔同單字）；3 天後重讀同一篇，比較第一次就懂的比例。
+// 泛讀：比目前程度簡單一級、認識 95% 以上的文章，不查字、讀快，讀完答段落大意。
+
+let R = null;   // 目前精讀／泛讀的狀態
+const pc = x => Math.round(x * 100);
+// 先拆字再跳脫，避免 &amp; 之類的字元被拆開
+const tapHtml = t => t.split(/([A-Za-z][A-Za-z'’-]*)/).map((x, i) => i % 2 ? `<span class="tw">${esc(x)}</span>` : esc(x)).join('');
+function hlWord(sen, w){
+  const rx = new RegExp('\\b(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').split(' ').join('\\s+') + '\\w*)', 'i');
+  const m = sen.match(rx); if (!m) return esc(sen);
+  return esc(sen.slice(0, m.index)) + '<b>' + esc(m[0]) + '</b>' + esc(sen.slice(m.index + m[0].length));
+}
+function tapBind(sel, a){ const el = $(sel); if (el) el.onclick = e => { const s = e.target.closest('.tw'); if (s) { s.classList.add('seen'); artTap(s.textContent, a); } }; }
+
+// ---------- 入口 ----------
+async function articleGo(extra){
+  if (!artState().placed) return artPlace();
+  const a = await artToday(!!extra); artStudy(a);
+}
+async function artExtGo(again){
+  if (!artState().placed) return artPlace();
+  if (again) artState().ext = null;
+  const a = await artExtPick(); artOpen(a, {mode:'ext'});
+}
+const artRereadDue = () => { const st = artState(), t = dnum(); return Object.entries(st.reread).filter(([id, r]) => !r.done && r.due <= t && artById(id)).map(([id]) => id); };
+function artRereadGo(){ const id = artRereadDue()[0]; if (!id) return toast('今天沒有要重讀的文章'); artStudy(artById(id), {reread:true}); }
+
+// 沒有斷句資料時請 Gemini 補（可略過）
+async function artEnsureAnn(a, title){
+  if (artAnn(a) || !artState().key) return artAnn(a);
+  let stop; const cancel = new Promise(r => { stop = r; }), t0 = Date.now();
+  view(header(title) + `<section class="panel result"><div class="score">🧩</div><p>Gemini 正在幫這篇文章準備斷句、主詞動詞標示和逐句翻譯…</p>
+    <p class="sub" id="awp">已等 0 秒</p><button class="ghost" id="awc">不等了，直接讀（沒有提示）</button></section>`);
+  const tick = setInterval(() => { const el = $('#awp'); if (!el) return clearInterval(tick); el.textContent = `已等 ${Math.round((Date.now() - t0) / 1000)} 秒`; }, 500);
+  $('#awc').onclick = () => stop('cancel');
+  try { const r = await Promise.race([artAnnotate(a), cancel]); return r === 'cancel' ? null : r; }
+  catch(e) { toast('無法準備提示：' + e.message); return null; }
+  finally { clearInterval(tick); }
+}
+
+// ---------- 精讀 ----------
+async function artStudy(a, opt = {}){
+  if (!a) return toast('找不到文章');
+  const ann = await artEnsureAnn(a, opt.reread ? '重讀' : '精讀');
+  R = {a, ann, i:0, marks:[], gist:{}, reread:!!opt.reread, t0:Date.now(),
+    sents:ann ? ann.s : artSents(a).map(x => ({...x, c:null, sv:['', ''], zh:''}))};
+  if (opt.reread) return artSent(0);
+  artPrev();
+}
+function artPrev(){
+  const a = R.a, pv = artPreview(a); R.pv = pv;
+  view(header('精讀・讀前預習') + `<section class="panel"><div class="num">Lv${a.lv}・${SIT_NAME[a.sit] || ''}・約 ${artWords(a)} 字・${a.src === 'ai' ? 'Gemini 生成' : '文章庫'}</div>
+    <h2 class="at">${esc(a.t)}</h2>${a.note ? `<p class="sub left">ℹ️ ${esc(a.note)}</p>` : ''}
+    <div class="cov">這篇你認識的字約 <b>${pc(pv.pct)}%</b>　預習後約 <b>${pc(pv.after)}%</b></div>
+    ${pv.pct < 0.85 ? '<p class="warn">這篇對你偏難。慢慢讀、多用提示沒關係，讀懂比讀快重要。</p>' : ''}${R.ann ? '' : '<p class="warn">這篇沒有斷句和翻譯資料（沒有 Gemini 或沒網路），只能看單字中文。</p>'}</section>
+    ${pv.list.length ? `<section class="panel"><h2>先認識這 ${pv.list.length} 個字</h2>${pv.list.map(x => `<div class="pv"><div><b>${esc(x.w)}</b>${x.phr ? ' <span class="num">片語</span>' : ''} <button class="ghost inl" data-w="${esc(x.w)}" onclick="say(this.dataset.w)">🔊</button>　${esc(x.zh || '（逐句讀時看翻譯）')}</div>${x.sen ? `<div class="sub left">${hlWord(x.sen, x.w)}</div>` : ''}</div>`).join('')}
+      <p class="sub left">App 字庫裡的字會排進明天的單字複習。</p></section>` : ''}
+    <section class="panel"><p class="sub left">接下來<b>一次讀一句</b>：看懂按「懂了」；不確定按「給提示」（標出<u>主詞</u>、<b class="vb">動詞</b>，並用 / 切成意群）；還是不懂再看翻譯。每段讀完回答「這段在講什麼」。</p>
+    <button class="next" onclick="artPrevDone()">開始逐句讀 ›</button></section>`);
+}
+function artPrevDone(){
+  const t = dnum(), st = artState();
+  R.pv.list.forEach(x => { if (VMAP[x.w] && !S.srs[x.w]) S.srs[x.w] = [0, t + 1, 0, t, 0]; else if (!VMAP[x.w] && x.zh) st.myWords[x.w] = x.zh; });
+  histSnap(); save(); R.t0 = Date.now(); artSent(0);
+}
+// 提示：主詞（底線）、動詞（粗體）、意群（/）
+function artHintHtml(x){
+  const t = x.t, cuts = new Set([0, t.length]), ends = new Set();
+  if (x.c) { let pos = 0; x.c.forEach((c, k) => { const i = t.indexOf(c, pos); if (i < 0) return; pos = i + c.length; if (k < x.c.length - 1) { ends.add(pos); cuts.add(pos); } }); }
+  const [sj, vb] = x.sv, si = sj ? t.indexOf(sj) : -1;
+  let vi = vb ? t.indexOf(vb, si >= 0 ? si + sj.length : 0) : -1; if (vb && vi < 0) vi = t.indexOf(vb);
+  const rs = []; if (si >= 0) rs.push([si, si + sj.length, 'su']); if (vi >= 0) rs.push([vi, vi + vb.length, 'vb']);
+  rs.forEach(([a, b]) => { cuts.add(a); cuts.add(b); });
+  const pts = [...cuts].sort((a, b) => a - b); let h = '';
+  for (let k = 0; k < pts.length - 1; k++) {
+    const a = pts[k], b = pts[k + 1], r = rs.find(([x0, x1]) => a >= x0 && b <= x1), seg = esc(t.slice(a, b));
+    h += r ? `<span class="${r[2]}">${seg}</span>` : seg;
+    if (ends.has(b)) h += '<span class="sl"> /</span>';
+  }
+  const has = x.c || si >= 0 || vi >= 0;
+  return has ? `<div class="shint">${h}</div><p class="sub left"><span class="su">主詞</span>　<span class="vb">動詞</span>　<span class="sl">/</span> 意群</p>` : '';
+}
+function artSent(state){
+  const x = R.sents[R.i], n = R.sents.length;
+  const prev = R.sents.slice(0, R.i).filter(y => y.p === x.p).map(y => esc(y.t)).join(' ');
+  const hint = state >= 1 ? artHintHtml(x) : '', canHint = !!(x.c || x.sv[0] || x.sv[1]);
+  const zh = state >= 2 ? `<div class="szh">${x.zh ? esc(x.zh) : '（這句沒有翻譯資料）'}</div>` : '';
+  const b = (t, f, c) => `<button class="${c}" onclick="${f}">${t}</button>`;
+  const btns = state === 0 ? b('✅ 懂了', 'artMark(0)', 'next') + b('💡 給提示', canHint ? 'artSent(1)' : 'artSent(2)', 'ghost') + b('❓ 不懂', 'artSent(2)', 'ghost')
+    : state === 1 ? b('✅ 懂了', 'artMark(1)', 'next') + b('看翻譯', 'artSent(2)', 'ghost') : b('下一句 ›', 'artMark(2)', 'next');
+  view(header(R.reread ? '重讀' : '精讀') + `<section class="panel"><div class="qmeta"><span>第 ${x.p + 1} 段</span><span>${R.i + 1}／${n} 句</span></div><div class="prog"><i style="width:${Math.round(R.i / n * 100)}%"></i></div>
+    ${prev ? `<p class="sprev">${prev}</p>` : ''}<div class="ssent" id="ssent">${tapHtml(x.t)}</div>${state >= 1 && !hint && canHint ? '' : ''}${hint}${zh}
+    <div class="row">${btns}</div><p class="sub left">點單字可以看中文；按「給提示」或「不懂」的句子會收進句子複習。</p></section>`);
+  tapBind('#ssent', R.a);
+}
+function artMark(m){
+  const x = R.sents[R.i], t = dnum();
+  R.marks[R.i] = m;
+  if (m >= 1 && !R.reread) { S.sent = S.sent || {}; const k = `${R.a.id}|${R.i}`; if (!S.sent[k]) S.sent[k] = [0, t + 1, 0, t]; save(); }
+  R.i++;
+  const endPara = R.i >= R.sents.length || R.sents[R.i].p !== x.p, g = R.ann && R.ann.gist && R.ann.gist[x.p];
+  if (endPara && g) return artGist(x.p, () => R.i >= R.sents.length ? artSum() : artSent(0));
+  R.i >= R.sents.length ? artSum() : artSent(0);
+}
+// 每段大意題（中文四選一）
+function artGist(p, next){
+  const g = R.ann.gist[p], opts = shuffle(mulberry32((R.t0 + p * 97) & 0xffffff), g.slice(0, 4));
+  R.gnext = next;
+  const paras = R.ann.gist.filter(Boolean).length;
+  view(header(R.ext ? '泛讀' : R.reread ? '重讀' : '精讀') + `<section class="panel"><div class="qmeta"><span>段落大意</span><span>第 ${p + 1} 段</span></div>
+    <h2>這段在講什麼？</h2><details class="script"><summary>再看一次這段</summary><div class="passage">${esc(R.a.p[p])}</div></details>
+    <div class="opts left" id="gopts">${opts.map((o, i) => `<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div><div id="gnx"></div></section>`);
+  $('#gopts').onclick = e => {
+    const btn = e.target.closest('.opt'); if (!btn || R.gist[p] != null) return;
+    const ok = opts[+btn.dataset.i] === g[0]; R.gist[p] = ok ? 1 : 0;
+    document.querySelectorAll('#gopts .opt').forEach(el => { if (opts[+el.dataset.i] === g[0]) el.classList.add('right'); else if (el === btn) el.classList.add('bad'); });
+    $('#gnx').innerHTML = `<p class="${ok ? 'ok' : 'warn'}">${ok ? '答對了！' : '這段的重點是：' + esc(g[0])}</p><button class="next" onclick="R.gnext()">繼續 ›</button>`;
+  };
+  void paras;
+}
+function artStudyStats(){
+  const n = R.sents.length || 1, m = R.marks, c = k => m.filter(x => x === k).length;
+  const gn = Object.keys(R.gist).length, g = Object.values(R.gist).reduce((s, x) => s + x, 0);
+  return {u:c(0) / n, h:c(1) / n, z:c(2) / n, g, gn, saved:c(1) + c(2)};
+}
+function artSum(){
+  const a = R.a, st = artState(), s = artStudyStats(), t = dnum();
+  const bar = `<div class="sbar"><i class="u" style="width:${pc(s.u)}%"></i><i class="h" style="width:${pc(s.h)}%"></i><i class="z" style="width:${pc(s.z)}%"></i></div>
+    <p class="sub">🟩 第一次就懂 ${pc(s.u)}%　🟨 提示後懂 ${pc(s.h)}%　🟥 看翻譯 ${pc(s.z)}%${s.gn ? `　・段落大意 ${s.g}／${s.gn}` : ''}</p>`;
+  if (R.reread) {
+    const r = st.reread[a.id]; if (r) { r.done = true; r.second = pc(s.u); r.date2 = t; }
+    S.daily.reread = true; save(); checkStreak();
+    const up = r ? pc(s.u) - r.first : 0;
+    return view(header('重讀結果') + `<section class="panel result"><div class="score">${pc(s.u)}<small>%</small></div><p>第一次就懂的句子</p>${bar}
+      ${r ? `<p class="${up >= 0 ? 'ok' : 'warn'}">3 天前第一次讀：${r.first}% → 今天：${pc(s.u)}%（${up >= 0 ? '進步 ' + up : '退步 ' + (-up)} 個百分點）</p>` : ''}
+      <p class="sub">${up >= 0 ? '同一篇第二次讀更懂，代表上次學的字和句型真的留下來了。' : '還有不熟的句子，句子複習會再出現。'}</p>
+      <button class="next" onclick="lessonPage()">回今日課表 ›</button><button class="ghost" onclick="artOpen(artById('${a.id}'), {mode:'int', again:true})">整篇再讀一次＋做測驗</button></section>`);
+  }
+  if (!st.reread[a.id]) st.reread[a.id] = {due:t + 3, first:pc(s.u), d:t};
+  save();
+  view(header('逐句讀完了') + `<section class="panel result"><div class="score">${pc(s.u)}<small>%</small></div><p>第一次就懂的句子</p>${bar}
+    <p class="sub">${s.saved ? `需要提示或翻譯的 ${s.saved} 句已收進句子複習。` : '每一句都看懂了！'}3 天後會請你重讀這篇，看看進步多少。</p>
+    <p>最後一步：<b>整篇不看提示再讀一次</b>（會計時），讀完做多益題。</p>
+    <button class="next" onclick="artOpen(R.a, {mode:'int', study:artStudyStats()})">整篇再讀一次 ›</button></section>`);
+}
+
+// ---------- 泛讀結束：段落大意 → 結果 ----------
+function artExtEnd(a, wpm){
+  const ann = artAnn(a);
+  R = {a, ann, ext:true, gist:{}, t0:Date.now(), wpm};
+  const ps = ann && ann.gist ? ann.gist.map((g, i) => g ? i : -1).filter(i => i >= 0) : [];
+  const step = k => k >= ps.length ? artExtDone() : artGist(ps[k], () => step(k + 1));
+  step(0);
+}
+function artExtDone(){
+  const a = R.a, st = artState(), gn = Object.keys(R.gist).length, g = Object.values(R.gist).reduce((s, x) => s + x, 0), target = ART_WPM[artStage(a.lv)];
+  st.hist.push({id:a.id, date:Date.now(), lv:a.lv, sc:gn ? Math.round(g / gn * 100) : 100, wpm:R.wpm, w:artWords(a), src:a.src, kind:'ext'});
+  if (st.hist.length > 200) st.hist.shift();
+  S.daily.ext = true; save(); checkStreak();
+  view(header('泛讀結果') + `<section class="panel result"><div class="score">${R.wpm}<small> 字／分</small></div><p>閱讀速度（目標 ${target}）</p>
+    ${gn ? `<p>段落大意答對 ${g}／${gn}</p>` : ''}<p class="sub">泛讀的重點是「不查字、順順地讀懂大意」。讀多了，看英文就不用在腦中一個字一個字翻成中文。</p>
+    <button class="next" onclick="lessonPage()">回今日課表 ›</button><button class="ghost" onclick="artExtGo(1)">再讀一篇泛讀</button></section>`);
+}
+
+// ---------- 閱讀程度檢測：8 段由易到難的短文，自評看懂多少＋2 題理解題 ----------
+const ART_PL = [
+  {lv:1, t:'Hi Tom, the meeting is at ten tomorrow. It is in Room 3. Please bring your notes. Amy will bring coffee. After the meeting, we will have lunch together. See you then. Lisa',
+   q:[['會議在哪裡？', '3 號會議室', '咖啡店', 'Tom 的辦公室', '餐廳'], ['會議結束後要做什麼？', '一起吃午餐', '寫筆記', '去買咖啡', '回家']]},
+  {lv:2, t:'Our office will be closed on Friday because we are cleaning the carpets. Please take your laptop home on Thursday. You can work from home on Friday. If you need help, call Ken at the front desk before 5 p.m. on Thursday. The office will open again on Monday morning.',
+   q:[['為什麼週五辦公室不開？', '要清洗地毯', '放國定假日', '公司要搬家', '電腦都壞了'], ['週四下班前要做什麼？', '把筆電帶回家', '打電話給所有客戶', '自己清洗地毯', '到櫃台領新電腦']]},
+  {lv:3, t:'Thank you for ordering from Green Leaf Office Supply. Your order of 20 boxes of printer paper was sent this morning. It should arrive in two or three days. However, the blue pens you asked for are out of stock right now. We expect to have them again next week. We will send them as soon as they arrive, and there is no extra shipping charge.',
+   q:[['印表機紙什麼時候會到？', '兩三天內', '今天早上', '下週', '一個月後'], ['關於藍色原子筆，何者正確？', '目前缺貨，到貨後免運費寄出', '已經和紙一起寄出', '這筆訂單被取消了', '要另外付運費']]},
+  {lv:4, t:'Starting next month, employees who ride a bicycle to work can park it in the new bike room on the first floor. The room is free to use, but you need to register at the security office first. Registered employees will receive a key card. The company has also installed two showers near the bike room, so cyclists can get ready before work. We hope this will encourage more people to leave their cars at home.',
+   q:[['想使用腳踏車室，要先做什麼？', '到警衛室登記', '先付停車費', '幫家人申請門禁卡', '搬到一樓辦公'], ['公司這樣做的主要目的可能是什麼？', '鼓勵員工少開車上班', '增加停車費收入', '把一樓改成停車場', '減少警衛的工作']]},
+  {lv:6, t:'Dear Ms. Patel, I am writing to confirm the changes to your conference booking. As requested, we have moved your event from the Lotus Room to the larger Orchid Hall, which can seat up to 150 guests. Because the hall is larger, the daily rate will increase from $900 to $1,200. However, since you booked more than three months in advance, we are happy to offer you a 10 percent discount on the total price. Lunch for all participants is still included. Please sign the attached form and return it by May 10 so that we can hold the hall for you.',
+   q:[['為什麼價格會提高？', '換到比較大的會議廳', '參加人數減少了', '午餐要另外付費', '她太晚預訂了'], ['Patel 女士要在 5 月 10 日前做什麼？', '簽好附件表格並寄回', '付清全部費用', '選好午餐菜單', '取消 Lotus Room 的預訂']]},
+  {lv:8, t:'Harbor Logistics announced on Tuesday that it will open a second distribution center in Riverside by early next year. The company, which currently handles about 40,000 shipments a week, said the new facility is needed to keep up with rising demand from online retailers. According to CEO Daniel Cho, the Riverside site was chosen because of its direct access to the highway and the nearby port. The center is expected to create roughly 300 jobs, most of them in warehouse operations and transportation. Local officials welcomed the news, although some residents have raised concerns about increased truck traffic on residential streets.',
+   q:[['公司為什麼要開新的物流中心？', '線上零售商的需求增加', '原本的中心要關閉', '當地政府要求', '卡車數量太多'], ['有些居民擔心什麼？', '住宅區的卡車會變多', '工作機會不夠多', '港口會被關閉', '公司會搬離 Riverside']]},
+  {lv:10, t:'Although remote work has become common in many industries, a recent survey of 2,000 managers suggests that companies are still struggling to measure its impact on productivity. Nearly two-thirds of the respondents said that their teams were completing projects on time, yet fewer than half felt confident that they could accurately evaluate individual performance. Several managers noted that traditional indicators, such as hours spent in the office, no longer provide meaningful information. Instead, a growing number of firms are adopting outcome-based reviews, in which employees are assessed on the results they deliver rather than on how visible they are. Critics, however, warn that such systems may undervalue work that is important but difficult to quantify, such as mentoring colleagues.',
+   q:[['根據調查，很多經理的主要困難是什麼？', '難以準確評估個人表現', '團隊無法準時完成專案', '員工不願意遠距工作', '辦公室空間不足'], ['批評者擔心「以成果評估」會怎樣？', '低估難以量化的工作，例如指導同事', '員工要花更多時間在辦公室', '成本太高無法實施', '經理會因此失去工作']]},
+  {lv:12, t:'Should the board approve the proposed merger, the combined entity would control roughly a quarter of the regional market for industrial coatings, a share that analysts believe could attract scrutiny from competition regulators. Executives at both firms have sought to preempt such concerns, arguing that the merger would primarily generate efficiencies in research and distribution rather than reduce consumer choice. Nonetheless, several major customers have privately expressed reservations, citing the risk that fewer suppliers could weaken their bargaining position over the long term. Had the companies disclosed more detailed plans for maintaining existing product lines, observers suggest, some of this skepticism might have been avoided.',
+   q:[['分析師認為合併可能帶來什麼問題？', '可能受到公平競爭主管機關審查', '研發成本會大幅增加', '董事會一定會反對', '兩家公司的市占率會下降'], ['文中暗示，公司當初怎麼做或許能減少疑慮？', '公布更詳細的維持現有產品線計畫', '降低產品售價', '找更多供應商合作', '更早宣布合併消息']]},
+];
+const ART_SELF = ['幾乎全懂', '大部分懂（約八成）', '大概一半', '很少'];
+let P = null;
+function artPlace(){
+  P = {i:0, res:[], fails:0};
+  view(header('閱讀程度檢測') + `<section class="panel"><h2>📏 找出適合你的文章難度</h2>
+    <p class="sub left">接下來有幾段由簡單到難的短文（最多 8 段，約 5 分鐘）。每段：</p><ol class="steps"><li>讀完短文（這次<b>不能查字</b>）</li><li>誠實選「看懂多少」</li><li>回答 2 題中文理解題</li></ol>
+    <p class="sub left">連續兩段看不懂就會停止。結果決定之後每天精讀和泛讀文章的難度；不是考試，看不懂很正常，照實作答，文章才會剛好適合你。</p>
+    <button class="next" onclick="artPlaceRead()">開始 ›</button></section>`);
+}
+function artPlaceRead(){
+  const x = ART_PL[P.i];
+  view(header('閱讀程度檢測') + `<section class="panel"><div class="qmeta"><span>第 ${P.i + 1} 段</span><span>約 ${x.t.split(/\s+/).length} 字</span></div>
+    <div class="ap">${esc(x.t)}</div><h2>你看懂多少？</h2><div class="opts">${ART_SELF.map((o, i) => `<button class="opt" onclick="artPlaceSelf(${i})">${o}</button>`).join('')}</div></section>`);
+}
+function artPlaceSelf(k){ P.self = k; P.ok = 0; P.qi = 0; artPlaceQ(); }
+function artPlaceQ(){
+  const x = ART_PL[P.i], q = x.q[P.qi], opts = shuffle(mulberry32(P.i * 31 + P.qi * 7 + 1), q.slice(1, 5));
+  view(header('閱讀程度檢測') + `<section class="panel"><div class="qmeta"><span>第 ${P.i + 1} 段・第 ${P.qi + 1} 題</span></div>
+    <details class="script"><summary>再看短文</summary><div class="passage">${esc(x.t)}</div></details><h2>${esc(q[0])}</h2>
+    <div class="opts left">${opts.map(o => `<button class="opt" data-a="${esc(o)}" onclick="artPlaceAns(this.dataset.a)">${esc(o)}</button>`).join('')}</div></section>`);
+}
+function artPlaceAns(o){
+  const x = ART_PL[P.i]; if (o === x.q[P.qi][1]) P.ok++;
+  if (++P.qi < x.q.length) return artPlaceQ();
+  const pass = P.ok === x.q.length && P.self <= 1;
+  P.res.push({lv:x.lv, self:P.self, ok:P.ok, pass});
+  P.fails = pass ? 0 : P.fails + 1; P.i++;
+  if (P.fails >= 2 || P.i >= ART_PL.length) return artPlaceEnd();
+  artPlaceRead();
+}
+function artPlaceEnd(){
+  const st = artState(), passed = P.res.filter(r => r.pass).map(r => r.lv), lv = passed.length ? Math.max(...passed) : 1, t = dnum();
+  st.lv = lv; st.since = 0; st.histFrom = Date.now(); st.placed = {date:t, lv, res:P.res};
+  if (st.today && st.today.date === t && !S.daily.article) st.today = null;
+  if (st.ext && st.ext.date === t && !S.daily.ext) st.ext = null;
+  st.gen = {date:t, n:0};   // 依新程度重新生成今天的 5 篇
+  save(); setTimeout(artDaily, 500);
+  const xl = Math.max(1, lv - 1);
+  view(header('檢測結果') + `<section class="panel result"><div class="score">Lv${lv}</div><p>精讀從 <b>Lv${lv}</b>（約 ${ART_LV[lv].w} 字）開始，泛讀用 <b>Lv${xl}</b>（約 ${ART_LV[xl].w} 字）</p>
+    <div class="left">${P.res.map(r => `<div class="task"><span>Lv${r.lv} 短文</span><span class="num">${ART_SELF[r.self]}・答對 ${r.ok}/2 ${r.pass ? '✅' : '—'}</span></div>`).join('')}</div>
+    <p class="sub">從「讀得懂」的程度開始，比硬讀難文章進步得快。最近 5 篇精讀表現好就會自動升級；想重測可以在「每日文章」頁再做一次。</p>
+    <button class="next" onclick="articleGo()">開始今天的精讀 ›</button><button class="ghost" onclick="lessonPage()">回今日課表</button></section>`);
 }
 
 // ================= 以 800 分為目標的調整 =================
@@ -4477,7 +4837,8 @@ function checkDay(){
 function tasks(){
   const d = S.daily;
   const due = dueWords().length, q = d.quota0 || 0;
-  return [{n:S.daily.article ? '每日文章已完成' : '讀完每日文章＋測驗', v:S.daily.article ? 1 : 0, max:1, ok:!!S.daily.article},
+  return [{n:S.daily.article ? '精讀已完成' : '精讀 1 篇（逐句讀懂＋測驗）', v:S.daily.article ? 1 : 0, max:1, ok:!!S.daily.article},
+    {n:S.daily.ext ? '泛讀已完成' : '泛讀 1 篇', v:S.daily.ext ? 1 : 0, max:1, ok:!!S.daily.ext},
     {n:due ? `複習到期單字（還有 ${due} 個）` : '到期單字已全部複習', v:due ? 0 : 1, max:1, ok:due === 0},
     {n:q ? `學新字 ${q} 個` : '今天先複習，不學新字', v:Math.min(d.newDone || 0, Math.max(q, 1)), max:Math.max(q, 1), ok:(d.newDone || 0) >= q},
     {n:'答對 40 題', v:Math.min(d.correct, 40), max:40, ok:d.correct >= 40}, {n:'聽力題 15 題', v:Math.min(d.listen, 15), max:15, ok:d.listen >= 15}];
@@ -4718,7 +5079,7 @@ function home(){
   const est = practiceEstimate(), dg = S.diag[S.diag.length - 1];
   const tabs = LEVELS.map(l => `<button class="lvbtn ${l === lv ? 'on' : ''}" onclick="setLv(${l})"><small>階段${l}</small>${LV_SHORT[l]}</button>`).join('');
   const cards = [
-    ['📰','每日文章','articleMenu()', `Lv${artState().lv}・約 ${ART_LV[artState().lv].w} 字`],
+    ['📰','每日閱讀','articleMenu()', artState().placed ? `精讀 Lv${artState().lv}・泛讀 Lv${Math.max(1, artState().lv - 1)}` : '先做閱讀程度檢測'],
     ['📈','學習曲線','curveView()', `已學 ${ms.L}・熟練 ${ms.M}・記得約 ${ms.R}`],
     ['📇','單字卡','flash()', `${VBY(lv).length} 字・${TOPICS(lv).length} 個主題`],
     ['📝','單字練習','vocabMenu()', '英翻中・中翻英・聽力・拼字'],

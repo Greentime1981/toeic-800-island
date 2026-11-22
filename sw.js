@@ -1,5 +1,5 @@
 // 多益 800 衝刺島 service worker（版本號由 build.py 依內容自動更新）
-const CACHE = 'toeic800-0432cf2b';
+const CACHE = 'toeic800-ea1ac3df';
 const ASSETS = ['./', './manifest.json', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
